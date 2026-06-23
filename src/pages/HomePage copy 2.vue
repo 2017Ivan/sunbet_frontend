@@ -1,9 +1,5 @@
 <template>
     <div class="min-h-screen bg-[#0D0D0D]">
-
-
-          <!-- <HeroCarousel/> -->
-
   
       <!-- ===== HERO SECTION ===== -->
       <section class="relative overflow-hidden">
@@ -13,17 +9,147 @@
         <div class="absolute top-0 left-0 right-0 h-[500px] bg-[url('data:image/svg+xml,%3Csvg width=%2260%22 height=%2260%22 viewBox=%220 0 60 60%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cg fill=%22none%22 fill-rule=%22evenodd%22%3E%3Cg fill=%22%23A32D2D%22 fill-opacity=%220.03%22%3E%3Cpath d=%22M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z%22/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')]" />
         <div class="absolute top-20 right-0 w-[600px] h-[600px] rounded-full bg-[#A32D2D]/10 blur-[140px] pointer-events-none" />
         <div class="absolute top-40 left-1/4 w-64 h-64 rounded-full bg-[#A32D2D]/8 blur-[80px] pointer-events-none" />
-<!-- 
-        <div class="h-20" />
-        <div class="h-20" /> -->
+
+
+
+
           <HeroCarousel/>
-
-
-      
+        <div class="relative z-10 max-w-screen-xl mx-auto px-4 pt-10 pb-8 lg:pt-16 lg:pb-12">
+          <div class="grid lg:grid-cols-2 gap-8 items-center">
   
-   
+            <!-- Left: Text -->
+            <div>
+              <!-- Live badge -->
+              <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#FF3B3B]/10 border border-[#FF3B3B]/25 text-[#FF3B3B] text-xs font-semibold mb-5">
+                <span class="w-1.5 h-1.5 rounded-full bg-[#FF3B3B] animate-pulse" />
+                {{ liveMatchCount }} Matches Live Now
+              </div>
+  
+              <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-[1.1] mb-4">
+                Tanzania's #1<br>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#A32D2D] to-[#E05555]">
+                  Sports Betting
+                </span><br>
+                Platform
+              </h1>
+  
+              <p class="text-[#606060] text-base lg:text-lg leading-relaxed mb-8 max-w-lg">
+                Bet on Football, Basketball, Tennis & more. Real-time odds, instant M-Pesa withdrawals, and jackpots up to TZS 50M.
+              </p>
+  
+              <!-- CTA Buttons -->
+              <div class="flex flex-wrap gap-3 mb-10">
+                <AppButton variant="primary" size="lg" @click="$router.push('/auth/register')">
+                  🎯 Start Betting Free
+                </AppButton>
+                <AppButton variant="secondary" size="lg" @click="$router.push('/live')">
+                  <span class="w-2 h-2 rounded-full bg-[#FF3B3B] animate-pulse mr-1" />
+                  Watch Live
+                </AppButton>
+              </div>
+  
+              <!-- Trust badges -->
+              <div class="flex flex-wrap items-center gap-4">
+                <div
+                  v-for="trust in trustBadges"
+                  :key="trust.label"
+                  class="flex items-center gap-2 text-xs text-[#606060]"
+                >
+                  <span class="text-[#22C55E]">{{ trust.icon }}</span>
+                  {{ trust.label }}
+                </div>
+              </div>
+            </div>
+  
+            <!-- Right: Featured match card + floating stats -->
+            <div class="relative hidden lg:block">
+  
+              <!-- Main featured match -->
+              <div class="bg-[#161616] border border-[#2A2A2A] rounded-[20px] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.5)]">
+                <div class="flex items-center justify-between mb-4">
+                  <div class="flex items-center gap-2">
+                    <span class="text-lg">⚽</span>
+                    <div>
+                      <p class="text-xs font-semibold text-[#A0A0A0]">Premier League</p>
+                      <p class="text-[10px] text-[#606060]">Today, 21:00</p>
+                    </div>
+                  </div>
+                  <span class="px-2.5 py-1 rounded-full bg-[#FF3B3B]/15 text-[#FF3B3B] text-[10px] font-bold border border-[#FF3B3B]/25 flex items-center gap-1">
+                    <span class="w-1.5 h-1.5 rounded-full bg-[#FF3B3B] animate-pulse" />
+                    LIVE 67'
+                  </span>
+                </div>
+  
+                <!-- Teams -->
+                <div class="grid grid-cols-3 gap-3 items-center mb-5">
+                  <div class="text-center">
+                    <!-- <div class="w-14 h-14 rounded-full bg-[#1E1E1E] border-2 border-[#2A2A2A] mx-auto flex items-center justify-center text-2xl mb-2">🔴</div> -->
+                    <p class="text-sm font-bold text-white">Man United</p>
+                    <p class="text-xs text-[#606060]">Home</p>
+                  </div>
+                  <div class="text-center">
+                    <div class="text-3xl font-black text-white">2<span class="text-[#A32D2D] mx-1">:</span>1</div>
+                    <p class="text-[10px] text-[#606060] mt-1">HT 1-0</p>
+                  </div>
+                  <div class="text-center">
+                    <!-- <div class="w-14 h-14 rounded-full bg-[#1E1E1E] border-2 border-[#2A2A2A] mx-auto flex items-center justify-center text-2xl mb-2">🔵</div> -->
+                    <p class="text-sm font-bold text-white">Chelsea</p>
+                    <p class="text-xs text-[#606060]">Away</p>
+                  </div>
+                </div>
+  
+                <!-- Odds -->
+                <div class="grid grid-cols-3 gap-2">
+                  <button
+                    v-for="odd in heroOdds"
+                    :key="odd.label"
+                    class="flex flex-col items-center gap-1 p-3 rounded-[10px] bg-[#1E1E1E] border border-[#2A2A2A] hover:border-[#A32D2D]/50 hover:bg-[#A32D2D]/10 transition-all group"
+                    @click="addToBetSlip(odd)"
+                  >
+                    <span class="text-[10px] text-[#606060] group-hover:text-[#A0A0A0]">{{ odd.label }}</span>
+                    <span class="text-base font-bold text-[#A32D2D]">{{ odd.value }}</span>
+                  </button>
+                </div>
+              </div>
+  
+              <!-- Floating stat cards -->
+              <div class="absolute -top-4 -right-4 bg-[#1E1E1E] border border-[#2A2A2A] rounded-[14px] px-4 py-3 shadow-xl">
+                <p class="text-[10px] text-[#606060]">Today's Jackpot</p>
+                <p class="text-lg font-black text-[#F59E0B]">TZS 50M</p>
+              </div>
+  
+              <div class="absolute -bottom-4 -left-4 bg-[#1E1E1E] border border-[#2A2A2A] rounded-[14px] px-4 py-3 shadow-xl flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-[#22C55E]/15 flex items-center justify-center">
+                  <svg class="w-4 h-4 text-[#22C55E]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                </div>
+                <div>
+                  <p class="text-[10px] text-[#606060]">Last payout</p>
+                  <p class="text-sm font-bold text-white">TZS 2,450,000</p>
+                </div>
+              </div>
+  
+            </div>
+          </div>
+        </div>
+  
+        <!-- Stats bar -->
+        <div class="relative z-10 border-t border-[#1E1E1E]">
+          <div class="max-w-screen-xl mx-auto px-4 py-4">
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <div
+                v-for="stat in platformStats"
+                :key="stat.label"
+                class="text-center"
+              >
+                <p class="text-xl sm:text-2xl font-black text-white">{{ stat.value }}</p>
+                <p class="text-xs text-[#606060] mt-0.5">{{ stat.label }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
-
   
       <!-- ===== SPORTS CATEGORIES ===== -->
       <section class="max-w-screen-xl mx-auto px-4 py-8">

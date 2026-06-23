@@ -133,3 +133,13 @@
     border: 1px solid rgba(255,255,255,0.08);
   }
 }
+
+
+/* Add to your global styles or tailwind.config.js */
+@layer utilities {
+  .xs\:inline {
+    @media (min-width: 480px) {
+      display: inline;
+    }
+  }
+}

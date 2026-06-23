@@ -46,6 +46,7 @@
       :bet-slip-count="betSlipStore.count"
       @toggle-betslip="betSlipOpen = !betSlipOpen"
     />
+    <Footer/>
 
   </div>
 </template>
@@ -53,13 +54,14 @@
 <script setup>
 import { ref, onMounted }    from 'vue'
 import { storeToRefs }       from 'pinia'
-import AppHeader             from '../components/layout/AppHeader.vue'
+import AppHeader             from '../components/layout/header/AppHeader.vue'
 import AppSidebar            from '../components/layout/AppSidebar.vue'
 import BottomNav             from '../components/layout/BottomNav.vue'
 import BetSlipDrawer         from '../components/layout/BetSlipDrawer.vue'
 import { useAuthStore }      from '../stores/useAuthStore'
 import { useWalletStore }    from '../stores/useWalletStore'
 import { useBetSlipStore }   from '../stores/useBetSlipStore'
+import Footer from '../components/layout/footer/Footer.vue'
 
 // ---- Stores ----
 const authStore    = useAuthStore()
