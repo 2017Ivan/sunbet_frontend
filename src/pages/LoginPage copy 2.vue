@@ -412,9 +412,7 @@
   
   // ---- Register ----
   const registerForm = ref({
-    name:            '',
     phone:           '',
-    dob:             '',
     password:        '',
     confirmPassword: '',
     referral:        '',
@@ -422,7 +420,7 @@
   })
   
   const registerErrors = ref({
-    name: '', phone: '', dob: '',
+ phone: '',
     password: '', confirmPassword: '', agreed: ''
   })
   

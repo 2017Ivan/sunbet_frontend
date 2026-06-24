@@ -131,12 +131,12 @@
 
       <!-- ROW 2: Navigation Links (scrollable on mobile, centered on desktop) -->
       <nav class="flex items-center border-t border-gray-800 overflow-x-auto overflow-y-hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-        <div class="flex items-center justify-center gap-1 px-4 w-full min-w-max">
+        <div class="flex items-center justify-center gap-1 px-4 w-full min-w-max py-2">
           <RouterLink
             v-for="link in navLinks"
             :key="link.to"
             :to="link.to"
-            class="flex items-center gap-2 px-4 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap flex-shrink-0"
+            class="flex items-center gap-2 px-4 py-1.5  text-sm font-medium transition-all duration-200 whitespace-nowrap flex-shrink-0"
             :class="$route.name === link.name
               ? 'bg-red-900/20 text-red-400'
               : 'text-gray-400 hover:text-white hover:bg-gray-800'"

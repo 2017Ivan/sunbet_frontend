@@ -1,47 +1,74 @@
 <template>
-  <div class="carousel-wrapper">
-    <!-- Slides -->
-    <div class="carousel-track" :style="{ transform: `translateX(-${current * 100}%)` }">
+  <div class="relative overflow-hidden h-[140px] w-full">
+    
+    <div 
+      class="flex h-full transition-transform duration-500 ease-out" 
+      :style="{ transform: `translateX(-${current * 100}%)` }"
+    >
       <div
         v-for="(slide, i) in slides"
         :key="i"
-        class="carousel-slide"
+        class="min-w-full h-full relative overflow-hidden flex items-end p-2 select-none"
         :style="{ background: slide.bg }"
       >
-        <!-- Glow blob -->
-        <div class="blob" :style="{ background: slide.blob }" />
+        <div 
+          class="absolute -top-[60px] -right-[60px] w-[300px] h-[200px] rounded-full pointer-events-none blur-3xl opacity-60" 
+          :style="{ background: slide.blob }" 
+        />
 
-        <!-- Big emoji -->
-        <div class="slide-emoji">{{ slide.emoji }}</div>
+        <div class="absolute right-8 top-1/2 -translate-y-1/2 text-[90px] opacity-20 pointer-events-none z-10">
+          {{ slide.emoji }}
+        </div>
 
-        <!-- Content -->
-        <div class="slide-content">
-          <span class="slide-badge" :style="{ background: slide.badgeBg, borderColor: slide.badgeBorder, color: slide.badgeColor }">
-            <span v-if="slide.liveIndicator" class="live-dot" />
+        <div class="relative z-20 flex flex-col gap-1 max-w-[70%]">
+          <span 
+            class="inline-flex items-center gap-1 px-3 py-1 rounded-full border text-[10px] md:text-xs font-bold uppercase tracking-wider w-fit"
+            :style="{ background: slide.badgeBg, borderColor: slide.badgeBorder, color: slide.badgeColor }"
+          >
+            <span v-if="slide.liveIndicator" class="w-1.5 h-1.5 rounded-full bg-[#FF3B3B] animate-pulse" />
             {{ slide.badge }}
           </span>
 
-          <h6 class="slide-title" :style="{ color: slide.titleColor || '#fff' }" v-html="slide.title" />
-          <p class="slide-sub">{{ slide.sub }}</p>
+          <h6
+            class="text-sm font-black leading-tight" 
+            :style="{ color: slide.titleColor || '#fff' }" 
+            v-html="slide.title" 
+          />
+          
+          <p class="text-xs md:text-sm text-white/70 max-w-[380px] line-clamp-1 md:line-clamp-none">
+            {{ slide.sub }}
+          </p>
 
-          <button class="slide-cta" :style="{ background: slide.ctaBg, color: slide.ctaColor }" @click="$router.push(slide.route)">
+          <button 
+            class="inline-flex items-center gap-1.5 px-4 py-1 rounded-full text-xs md:text-sm font-bold w-fit transition-opacity duration-200 hover:opacity-90 active:scale-95 transform" 
+            :style="{ background: slide.ctaBg, color: slide.ctaColor }" 
+            @click="$router.push(slide.route)"
+          >
             {{ slide.cta }} →
           </button>
         </div>
       </div>
     </div>
 
-    <!-- Prev / Next -->
-    <button class="carousel-btn prev" @click="prev">&#8249;</button>
-    <button class="carousel-btn next" @click="next">&#8250;</button>
+    <button 
+      class="hidden sm:flex absolute left-4 top-1/2 -translate-y-1/2 z-30 bg-black/45 border border-white/15 text-white w-9 h-9 rounded-full items-center justify-center text-xl transition-all duration-200 hover:bg-black/70 active:scale-95" 
+      @click="prev"
+    >
+      &#8249;
+    </button>
+    <button 
+      class="hidden sm:flex absolute right-4 top-1/2 -translate-y-1/2 z-30 bg-black/45 border border-white/15 text-white w-9 h-9 rounded-full items-center justify-center text-xl transition-all duration-200 hover:bg-black/70 active:scale-95" 
+      @click="next"
+    >
+      &#8250;
+    </button>
 
-    <!-- Dots -->
-    <div class="carousel-dots">
+    <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 z-30">
       <button
         v-for="(_, i) in slides"
         :key="i"
-        class="dot"
-        :class="{ active: i === current }"
+        class="h-1.5 rounded-full transition-all duration-350 p-0"
+        :class="i === current ? 'w-5 bg-white' : 'w-1.5 bg-white/30'"
         @click="goTo(i)"
       />
     </div>
@@ -68,7 +95,7 @@ const slides = [
     ctaBg: '#fff',
     ctaColor: '#1a0505',
     bg: 'linear-gradient(135deg,#3a0808 0%,#1a0505 50%,#0D0D0D 100%)',
-    blob: 'rgba(163,45,45,0.12)',
+    blob: 'rgba(163,45,45,0.25)', // Nimeongeza opacity kidogo ionekane vyema na Tailwind blur
     route: '/auth/register',
     liveIndicator: false,
   },
@@ -85,7 +112,7 @@ const slides = [
     ctaBg: '#F59E0B',
     ctaColor: '#1a0a00',
     bg: 'linear-gradient(135deg,#2a1a00 0%,#3d2500 50%,#0D0D0D 100%)',
-    blob: 'rgba(245,158,11,0.10)',
+    blob: 'rgba(245,158,11,0.20)',
     route: '/sports',
     liveIndicator: false,
   },
@@ -102,7 +129,7 @@ const slides = [
     ctaBg: '#FF3B3B',
     ctaColor: '#fff',
     bg: 'linear-gradient(135deg,#001a3a 0%,#001228 50%,#0D0D0D 100%)',
-    blob: 'rgba(56,125,255,0.10)',
+    blob: 'rgba(56,125,255,0.20)',
     route: '/live',
     liveIndicator: true,
   },
@@ -119,15 +146,15 @@ const slides = [
     ctaBg: '#22C55E',
     ctaColor: '#001a0c',
     bg: 'linear-gradient(135deg,#002a14 0%,#001a0c 50%,#0D0D0D 100%)',
-    blob: 'rgba(34,197,94,0.10)',
+    blob: 'rgba(34,197,94,0.20)',
     route: '/wallet',
     liveIndicator: false,
   },
 ]
 
-const goTo = (i) => { current.value = i }
+const goTo = (i) => { current.value = i; resetTimer(); }
 const next = () => { current.value = (current.value + 1) % slides.length }
-const prev = () => { current.value = (current.value - 1 + slides.length) % slides.length }
+const prev = () => { current.value = (current.value - 1 + slides.length) % slides.length; resetTimer(); }
 
 const resetTimer = () => {
   clearInterval(timer)
@@ -137,160 +164,3 @@ const resetTimer = () => {
 onMounted(() => resetTimer())
 onUnmounted(() => clearInterval(timer))
 </script>
-
-<style scoped>
-.carousel-wrapper {
-  position: relative;
-  /* border-radius: 20px; */
-  overflow: hidden;
-  height: 150px;
-}
-
-.carousel-track {
-  display: flex;
-  height: 100%;
-  transition: transform 0.5s ease;
-}
-
-.carousel-slide {
-  min-width: 100%;
-  position: relative;
-  overflow: hidden;
-  display: flex;
-  align-items: flex-end;
-}
-
-.blob {
-  position: absolute;
-  top: -60px;
-  right: -60px;
-  width: 300px;
-  height: 300px;
-  border-radius: 50%;
-  pointer-events: none;
-}
-
-.slide-emoji {
-  position: absolute;
-  right: 32px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 100px;
-  opacity: 0.3;
-  pointer-events: none;
-  user-select: none;
-}
-
-.slide-content {
-  position: relative;
-  z-index: 2;
-  padding: 28px 28px 36px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.slide-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 14px;
-  border-radius: 999px;
-  border: 1px solid;
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  width: fit-content;
-}
-
-.live-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #FF3B3B;
-  animation: pulse 1.5s infinite;
-  display: inline-block;
-}
-
-.slide-title {
-  font-size: 15px;
-  font-weight: 900;
-  line-height: 1.15;
-}
-
-.slide-sub {
-  font-size: 14px;
-  color: rgba(255, 255, 255, 0.65);
-  max-width: 380px;
-}
-
-.slide-cta {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 11px 24px;
-  border-radius: 999px;
-  font-size: 13px;
-  font-weight: 700;
-  border: none;
-  cursor: pointer;
-  width: fit-content;
-  transition: opacity 0.2s;
-}
-.slide-cta:hover { opacity: 0.88; }
-
-/* Prev / Next buttons */
-.carousel-btn {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 5;
-  background: rgba(0, 0, 0, 0.45);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: #fff;
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  cursor: pointer;
-  font-size: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.2s;
-}
-.carousel-btn:hover { background: rgba(0, 0, 0, 0.7); }
-.carousel-btn.prev { left: 14px; }
-.carousel-btn.next { right: 14px; }
-
-/* Dots */
-.carousel-dots {
-  position: absolute;
-  bottom: 14px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 6px;
-  z-index: 5;
-}
-
-.dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.3);
-  border: none;
-  cursor: pointer;
-  transition: all 0.35s;
-  padding: 0;
-}
-.dot.active {
-  width: 22px;
-  background: #fff;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.35; }
-}
-</style>

@@ -272,7 +272,7 @@
                           <!-- Teams -->
                           <div class="flex-1 min-w-0">
                             <div class="flex items-center gap-2 mb-1">
-                              <span class="text-sm">{{ match.homeFlag }}</span>
+                              <!-- <span class="text-sm">{{ match.homeFlag }}</span> -->
                               <span
                                 class="text-sm font-semibold truncate"
                                 :class="match.isLive && match.score.home > match.score.away ? 'text-white' : 'text-[#A0A0A0]'"
@@ -281,7 +281,7 @@
                               </span>
                             </div>
                             <div class="flex items-center gap-2">
-                              <span class="text-sm">{{ match.awayFlag }}</span>
+                              <!-- <span class="text-sm">{{ match.awayFlag }}</span> -->
                               <span
                                 class="text-sm font-semibold truncate"
                                 :class="match.isLive && match.score.away > match.score.home ? 'text-white' : 'text-[#A0A0A0]'"

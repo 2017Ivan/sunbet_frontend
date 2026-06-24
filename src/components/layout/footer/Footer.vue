@@ -1,6 +1,6 @@
 <template lang="">
   <!-- ===== FOOTER ===== -->
-<footer class="bg-[#0A0A0A] border-t border-[#1A1A1A] mt-10">
+<footer class="bg-[#0A0A0A] border-t border-[#1A1A1A] mt-10 max-w-screen-xl mx-auto px-4">
   <!-- Main Footer -->
   <div class="max-w-screen-xl mx-auto px-4 pt-12 pb-6">
     

@@ -88,7 +88,7 @@ const routes = [
       {
         path: 'register',
         name: 'register',
-        component: LoginPage, // same page, tab inabadilika
+        component: LoginPage, 
         meta: { title: 'Register — SunBet', guestOnly: true }
       },
     ]
