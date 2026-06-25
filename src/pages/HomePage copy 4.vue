@@ -55,21 +55,112 @@
       <section class="w-full px-3 sm:px-4 pb-6 sm:pb-8">
         <div class="max-w-screen-xl mx-auto">
           <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-4 sm:mb-5">
+            <!-- <div class="flex items-center gap-3">
+              <h2 class="text-base sm:text-lg font-bold text-white">Featured Matches</h2>
+              <span class="px-2 py-0.5 rounded-full bg-[#1E1E1E] text-[#606060] text-xs">
+                {{ filteredMatches.length }} games
+              </span>
+            </div> -->
 
-           
+            <!-- Filter tabs - Scrollable on mobile -->
+            <div class="flex gap-1 p-1 bg-[#161616] rounded-[10px] border border-[#2A2A2A] overflow-x-auto w-full sm:w-auto scrollbar-hide">
+              <button
+                v-for="filter in matchFilters"
+                :key="filter"
+                class="px-2.5 sm:px-3 py-1 text-[11px] sm:text-xs font-semibold rounded-[7px] transition-all whitespace-nowrap flex-shrink-0"
+                :class="activeFilter === filter
+                  ? 'bg-[#A32D2D] text-white'
+                  : 'text-[#606060] hover:text-white'"
+                @click="activeFilter = filter"
+              >
+                {{ filter }}
+              </button>
+            </div>
           </div>
 
           <!-- Matches grid -->
-
-
           <div class="space-y-3">
-            <MatchCard
+            <div
               v-for="match in filteredMatches"
               :key="match.id"
-              :match="match"
-            />
+              class="bg-[#161616] border border-[#2A2A2A] rounded-[16px] p-3 sm:p-4 hover:border-[#A32D2D]/30 transition-all duration-200 group"
+            >
+              <!-- Match header -->
+              <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center gap-2">
+                  <div>
+                    <p class="text-[11px] sm:text-xs font-medium text-[#A0A0A0]">{{ match.league }}</p>
+                    <p class="text-[9px] sm:text-[10px] text-[#606060]">{{ match.time }}</p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-1.5 sm:gap-2">
+                  <span
+                    v-if="match.isLive"
+                    class="flex items-center gap-1.5 px-1.5 sm:px-2 py-0.5 rounded-full bg-[#FF3B3B]/15 text-[#FF3B3B] text-[9px] sm:text-[10px] font-bold border border-[#FF3B3B]/25"
+                  >
+                    <span class="w-1.5 h-1.5 rounded-full bg-[#FF3B3B] animate-pulse" />
+                    {{ match.minute }}'
+                  </span>
+                  <span
+                    v-else
+                    class="text-[9px] sm:text-[10px] text-[#606060] px-1.5 sm:px-2 py-0.5 rounded-full bg-[#1E1E1E]"
+                  >
+                    {{ match.time }}
+                  </span>
+                  <button class="text-[#606060] hover:text-[#F59E0B] transition-colors">
+                    <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Teams + Score -->
+              <div class="flex items-center justify-between mb-4">
+                <div class="flex-1">
+                  <div class="flex items-center gap-1.5 sm:gap-2 mb-1.5">
+                    <!-- <span class="text-base sm:text-lg">{{ match.homeFlag }}</span> -->
+                    <span class="text-sm font-semibold text-white truncate">{{ match.home }}</span>
+                    <span v-if="match.isLive" class="text-sm font-black text-white ml-auto mr-2">{{ match.score.home }}</span>
+                  </div>
+                  <div class="flex items-center gap-1.5 sm:gap-2">
+                    <!-- <span class="text-base sm:text-lg">{{ match.awayFlag }}</span> -->
+                    <span class="text-sm font-semibold text-[#A0A0A0] truncate">{{ match.away }}</span>
+                    <span v-if="match.isLive" class="text-sm font-black text-[#A0A0A0] ml-auto mr-2">{{ match.score.away }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Odds buttons -->
+              <div class="grid grid-cols-3 gap-1.5 sm:gap-2">
+                <button
+                  v-for="odd in match.odds"
+                  :key="odd.label"
+                  class="flex flex-col items-center gap-0.5 py-2 sm:py-2.5 px-1.5 sm:px-2 rounded-[10px] border transition-all duration-200"
+                  :class="isBetSelected(match.id, odd.label)
+                    ? 'bg-[#A32D2D] border-[#A32D2D] text-white'
+                    : 'bg-[#1E1E1E] border-[#2A2A2A] hover:border-[#A32D2D]/40 hover:bg-[#A32D2D]/8 text-[#A0A0A0]'"
+                  @click="toggleBet(match, odd)"
+                >
+                  <span class="text-[9px] sm:text-[10px] font-medium">{{ odd.label }}</span>
+                  <span
+                    class="text-sm font-bold"
+                    :class="isBetSelected(match.id, odd.label) ? 'text-white' : 'text-[#A32D2D]'"
+                  >
+                    {{ odd.value }}
+                  </span>
+                </button>
+              </div>
+
+              <!-- More markets link -->
+              <button class="w-full mt-3 text-[10px] sm:text-xs text-[#606060] hover:text-[#A0A0A0] transition-colors flex items-center justify-center gap-1">
+                <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
+                </svg>
+                {{ match.marketCount }} more markets
+              </button>
+            </div>
           </div>
-       
 
           <!-- Load more -->
           <button
@@ -81,6 +172,43 @@
         </div>
       </section>
 
+      <!-- ===== PROMOTIONS BANNER ===== -->
+      <section class="w-full px-3 sm:px-4 pb-6 sm:pb-8">
+        <div class="max-w-screen-xl mx-auto">
+          <div class="flex items-center justify-between mb-4 sm:mb-5">
+            <h2 class="text-base sm:text-lg font-bold text-white">Hot Promotions 🔥</h2>
+            <RouterLink to="/promotions" class="text-xs text-[#A32D2D] font-semibold hover:text-[#C94040] transition-colors">
+              View all →
+            </RouterLink>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+            <div
+              v-for="promo in promotions"
+              :key="promo.id"
+              class="relative overflow-hidden rounded-[18px] p-4 sm:p-5 cursor-pointer group"
+              :style="{ background: promo.gradient }"
+              @click="$router.push('/promotions')"
+            >
+              <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=%2240%22 height=%2240%22 viewBox=%220 0 40 40%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cg fill=%22%23fff%22 fill-opacity=%220.05%22%3E%3Cpath d=%22M0 40L40 0H20L0 20M40 40V20L20 40%22/%3E%3C/g%3E%3C/svg%3E')]" />
+              <div class="relative z-10">
+                <span class="text-2xl sm:text-3xl mb-2 sm:mb-3 block">{{ promo.emoji }}</span>
+                <span class="inline-block px-2.5 py-1 rounded-full bg-white/20 text-white text-[9px] sm:text-[10px] font-bold mb-2 sm:mb-3">
+                  {{ promo.badge }}
+                </span>
+                <h3 class="text-base sm:text-lg font-black text-white leading-tight mb-1">{{ promo.title }}</h3>
+                <p class="text-xs sm:text-sm text-white/70 leading-relaxed mb-3 sm:mb-4">{{ promo.description }}</p>
+                <button class="flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-white/20 hover:bg-white/30 text-white text-[11px] sm:text-xs font-semibold transition-all group-hover:gap-2.5">
+                  {{ promo.cta }}
+                  <svg class="w-3 h-3 transition-transform group-hover:translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polyline points="9 18 15 12 9 6"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
       <!-- ===== JACKPOT TICKER ===== -->
       <section class="w-full px-3 sm:px-4 pb-6 sm:pb-8">
@@ -123,7 +251,57 @@
       </section>
 
       <!-- ===== RECENT WINNERS ===== -->
-    <RecentWinners :winners="recentWinners" :scroll-speed="1.5" />
+      <section class="w-full px-3 sm:px-4 pb-8 sm:pb-10">
+        <div class="max-w-screen-xl mx-auto">
+          <div class="flex items-center justify-between mb-4 sm:mb-5">
+            <h2 class="text-base sm:text-lg font-bold text-white">Recent Winners 🏅</h2>
+            <RouterLink to="/leaderboard" class="text-xs text-[#A32D2D] font-semibold hover:text-[#C94040] transition-colors">
+              Leaderboard →
+            </RouterLink>
+          </div>
+
+          <div class="space-y-2">
+            <div
+              v-for="(winner, i) in recentWinners"
+              :key="i"
+              class="flex items-center gap-2 sm:gap-3 bg-[#161616] border border-[#2A2A2A] rounded-[14px] px-3 sm:px-4 py-2.5 sm:py-3 hover:border-[#A32D2D]/20 transition-all"
+            >
+              <!-- Rank -->
+              <div
+                class="w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-[10px] sm:text-xs font-black flex-shrink-0"
+                :class="[
+                  i === 0 ? 'bg-[#F59E0B]/20 text-[#F59E0B]' :
+                  i === 1 ? 'bg-[#C0C0C0]/20 text-[#C0C0C0]' :
+                  i === 2 ? 'bg-[#CD7F32]/20 text-[#CD7F32]' :
+                  'bg-[#1E1E1E] text-[#606060]'
+                ]"
+              >
+                {{ i < 3 ? ['🥇','🥈','🥉'][i] : i + 1 }}
+              </div>
+
+              <!-- Avatar -->
+              <div
+                class="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-xs sm:text-sm font-bold text-white flex-shrink-0"
+                :style="{ background: winner.avatarColor }"
+              >
+                {{ winner.initials }}
+              </div>
+
+              <!-- Info -->
+              <div class="flex-1 min-w-0">
+                <p class="text-xs sm:text-sm font-semibold text-white truncate">{{ winner.name }}</p>
+                <p class="text-[10px] sm:text-xs text-[#606060] truncate">{{ winner.bet }} • {{ winner.sport }}</p>
+              </div>
+
+              <!-- Amount -->
+              <div class="text-right flex-shrink-0">
+                <p class="text-xs sm:text-sm font-black text-[#22C55E]">+{{ winner.amount }}</p>
+                <p class="text-[8px] sm:text-[10px] text-[#606060]">{{ winner.time }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
 </template>
 
@@ -133,8 +311,7 @@ import { RouterLink, useRouter } from 'vue-router'
 import AppButton from '../components/ui/AppButton.vue'
 import { useBetSlipStore } from '../stores/useBetSlipStore'
 import HeroCarousel from '../components/shared/HeroSection/HeroCarousel.vue'
-import RecentWinners from '../components/ui/RecentWinners.vue' 
-import MatchCard from '../components/betting/MatchCard.vue'
+
 const router       = useRouter()
 const betSlipStore = useBetSlipStore()
 
@@ -310,56 +487,11 @@ const promotions = [
 
 // ---- Recent winners ----
 const recentWinners = [
-  { 
-    initials: 'JM', 
-    phone: '+255677453123',
-    name: 'James M.', 
-    bet: 'Accumulator x8', 
-    sport: 'Football', 
-    amount: 'TZS 4,200,000', 
-    time: '5 min ago', 
-    avatarColor: '#A32D2D' 
-  },
-  { 
-    initials: 'AK', 
-    phone: '+255712345678',
-    name: 'Amina K.', 
-    bet: 'Single bet', 
-    sport: 'Tennis', 
-    amount: 'TZS 850,000', 
-    time: '12 min ago', 
-    avatarColor: '#7A1F1F' 
-  },
-  { 
-    initials: 'SM', 
-    phone: '+255756789012',
-    name: 'Said M.', 
-    bet: 'Double bet', 
-    sport: 'Basketball', 
-    amount: 'TZS 1,350,000', 
-    time: '28 min ago', 
-    avatarColor: '#C94040' 
-  },
-  { 
-    initials: 'FH', 
-    phone: '+255698765432',
-    name: 'Fatuma H.', 
-    bet: 'Accumulator x5', 
-    sport: 'Football', 
-    amount: 'TZS 2,780,000', 
-    time: '1 hr ago', 
-    avatarColor: '#6B1A1A' 
-  },
-  { 
-    initials: 'DM', 
-    phone: '+255623456789',
-    name: 'David M.', 
-    bet: 'Single bet', 
-    sport: 'Cricket', 
-    amount: 'TZS 420,000', 
-    time: '2 hrs ago', 
-    avatarColor: '#8B2020' 
-  },
+  { initials: 'JM', name: 'James M.', bet: 'Accumulator x8', sport: 'Football', amount: 'TZS 4,200,000', time: '5 min ago', avatarColor: '#A32D2D' },
+  { initials: 'AK', name: 'Amina K.', bet: 'Single bet',     sport: 'Tennis',   amount: 'TZS 850,000',  time: '12 min ago', avatarColor: '#7A1F1F' },
+  { initials: 'SM', name: 'Said M.',  bet: 'Double bet',     sport: 'Basketball',amount: 'TZS 1,350,000',time: '28 min ago', avatarColor: '#C94040' },
+  { initials: 'FH', name: 'Fatuma H.',bet: 'Accumulator x5', sport: 'Football', amount: 'TZS 2,780,000',time: '1 hr ago',   avatarColor: '#6B1A1A' },
+  { initials: 'DM', name: 'David M.', bet: 'Single bet',     sport: 'Cricket',  amount: 'TZS 420,000',  time: '2 hrs ago',  avatarColor: '#8B2020' },
 ]
 
 // ---- Jackpot countdown ----

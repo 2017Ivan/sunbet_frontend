@@ -19,8 +19,8 @@
           </button>
 
           <!-- Logo -->
-          <RouterLink to="/" class="flex items-center gap-2.5 select-none">
-            <div class="w-8 h-8 rounded-[8px] bg-[#A32D2D] flex items-center justify-center shadow-[0_4px_12px_rgba(163,45,45,0.4)]">
+          <RouterLink to="/" class="flex items-center gap-1 select-none">
+            <div class="hidden md:flex w-8 h-8 rounded-[8px] bg-[#A32D2D]  items-center justify-center shadow-[0_4px_12px_rgba(163,45,45,0.4)]">
               <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
               </svg>
@@ -66,11 +66,11 @@
   to="/wallet"
   class="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 rounded-[8px] sm:rounded-[10px] bg-[#1E1E1E] border border-[#A32D2D]/40 hover:border-[#A32D2D] transition-colors"
 >
-  <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#A32D2D]" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M21 18v1a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h14a2 2 0 012 2v1"/>
+  <!-- <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#A32D2D]" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M21 18v1a2 2 0 01-2 2H5a2 2 0 01-2-2V5     a2 2 0 012-2h14a2 2 0 012 2v1"/>
     <path d="M17 12h4v4h-4a2 2 0 010-4z"/>
-  </svg>
-  <span class="text-[10px] sm:text-xs text-[#606060] font-medium hidden xs:inline">TZS</span>
+  </svg> -->
+  <span class="text-[10px] text-[#606060] font-medium  xs:inline">TZS</span>
   <span class="text-xs sm:text-sm font-bold text-[#A32D2D]">{{ formattedBalance }}</span>
 </RouterLink>
 

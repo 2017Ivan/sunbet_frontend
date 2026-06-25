@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-[#0D0D0D] text-white flex flex-col">
+  <div class="min-h-screen bg-white text-white flex flex-col">
 
     <!-- Header (Sasa hivi urefu wake ni ~92px kutokana na Row 2) -->
     <AppHeader
@@ -26,7 +26,7 @@
       MAIN CONTAINER 
       Nimetumia pt-[100px] ili kutoa nafasi ya kutosha kwa ajili ya Hero Carousel isijifiche!
     -->
-    <main class="pt-[104px] pb-24 lg:pb-8 flex-1 w-full  mx-auto">
+    <main class="pt-[104px] flex-1 w-full  mx-auto">
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start h-full relative">
         
         <!-- Left Side: Kurasa zote (HomePage, SportsLobby nk) -->
