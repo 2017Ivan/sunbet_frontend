@@ -3,21 +3,11 @@
   
       <!-- ===== STICKY HEADER ===== -->
       <div class="sticky top-16 z-30 bg-[#0D0D0D]/95 backdrop-blur-xl border-b border-[#1E1E1E]">
-        <div class="max-w-screen-xl mx-auto px-4">
+        <div class="max-w-screen-xl mx-auto ">
   
           <!-- Top row -->
           <div class="flex items-center justify-between py-3 gap-3">
-            <div class="flex items-center gap-3">
-              <!-- Live pulse indicator -->
-              <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#FF3B3B]/10 border border-[#FF3B3B]/25">
-                <span class="w-2 h-2 rounded-full bg-[#FF3B3B] animate-pulse" />
-                <span class="text-[#FF3B3B] text-xs font-bold tracking-wide">LIVE</span>
-              </div>
-              <div>
-                <span class="text-white font-bold text-lg">Betting</span>
-                <span class="ml-2 text-xs text-[#606060]">{{ liveMatches.length }} matches</span>
-              </div>
-            </div>
+           
   
             <!-- Auto refresh toggle -->
             <div class="flex items-center gap-3">

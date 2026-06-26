@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-white text-white flex flex-col">
+  <div class="min-h-screen bg-gray-900 text-white flex flex-col">
 
     <!-- Header (Sasa hivi urefu wake ni ~92px kutokana na Row 2) -->
     <AppHeader

@@ -1,6 +1,6 @@
 <template>
   <div 
-    class="bg-[#161616] border border-[#2A2A2A] rounded-[16px] p-3 sm:p-4 hover:border-[#A32D2D]/40 transition-all duration-300 group hover:shadow-[0_8px_30px_rgba(163,45,45,0.15)]"
+    class="bg-gray-900/70 border-b border-[#2A2A2A]  p-3  hover:border-[#A32D2D]/40 transition-all duration-300 group hover:shadow-[0_8px_30px_rgba(163,45,45,0.15)]"
   >
     <!-- Match header -->
     <div class="flex items-center justify-between mb-3">

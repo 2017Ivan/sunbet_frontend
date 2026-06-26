@@ -1,5 +1,5 @@
 <template>
-    <div class="min-h-screen bg-[#0D0D0D]">
+    <div class="min-h-screen bg-gray-950">
   
       <!-- ===== HERO SECTION ===== -->
       <section class="relative overflow-hidden">
@@ -62,7 +62,7 @@
           <!-- Matches grid -->
 
 
-          <div class="space-y-3">
+          <div class="">
             <MatchCard
               v-for="match in filteredMatches"
               :key="match.id"

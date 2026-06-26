@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-[#0D0D0D]">
+  <div class="min-h-screen bg-gray-950">
 
     <!-- ===== PAGE HEADER ===== -->
     <div class="bg-[#0D0D0D] border-b border-[#1E1E1E] sticky top-16 z-30">
@@ -9,7 +9,7 @@
       </div>
     </div>
 
-    <div class="max-w-screen-xl mx-auto px-4 py-6">
+    <div class="max-w-screen-xl mx-auto py-6">
       <div class="flex gap-6">
 
         <!-- ===== LEFT SIDEBAR: Leagues filter (desktop) ===== -->
@@ -134,7 +134,7 @@
 
           <!-- Matches grid using MatchCard component -->
           <template v-if="displayedMatches.length > 0">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div class="grid grid-cols-1">
               <MatchCard
                 v-for="match in displayedMatches"
                 :key="match.id"
@@ -158,7 +158,7 @@
           </div>
 
           <!-- Load more -->
-          <button
+          <!-- <button
             v-if="displayedMatches.length > 0"
             class="w-full mt-4 py-3.5 rounded-[12px] border border-[#2A2A2A] text-sm text-[#606060] hover:text-white hover:border-[#333] transition-all flex items-center justify-center gap-2"
             :class="loadingMore ? 'opacity-50 cursor-not-allowed' : ''"
@@ -170,7 +170,7 @@
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
             </svg>
             {{ loadingMore ? 'Loading...' : 'Load more matches' }}
-          </button>
+          </button> -->
 
         </div>
       </div>
