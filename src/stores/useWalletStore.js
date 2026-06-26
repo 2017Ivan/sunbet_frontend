@@ -1,27 +1,29 @@
+// stores/walletStore.js
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { useAuthStore } from './useAuthStore'
+import { useAuthStore } from './authStore'
+import authService from '../services/auth/auth.service'
 
 export const useWalletStore = defineStore('wallet', () => {
   const authStore = useAuthStore()
 
   // ===== STATE =====
-  const transactions   = ref([])
-  const isLoading      = ref(false)
-  const isDepositing   = ref(false)
-  const isWithdrawing  = ref(false)
-  const error          = ref(null)
+  const transactions = ref([])
+  const isLoading = ref(false)
+  const isDepositing = ref(false)
+  const isWithdrawing = ref(false)
+  const error = ref(null)
   const successMessage = ref(null)
-  const bonusBalance   = ref(10000)
-  const pendingAmount  = ref(0)
+  const bonusBalance = ref(0)
+  const pendingAmount = ref(0)
 
   // ===== GETTERS =====
-  const mainBalance = computed(() => authStore.balance)
+  const mainBalance = computed(() => authStore.user?.balance || 0)
 
-  const totalBalance = computed(() => mainBalance.value + bonusBalance.value)
+  const totalBalance = computed(() => Number(mainBalance.value) + Number(bonusBalance.value))
 
   const depositHistory = computed(() =>
-    transactions.value.filter(t => t.type === 'deposit')
+    transactions.value.filter(t => t.type === 'deposit' || t.type === 'deposit')
   )
 
   const withdrawHistory = computed(() =>
@@ -30,25 +32,25 @@ export const useWalletStore = defineStore('wallet', () => {
 
   const totalDeposited = computed(() =>
     depositHistory.value
-      .filter(t => t.status === 'completed')
-      .reduce((sum, t) => sum + t.amount, 0)
+      .filter(t => t.status === 'completed' || t.status === 'success')
+      .reduce((sum, t) => sum + Number(t.amount), 0)
   )
 
   const totalWithdrawn = computed(() =>
     withdrawHistory.value
-      .filter(t => t.status === 'completed')
-      .reduce((sum, t) => sum + t.amount, 0)
+      .filter(t => t.status === 'completed' || t.status === 'success')
+      .reduce((sum, t) => sum + Number(t.amount), 0)
   )
 
   const recentTransactions = computed(() =>
     [...transactions.value]
-      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      .sort((a, b) => new Date(b.createdAt || b.created_at) - new Date(a.createdAt || a.created_at))
       .slice(0, 20)
   )
 
   // ===== HELPERS =====
   const clearMessages = () => {
-    error.value          = null
+    error.value = null
     successMessage.value = null
   }
 
@@ -58,7 +60,8 @@ export const useWalletStore = defineStore('wallet', () => {
 
   const addTransaction = (tx) => {
     transactions.value.unshift({
-      id:        generateRef(),
+      id: generateRef(),
+      created_at: new Date().toISOString(),
       createdAt: new Date().toISOString(),
       ...tx,
     })
@@ -68,33 +71,29 @@ export const useWalletStore = defineStore('wallet', () => {
 
   // -- Fetch transactions --
   const fetchTransactions = async ({ page = 1, limit = 20, type = 'all' } = {}) => {
+    if (!authStore.isLoggedIn) {
+      error.value = 'Please login first'
+      return { success: false, message: 'Not authenticated' }
+    }
+
     isLoading.value = true
-    error.value     = null
+    error.value = null
+    
     try {
-      // TODO: replace with real API
-      // const res = await api.get('/wallet/transactions', { params: { page, limit, type } })
-      // transactions.value = res.data.transactions
-
-      await new Promise(r => setTimeout(r, 800))
-
-      // Seed fake transactions if empty
-      if (!transactions.value.length) {
-        transactions.value = [
-          { id: 'TXN001', type: 'deposit',    amount: 50000,  status: 'completed', method: 'M-Pesa',    phone: '+255 712 345 678', ref: 'DEP001XYZ', createdAt: new Date(Date.now() - 3600000).toISOString(),   description: 'Deposit via M-Pesa'          },
-          { id: 'TXN002', type: 'bet',        amount: 10000,  status: 'active',    method: 'Wallet',    phone: null,               ref: 'BET002ABC', createdAt: new Date(Date.now() - 7200000).toISOString(),   description: 'Bet placed — Accumulator x5' },
-          { id: 'TXN003', type: 'win',        amount: 306000, status: 'completed', method: 'Wallet',    phone: null,               ref: 'WIN003DEF', createdAt: new Date(Date.now() - 86400000).toISOString(),  description: 'Bet won — Accumulator x4'    },
-          { id: 'TXN004', type: 'withdrawal', amount: 80000,  status: 'completed', method: 'M-Pesa',    phone: '+255 712 345 678', ref: 'WTH004GHI', createdAt: new Date(Date.now() - 172800000).toISOString(), description: 'Withdrawal to M-Pesa'        },
-          { id: 'TXN005', type: 'bonus',      amount: 10000,  status: 'completed', method: 'Bonus',     phone: null,               ref: 'BON005JKL', createdAt: new Date(Date.now() - 259200000).toISOString(), description: 'Welcome bonus credited'       },
-          { id: 'TXN006', type: 'deposit',    amount: 30000,  status: 'completed', method: 'Tigo Pesa', phone: '+255 713 456 789', ref: 'DEP006MNO', createdAt: new Date(Date.now() - 345600000).toISOString(), description: 'Deposit via Tigo Pesa'        },
-          { id: 'TXN007', type: 'bet',        amount: 25000,  status: 'lost',      method: 'Wallet',    phone: null,               ref: 'BET007PQR', createdAt: new Date(Date.now() - 432000000).toISOString(), description: 'Bet placed — Single'         },
-          { id: 'TXN008', type: 'deposit',    amount: 100000, status: 'completed', method: 'Airtel',    phone: '+255 714 567 890', ref: 'DEP008STU', createdAt: new Date(Date.now() - 518400000).toISOString(), description: 'Deposit via Airtel Money'     },
-        ]
+      // 🔥 Use authService which already has api instance
+      const response = await authService.getTransactions({ page, limit, type })
+      
+      if (response.success) {
+        transactions.value = response.data || response.transactions || []
+        return { success: true, transactions: transactions.value }
       }
-
-      return { success: true, transactions: transactions.value }
+      
+      return { success: false, message: response.message || 'Failed to fetch transactions' }
+      
     } catch (err) {
-      error.value = 'Failed to load transactions.'
-      return { success: false }
+      console.error('Fetch transactions error:', err)
+      error.value = err.message || 'Failed to load transactions.'
+      return { success: false, error: error.value }
     } finally {
       isLoading.value = false
     }
@@ -102,6 +101,11 @@ export const useWalletStore = defineStore('wallet', () => {
 
   // -- Deposit --
   const deposit = async ({ amount, method, phone, promoCode = '' }) => {
+    if (!authStore.isLoggedIn) {
+      error.value = 'Please login first'
+      return { success: false, error: 'Not authenticated' }
+    }
+
     isDepositing.value = true
     clearMessages()
 
@@ -114,53 +118,46 @@ export const useWalletStore = defineStore('wallet', () => {
         throw new Error('Maximum deposit is TZS 5,000,000')
       }
 
-      // TODO: replace with real API
-      // const res = await api.post('/wallet/deposit', { amount, method, phone, promoCode })
-
-      await new Promise(r => setTimeout(r, 2000))
-
-      const ref     = generateRef('DEP')
-      const bonus   = promoCode?.toUpperCase() === 'SUNBET100' ? 10000 : 0
-      const total   = amount + bonus
-
-      // Add transaction
-      addTransaction({
-        type:        'deposit',
+      // 🔥 Use authService
+      const response = await authService.deposit({
         amount,
-        status:      'completed',
-        method:      methodLabel(method),
+        method,
         phone,
-        ref,
-        description: `Deposit via ${methodLabel(method)}`,
+        promoCode
       })
 
-      if (bonus > 0) {
-        bonusBalance.value += bonus
+      if (response.success) {
+        const data = response.data || {}
+        
+        // Add transaction
         addTransaction({
-          type:        'bonus',
-          amount:      bonus,
-          status:      'completed',
-          method:      'Bonus',
-          phone:       null,
-          ref:         generateRef('BON'),
-          description: 'Promo bonus — ' + promoCode,
+          type: 'deposit',
+          amount: amount,
+          status: data.status || 'completed',
+          method: methodLabel(method),
+          phone: phone,
+          ref: data.reference || generateRef('DEP'),
+          description: `Deposit via ${methodLabel(method)}`,
         })
+
+        // Update balance using authStore
+        await authStore.fetchUserBalance()
+
+        successMessage.value = {
+          title: 'Deposit Successful!',
+          subtitle: 'Your account has been credited',
+          amount: `TZS ${Number(amount).toLocaleString()}`,
+          ref: data.reference || generateRef('DEP'),
+          status: 'Completed',
+        }
+
+        return { success: true, ref: data.reference, amount }
       }
 
-      // Update balance
-      authStore.addToBalance(amount)
-
-      successMessage.value = {
-        title:    'Deposit Successful!',
-        subtitle: 'Your account has been credited',
-        amount:   `TZS ${total.toLocaleString()}`,
-        ref,
-        status:   'Completed',
-      }
-
-      return { success: true, ref, amount: total }
+      return { success: false, error: response.message || 'Failed to process deposit' }
 
     } catch (err) {
+      console.error('Deposit error:', err)
       error.value = err.message || 'Deposit failed. Please try again.'
       return { success: false, error: error.value }
     } finally {
@@ -170,6 +167,11 @@ export const useWalletStore = defineStore('wallet', () => {
 
   // -- Withdraw --
   const withdraw = async ({ amount, method, phone, pin }) => {
+    if (!authStore.isLoggedIn) {
+      error.value = 'Please login first'
+      return { success: false, error: 'Not authenticated' }
+    }
+
     isWithdrawing.value = true
     clearMessages()
 
@@ -179,7 +181,7 @@ export const useWalletStore = defineStore('wallet', () => {
         throw new Error('Minimum withdrawal is TZS 1,000')
       }
       if (amount > mainBalance.value) {
-        throw new Error('Insufficient balance')
+        throw new Error(`Insufficient balance. Your balance is TZS ${mainBalance.value.toLocaleString()}`)
       }
       if (amount > 5000000) {
         throw new Error('Maximum withdrawal per transaction is TZS 5,000,000')
@@ -188,52 +190,45 @@ export const useWalletStore = defineStore('wallet', () => {
         throw new Error('Invalid PIN')
       }
 
-      // TODO: replace with real API
-      // const res = await api.post('/wallet/withdraw', { amount, method, phone, pin })
-
-      await new Promise(r => setTimeout(r, 2500))
-
-      // Fake PIN validation
-      if (pin.toString() !== '1234') {
-        throw new Error('Incorrect PIN. Please try again.')
-      }
-
-      const ref = generateRef('WTH')
-
-      addTransaction({
-        type:        'withdrawal',
+      // 🔥 Use authService
+      const response = await authService.withdraw({
         amount,
-        status:      'processing',
-        method:      methodLabel(method),
+        method,
         phone,
-        ref,
-        description: `Withdrawal to ${methodLabel(method)}`,
+        pin
       })
 
-      // Deduct balance
-      authStore.deductFromBalance(amount)
-      pendingAmount.value += amount
+      if (response.success) {
+        const data = response.data || {}
 
-      // Simulate processing complete after 3 min (fake)
-      setTimeout(() => {
-        const tx = transactions.value.find(t => t.ref === ref)
-        if (tx) {
-          tx.status = 'completed'
-          pendingAmount.value = Math.max(0, pendingAmount.value - amount)
+        addTransaction({
+          type: 'withdrawal',
+          amount: amount,
+          status: data.status || 'processing',
+          method: methodLabel(method),
+          phone: phone,
+          ref: data.reference || generateRef('WTH'),
+          description: `Withdrawal to ${methodLabel(method)}`,
+        })
+
+        // Update balance using authStore
+        await authStore.fetchUserBalance()
+
+        successMessage.value = {
+          title: 'Withdrawal Initiated!',
+          subtitle: 'Funds sent to your mobile number',
+          amount: `TZS ${Number(amount).toLocaleString()}`,
+          ref: data.reference || generateRef('WTH'),
+          status: data.status || 'Processing',
         }
-      }, 10000) // 10s for demo (real: ~3 min)
 
-      successMessage.value = {
-        title:    'Withdrawal Initiated!',
-        subtitle: 'Funds sent to your mobile number',
-        amount:   `TZS ${amount.toLocaleString()}`,
-        ref,
-        status:   'Processing (~3 min)',
+        return { success: true, ref: data.reference, amount }
       }
 
-      return { success: true, ref, amount }
+      return { success: false, error: response.message || 'Failed to process withdrawal' }
 
     } catch (err) {
+      console.error('Withdrawal error:', err)
       error.value = err.message || 'Withdrawal failed. Please try again.'
       return { success: false, error: error.value }
     } finally {
@@ -244,62 +239,123 @@ export const useWalletStore = defineStore('wallet', () => {
   // -- Check promo code --
   const checkPromoCode = async (code) => {
     try {
-      // TODO: await api.post('/wallet/promo/check', { code })
-      await new Promise(r => setTimeout(r, 800))
-
-      const validCodes = {
-        'SUNBET100': { bonus: 10000, description: '+TZS 10,000 bonus on deposit!' },
-        'WELCOME50': { bonus: 5000,  description: '+TZS 5,000 bonus on deposit!'  },
-        'VIP2024':   { bonus: 20000, description: '+TZS 20,000 VIP bonus!'        },
+      // 🔥 Use authService
+      const response = await authService.checkPromo(code)
+      
+      if (response.success) {
+        return {
+          valid: true,
+          bonus: response.bonus || 0,
+          description: response.message || 'Promo code applied!'
+        }
       }
-
-      const found = validCodes[code.toUpperCase()]
-      if (found) {
-        return { valid: true, ...found }
-      } else {
-        return { valid: false, description: 'Invalid or expired promo code.' }
+      
+      return { valid: false, description: response.message || 'Invalid or expired promo code.' }
+      
+    } catch (err) {
+      console.error('Promo check error:', err)
+      return { 
+        valid: false, 
+        description: err.message || 'Could not verify code. Try again.' 
       }
-    } catch {
-      return { valid: false, description: 'Could not verify code. Try again.' }
     }
   }
 
   // -- Set spending limit --
   const setSpendingLimit = async ({ daily, weekly, monthly }) => {
+    if (!authStore.isLoggedIn) {
+      error.value = 'Please login first'
+      return { success: false }
+    }
+
     isLoading.value = true
     try {
-      // TODO: await api.post('/wallet/limits', { daily, weekly, monthly })
-      await new Promise(r => setTimeout(r, 800))
-      return { success: true }
-    } catch {
-      error.value = 'Failed to set limits.'
+      // 🔥 Use authService
+      const response = await authService.setLimits({ daily, weekly, monthly })
+      
+      if (response.success) {
+        return { success: true }
+      }
+      
+      return { success: false, message: response.message }
+      
+    } catch (err) {
+      console.error('Set limits error:', err)
+      error.value = err.message || 'Failed to set limits.'
       return { success: false }
     } finally {
       isLoading.value = false
     }
   }
 
+  // -- Refresh balance --
+  const refreshBalance = async () => {
+    if (!authStore.isLoggedIn) return { success: false }
+    return await authStore.fetchUserBalance()
+  }
+
   // -- Format helpers --
-  const methodLabel = (method) => ({
-    mpesa:       'M-Pesa',
-    tigopesa:    'Tigo Pesa',
-    airtelmoney: 'Airtel Money',
-    halopesa:    'HaloPesa',
-  }[method] || method)
+  const methodLabel = (method) => {
+    const methods = {
+      mpesa: 'M-Pesa',
+      tigopesa: 'Tigo Pesa',
+      airtelmoney: 'Airtel Money',
+      halopesa: 'HaloPesa',
+      wallet: 'Wallet',
+      bank: 'Bank Transfer',
+      card: 'Card Payment'
+    }
+    return methods[method?.toLowerCase()] || method || 'Unknown'
+  }
 
   const formatAmount = (amount) =>
     `TZS ${Number(amount).toLocaleString('en-TZ')}`
 
   const formatDate = (dateStr) => {
+    if (!dateStr) return 'N/A'
     const date = new Date(dateStr)
-    const now  = new Date()
+    if (isNaN(date.getTime())) return 'Invalid date'
+    
+    const now = new Date()
     const diff = now - date
 
-    if (diff < 60000)      return 'Just now'
-    if (diff < 3600000)    return Math.floor(diff / 60000) + ' min ago'
-    if (diff < 86400000)   return Math.floor(diff / 3600000) + ' hrs ago'
-    if (diff < 172800000)  return 'Yesterday'
-    return date.toLocaleDateString('en-TZ', { day: 'numeric', month: 'short' })
+    if (diff < 60000) return 'Just now'
+    if (diff < 3600000) return Math.floor(diff / 60000) + ' min ago'
+    if (diff < 86400000) return Math.floor(diff / 3600000) + ' hrs ago'
+    if (diff < 172800000) return 'Yesterday'
+    return date.toLocaleDateString('en-TZ', { 
+      day: 'numeric', 
+      month: 'short',
+      year: 'numeric'
+    })
+  }
+
+  const getStatusColor = (status) => {
+    const colors = {
+      completed: 'text-green-400',
+      success: 'text-green-400',
+      processing: 'text-yellow-400',
+      pending: 'text-yellow-400',
+      failed: 'text-red-400',
+      lost: 'text-red-400',
+      active: 'text-blue-400',
+      cancelled: 'text-gray-400'
+    }
+    return colors[status?.toLowerCase()] || 'text-gray-400'
+  }
+
+  const getStatusBadge = (status) => {
+    const badges = {
+      completed: 'bg-green-500/10 text-green-400 border-green-500/20',
+      success: 'bg-green-500/10 text-green-400 border-green-500/20',
+      processing: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
+      pending: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
+      failed: 'bg-red-500/10 text-red-400 border-red-500/20',
+      lost: 'bg-red-500/10 text-red-400 border-red-500/20',
+      active: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+      cancelled: 'bg-gray-500/10 text-gray-400 border-gray-500/20'
+    }
+    return badges[status?.toLowerCase()] || 'bg-gray-500/10 text-gray-400 border-gray-500/20'
   }
 
   return {
@@ -312,6 +368,7 @@ export const useWalletStore = defineStore('wallet', () => {
     successMessage,
     bonusBalance,
     pendingAmount,
+    
     // getters
     mainBalance,
     totalBalance,
@@ -320,6 +377,7 @@ export const useWalletStore = defineStore('wallet', () => {
     totalDeposited,
     totalWithdrawn,
     recentTransactions,
+    
     // actions
     fetchTransactions,
     deposit,
@@ -327,9 +385,13 @@ export const useWalletStore = defineStore('wallet', () => {
     checkPromoCode,
     setSpendingLimit,
     clearMessages,
+    refreshBalance,
+    
     // helpers
     formatAmount,
     formatDate,
     methodLabel,
+    getStatusColor,
+    getStatusBadge,
   }
 })

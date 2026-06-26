@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen bg-gray-900 text-white flex flex-col">
 
-    <!-- Header -->
+    <!-- Header (Sasa hivi urefu wake ni ~92px kutokana na Row 2) -->
     <AppHeader
       :is-logged-in="isLoggedIn"
       :user="user"
@@ -24,11 +24,12 @@
 
     <!-- 
       MAIN CONTAINER 
+      Nimetumia pt-[100px] ili kutoa nafasi ya kutosha kwa ajili ya Hero Carousel isijifiche!
     -->
-    <main class="pt-[104px] flex-1 w-full mx-auto">
+    <main class="pt-[104px] flex-1 w-full  mx-auto">
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start h-full relative">
         
-        <!-- Left Side: Kurasa zote -->
+        <!-- Left Side: Kurasa zote (HomePage, SportsLobby nk) -->
         <div class="lg:col-span-8 xl:col-span-9 min-w-0">
           <RouterView v-slot="{ Component, route }">
             <Transition name="page" mode="out-in">
@@ -38,6 +39,7 @@
         </div>
 
         <!-- Right Side: Permanent Desktop Bet Slip -->
+        <!-- Inakuwa 'sticky' chini ya header, inaonekana kuanzia lg screen kwenda juu -->
         <aside class="hidden lg:block lg:col-span-4 xl:col-span-3 sticky top-[110px] max-h-[calc(100vh-140px)] overflow-y-auto bg-[#1E1E1E] border border-[#2A2A2A] rounded-xl p-4">
           <div class="flex items-center justify-between border-b border-[#2A2A2A] pb-3 mb-4">
             <h3 class="font-bold text-sm tracking-wide text-white uppercase flex items-center gap-2">
@@ -55,13 +57,17 @@
             </button>
           </div>
 
-          <!-- BetSlip Content -->
+          <!-- Sehemu ya ku-render BetSlip Drawer content ikiwa kwenye desktop -->
           <div v-if="betSlipStore.count === 0" class="py-12 text-center text-gray-500 text-xs">
             <p>Your betslip is empty.</p>
             <p class="mt-1">Select odds from any match to add a bet.</p>
           </div>
           
           <div v-else class="flex flex-col gap-3">
+            <!-- 
+              Hapa unaweza ku-import component ya list ya betslip yako moja kwa moja 
+              au ku-pass data kwenda kwenye `BetSlipDrawer` lakini ukiivua ile modal/drawer element.
+            -->
             <div v-for="(bet, index) in betSlipStore.items" :key="index" class="p-3 bg-[#141414] rounded-lg border border-[#2A2A2A] text-xs">
               <div class="flex justify-between items-start">
                 <p class="font-semibold text-white">{{ bet.selection }}</p>
@@ -74,10 +80,12 @@
               </div>
             </div>
 
+
+            <!-- Mfano wa sehemu ya kuweka dau (Stake Box) -->
             <div class="mt-4 pt-4 border-t border-[#2A2A2A] space-y-3">
               <div class="flex justify-between text-sm">
                 <span class="text-gray-400">Total Odds</span>
-                <span class="font-bold text-white">{{ totalOdds }}</span>
+                <span class="font-bold text-white">2.45</span>
               </div>
               <button @click="handlePlaceBet" class="w-full py-2.5 bg-[#A32D2D] hover:bg-[#7A1F1F] text-white font-bold text-sm rounded-lg transition-colors">
                 Place Bet
@@ -89,7 +97,7 @@
       </div>
     </main>
 
-    <!-- Mobile-only Bet Slip Drawer -->
+    <!-- Mobile-only Bet Slip Drawer (Inafanya kazi kwenye simu tu sasa hivi) -->
     <BetSlipDrawer
       class="lg:hidden"
       :open="betSlipOpen"
@@ -110,117 +118,52 @@
   </div>
 </template>
 
+
+
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
-import { storeToRefs } from 'pinia'
-import { useRouter } from 'vue-router'
-import AppHeader from '../components/layout/header/AppHeader.vue'
-import AppSidebar from '../components/layout/AppSidebar.vue'
-import BottomNav from '../components/layout/BottomNav.vue'
-import BetSlipDrawer from '../components/layout/BetSlipDrawer.vue'
-import { useAuthStore } from '../stores/authStore.js'
-import { useWalletStore } from '../stores/useWalletStore'
-import { useBetSlipStore } from '../stores/useBetSlipStore'
+import { ref, onMounted }    from 'vue'
+import { storeToRefs }       from 'pinia'
+import AppHeader             from '../components/layout/header/AppHeader.vue'
+import AppSidebar            from '../components/layout/AppSidebar.vue'
+import BottomNav             from '../components/layout/BottomNav.vue'
+import BetSlipDrawer         from '../components/layout/BetSlipDrawer.vue'
+import { useAuthStore }      from '../stores/authStore.js'
+import { useWalletStore }    from '../stores/useWalletStore'
+import { useBetSlipStore }   from '../stores/useBetSlipStore'
 import Footer from '../components/layout/footer/Footer.vue'
 
-const router = useRouter()
-
 // ---- Stores ----
-const authStore = useAuthStore()
-const walletStore = useWalletStore()
+const authStore    = useAuthStore()
+const walletStore  = useWalletStore()
 const betSlipStore = useBetSlipStore()
 
 // ---- Reactive state kutoka authStore ----
-const { isLoggedIn, user, balance, isLoading } = storeToRefs(authStore)
+const { isLoggedIn, user, balance } = storeToRefs(authStore)
 
 // ---- Local UI state ----
 const sidebarOpen = ref(false)
 const betSlipOpen = ref(false)
 
-// ---- Computed ----
-const totalOdds = computed(() => {
-  return betSlipStore.items.reduce((acc, bet) => acc * bet.odds, 1).toFixed(2)
-})
-
-// ---- On mount: initialize app ----
+// ---- On mount: fetch user + transactions ----
 onMounted(async () => {
-  await initializeApp()
-})
-
-// ---- Watch for auth changes ----
-watch(isLoggedIn, (newVal) => {
-  if (newVal) {
-    // User logged in, fetch balance
-    fetchUserData()
-  } else {
-    // User logged out, clear any sensitive data
-    betSlipStore.clearAll()
+  await authStore.fetchMe()
+  if (authStore.isLoggedIn) {
+    await walletStore.fetchTransactions()
   }
 })
-
-// ---- Initialize App ----
-const initializeApp = async () => {
-  try {
-    // First, check if user is authenticated
-    await authStore.initialize()
-    
-    if (authStore.isLoggedIn) {
-      await fetchUserData()
-    } else {
-      console.log('User is not authenticated')
-    }
-  } catch (error) {
-    console.error('Error initializing app:', error)
-  }
-}
-
-// ---- Fetch User Data ----
-const fetchUserData = async () => {
-  try {
-    // Fetch profile
-    await authStore.fetchUserProfile()
-    
-    // Fetch balance
-    await authStore.fetchUserBalance()
-    
-    // Fetch transactions
-    if (authStore.isLoggedIn) {
-      await walletStore.fetchTransactions()
-    }
-  } catch (error) {
-    console.error('Error fetching user data:', error)
-  }
-}
 
 // ---- Actions ----
-const handleLogout = async () => {
+const handleLogout = () => {
   sidebarOpen.value = false
   betSlipOpen.value = false
-  await authStore.logout()
-  router.push('/')
+  authStore.logout()
 }
 
-const handlePlaceBet = () => {
-  // Check if user is logged in before placing bet
-  if (!authStore.isLoggedIn) {
-    router.push('/login')
-    return
-  }
-  
-  console.log('Placing bet:', { 
-    stake: 0, 
-    betType: 'single', 
-    bets: betSlipStore.items 
-  })
+const handlePlaceBet = ({ stake, betType }) => {
+  console.log('Placing bet:', { stake, betType, bets: betSlipStore.items })
   betSlipStore.clearAll()
   betSlipOpen.value = false
 }
-
-// ---- Expose for template ----
-defineExpose({
-  handleLogout,
-  handlePlaceBet
-})
 </script>
 
 <style scoped>
@@ -234,20 +177,5 @@ defineExpose({
 .page-leave-to {
   opacity: 0;
   transform: translateY(-8px);
-}
-
-/* Scrollbar styling for betslip */
-aside::-webkit-scrollbar {
-  width: 4px;
-}
-aside::-webkit-scrollbar-track {
-  background: transparent;
-}
-aside::-webkit-scrollbar-thumb {
-  background: #2A2A2A;
-  border-radius: 10px;
-}
-aside::-webkit-scrollbar-thumb:hover {
-  background: #A32D2D;
 }
 </style>

@@ -1,5 +1,6 @@
 <template>
   <div>
+ 
     <div class="flex gap-1 p-1 bg-[#161616] rounded-[14px] mb-8 border border-[#2A2A2A]">
       <button
         v-for="tab in ['Login', 'Register']"
@@ -13,15 +14,17 @@
         {{ tab }}
       </button>
     </div>
-
+ 
     <Transition name="form" mode="out-in">
       <div v-if="activeTab === 'Login'" key="login">
+ 
         <div class="mb-6">
           <h2 class="text-2xl font-bold text-white">Welcome back 👋</h2>
           <p class="text-sm text-[#606060] mt-1">Login to continue betting</p>
         </div>
-
+ 
         <form class="space-y-4" @submit.prevent="handleLogin">
+ 
           <AppInput
             v-model="loginForm.phone"
             label="Phone Number"
@@ -36,7 +39,7 @@
               </svg>
             </template>
           </AppInput>
-
+ 
           <AppInput
             v-model="loginForm.password"
             label="Password"
@@ -52,7 +55,7 @@
               </svg>
             </template>
           </AppInput>
-
+ 
           <div class="flex items-center justify-between">
             <label class="flex items-center gap-2 cursor-pointer group">
               <div
@@ -68,16 +71,11 @@
               </div>
               <span class="text-xs text-[#606060]">Remember me</span>
             </label>
-            <button type="button" class="text-xs text-[#A32D2D] hover:text-[#C94040] transition-colors" @click="goToForgotPassword">
+            <button type="button" class="text-xs text-[#A32D2D] hover:text-[#C94040] transition-colors">
               Forgot password?
             </button>
           </div>
-
-          <!-- Error Message -->
-          <div v-if="loginError" class="p-3 rounded-lg bg-[#EF4444]/10 border border-[#EF4444]/20 text-[#EF4444] text-sm">
-            {{ loginError }}
-          </div>
-
+ 
           <AppButton
             type="submit"
             variant="primary"
@@ -89,13 +87,13 @@
           >
             Login to SunBet
           </AppButton>
-
+ 
           <div class="relative flex items-center gap-3 my-2">
             <div class="flex-1 h-px bg-[#2A2A2A]" />
             <span class="text-xs text-[#606060]">or continue with</span>
             <div class="flex-1 h-px bg-[#2A2A2A]" />
           </div>
-
+ 
           <div class="grid grid-cols-2 gap-3">
             <button
               type="button"
@@ -116,23 +114,27 @@
               <span class="text-[#4CAF50] font-bold text-xs">M-PESA</span>
             </button>
           </div>
+ 
         </form>
-
+ 
         <p class="text-center text-sm text-[#606060] mt-6">
           Don't have an account?
           <button class="text-[#A32D2D] font-semibold hover:text-[#C94040] transition-colors" @click="switchTab('Register')">
             Register free
           </button>
         </p>
+ 
       </div>
-
+ 
       <div v-else key="register">
+ 
         <div class="mb-6">
           <h2 class="text-2xl font-bold text-white">Create account 🎯</h2>
           <p class="text-sm text-[#606060] mt-1">Join 2M+ bettors on SunBet</p>
         </div>
-
+ 
         <form class="space-y-4" @submit.prevent="handleRegister">
+ 
           <AppInput
             v-model="registerForm.phone"
             label="Phone Number"
@@ -148,7 +150,7 @@
               </svg>
             </template>
           </AppInput>
-
+ 
           <AppInput
             v-model="registerForm.password"
             label="Password"
@@ -164,7 +166,7 @@
               </svg>
             </template>
           </AppInput>
-
+ 
           <div v-if="registerForm.password" class="space-y-1.5">
             <div class="flex gap-1">
               <div
@@ -178,7 +180,7 @@
               {{ passwordStrength.label }}
             </p>
           </div>
-
+ 
           <label class="flex items-start gap-3 cursor-pointer group pt-2">
             <div
               class="w-4 h-4 mt-0.5 rounded border flex-shrink-0 flex items-center justify-center transition-all"
@@ -198,12 +200,7 @@
             </span>
           </label>
           <p v-if="registerErrors.agreed" class="text-xs text-[#EF4444] -mt-2">{{ registerErrors.agreed }}</p>
-
-          <!-- Error Message -->
-          <div v-if="registerError" class="p-3 rounded-lg bg-[#EF4444]/10 border border-[#EF4444]/20 text-[#EF4444] text-sm">
-            {{ registerError }}
-          </div>
-
+ 
           <AppButton
             type="submit"
             variant="primary"
@@ -215,227 +212,135 @@
           >
             Create Account 🎉
           </AppButton>
+ 
         </form>
-
+ 
         <p class="text-center text-sm text-[#606060] mt-6">
           Already have an account?
           <button class="text-[#A32D2D] font-semibold hover:text-[#C94040] transition-colors" @click="switchTab('Login')">
             Login here
           </button>
         </p>
+ 
       </div>
     </Transition>
+ 
   </div>
 </template>
-
+ 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { useAuthStore } from '../stores/authStore.js'
-import AppInput from '../components/ui/AppInput.vue'
+import AppInput  from '../components/ui/AppInput.vue'
 import AppButton from '../components/ui/AppButton.vue'
-
+ 
 const router = useRouter()
-const route = useRoute()
-const authStore = useAuthStore()
-
-// ---- Active Tab ----
+const route  = useRoute()
+ 
 const activeTab = ref(route.name === 'register' ? 'Register' : 'Login')
-
-// ---- Loading State ----
-const loading = ref(false)
-
-// ---- Error States ----
-const loginError = ref('')
-const registerError = ref('')
-
-// ---- Login Form ----
+const loading   = ref(false)
+ 
+const switchTab = (tab) => {
+  activeTab.value = tab
+  clearErrors()
+  router.replace({ name: tab.toLowerCase() })
+}
+ 
+// ---- Login State & Logic ----
 const loginForm = ref({
-  phone: '',
+  phone:    '',
   password: '',
   remember: false,
 })
 const loginErrors = ref({ phone: '', password: '' })
-
-// ---- Register Form ----
-const registerForm = ref({
-  phone: '',
-  password: '',
-  agreed: false,
-})
-const registerErrors = ref({ phone: '', password: '', agreed: '' })
-
-// ---- Switch Tab ----
-const switchTab = (tab) => {
-  activeTab.value = tab
-  clearErrors()
-  loginError.value = ''
-  registerError.value = ''
-  router.push({ name: tab.toLowerCase() })
-}
-
-// ---- Go to Forgot Password ----
-const goToForgotPassword = () => {
-  router.push({ name: 'forgot-password' })
-}
-
-// ---- HANDLE LOGIN ----
+ 
 const handleLogin = async () => {
   clearErrors()
-  loginError.value = ''
   let valid = true
-
-  // Validate phone
+ 
   if (!loginForm.value.phone) {
     loginErrors.value.phone = 'Phone number is required'
     valid = false
-  } else if (loginForm.value.phone.length < 9) {
-    loginErrors.value.phone = 'Please enter a valid phone number'
-    valid = false
   }
-
-  // Validate password
   if (!loginForm.value.password) {
     loginErrors.value.password = 'Password is required'
     valid = false
-  } else if (loginForm.value.password.length < 4) {
-    loginErrors.value.password = 'Password must be at least 4 characters'
-    valid = false
   }
-
   if (!valid) return
-
+ 
   loading.value = true
-  
   try {
-    const result = await authStore.login(
-      loginForm.value.phone,
-      loginForm.value.password
-    )
-
-    if (result.success) {
-      // Login successful
-      const redirect = route.query.redirect || '/'
-      router.push(redirect)
-    } else {
-      // Login failed
-      loginError.value = result.message || 'Login failed. Please try again.'
-      
-      // Handle specific errors
-      if (result.message?.toLowerCase().includes('phone')) {
-        loginErrors.value.phone = result.message
-      } else if (result.message?.toLowerCase().includes('password')) {
-        loginErrors.value.password = result.message
-      }
-    }
-  } catch (error) {
-    console.error('Login error:', error)
-    loginError.value = 'An unexpected error occurred. Please try again.'
+    await new Promise(r => setTimeout(r, 1500))
+    localStorage.setItem('sunbet_token', 'fake_token')
+    router.push('/')
   } finally {
     loading.value = false
   }
 }
-
-// ---- HANDLE REGISTER ----
+ 
+// ---- Register State & Logic ----
+const registerForm = ref({
+  phone:    '',
+  password: '',
+  agreed:   false,
+})
+const registerErrors = ref({ phone: '', password: '', agreed: '' })
+ 
 const handleRegister = async () => {
   clearErrors()
-  registerError.value = ''
   let valid = true
-
-  // Validate phone
+ 
   if (!registerForm.value.phone) {
     registerErrors.value.phone = 'Phone number is required'
     valid = false
-  } else if (registerForm.value.phone.length < 9) {
-    registerErrors.value.phone = 'Please enter a valid phone number'
+  }
+  if (!registerForm.value.password || registerForm.value.password.length < 8) {
+    registerErrors.value.password = 'Password must be at least 8 characters'
     valid = false
   }
-
-  // Validate password
-  if (!registerForm.value.password) {
-    registerErrors.value.password = 'Password is required'
-    valid = false
-  } else if (registerForm.value.password.length < 4) {
-    registerErrors.value.password = 'Password must be at least 4 characters'
-    valid = false
-  }
-
-  // Validate agreement
   if (!registerForm.value.agreed) {
-    registerErrors.value.agreed = 'You must agree to the terms and conditions'
+    registerErrors.value.agreed = 'You must agree to the terms'
     valid = false
   }
-
   if (!valid) return
-
+ 
   loading.value = true
-
   try {
-    const result = await authStore.register(
-      registerForm.value.phone,
-      registerForm.value.password
-    )
-
-    if (result.success) {
-      // Registration successful - user is automatically logged in
-      const redirect = route.query.redirect || '/'
-      router.push(redirect)
-    } else {
-      // Registration failed
-      registerError.value = result.message || 'Registration failed. Please try again.'
-      
-      // Handle specific errors
-      if (result.message?.toLowerCase().includes('phone') || 
-          result.message?.toLowerCase().includes('exists')) {
-        registerErrors.value.phone = result.message
-      } else if (result.message?.toLowerCase().includes('password')) {
-        registerErrors.value.password = result.message
-      }
-    }
-  } catch (error) {
-    console.error('Register error:', error)
-    registerError.value = 'An unexpected error occurred. Please try again.'
+    await new Promise(r => setTimeout(r, 1800))
+    localStorage.setItem('sunbet_token', 'fake_token')
+    router.push('/')
   } finally {
     loading.value = false
   }
 }
-
-// ---- Password Strength ----
+ 
+// ---- Password strength ----
 const passwordStrength = computed(() => {
   const p = registerForm.value.password
   let score = 0
-  if (p.length >= 8) score++
-  if (/[A-Z]/.test(p)) score++
-  if (/[0-9]/.test(p)) score++
+  if (p.length >= 8)          score++
+  if (/[A-Z]/.test(p))        score++
+  if (/[0-9]/.test(p))        score++
   if (/[^A-Za-z0-9]/.test(p)) score++
-
+ 
   const map = {
-    0: { label: 'Too weak', color: 'bg-[#EF4444]', textColor: 'text-[#EF4444]' },
-    1: { label: 'Weak', color: 'bg-[#EF4444]', textColor: 'text-[#EF4444]' },
-    2: { label: 'Fair', color: 'bg-[#F59E0B]', textColor: 'text-[#F59E0B]' },
-    3: { label: 'Good', color: 'bg-[#22C55E]', textColor: 'text-[#22C55E]' },
-    4: { label: 'Strong 💪', color: 'bg-[#22C55E]', textColor: 'text-[#22C55E]' },
+    0: { label: 'Too weak',   color: 'bg-[#EF4444]', textColor: 'text-[#EF4444]' },
+    1: { label: 'Weak',       color: 'bg-[#EF4444]', textColor: 'text-[#EF4444]' },
+    2: { label: 'Fair',       color: 'bg-[#F59E0B]', textColor: 'text-[#F59E0B]' },
+    3: { label: 'Good',       color: 'bg-[#22C55E]', textColor: 'text-[#22C55E]' },
+    4: { label: 'Strong 💪',  color: 'bg-[#22C55E]', textColor: 'text-[#22C55E]' },
   }
   return { score, ...map[score] }
 })
-
-// ---- Clear Errors ----
+ 
 const clearErrors = () => {
-  loginErrors.value = { phone: '', password: '' }
+  loginErrors.value    = { phone: '', password: '' }
   registerErrors.value = { phone: '', password: '', agreed: '' }
 }
-
-// ---- Check if user is already logged in ----
-onMounted(() => {
-  if (authStore.isLoggedIn) {
-    router.push('/')
-  }
-})
 </script>
-
+ 
 <style scoped>
-.form-enter-active,
-.form-leave-active {
+.form-enter-active, .form-leave-active {
   transition: all 0.2s ease;
 }
 .form-enter-from {

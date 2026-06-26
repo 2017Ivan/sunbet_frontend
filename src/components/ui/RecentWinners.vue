@@ -24,7 +24,7 @@
         <div
           v-for="(winner, i) in duplicatedWinners"
           :key="i"
-          class="flex-col flex-shrink-0 flex items-start gap-2 sm:gap-3 bg-[#161616] border border-[#2A2A2A] rounded-br-[30px] px-3 sm:px-4 py-2.5 sm:py-6 hover:border-[#A32D2D]/30 hover:bg-[#1A1A1A] transition-all duration-300 group"
+          class="flex-col flex-shrink-0 flex items-start gap-1 bg-gray-900 border border-[#2A2A2A] rounded-br-[30px] px-3 sm:px-4 py-2.5  hover:border-[#A32D2D]/30 hover:bg-[#1A1A1A] transition-all duration-300 group"
         >
         
 

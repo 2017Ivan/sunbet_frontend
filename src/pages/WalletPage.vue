@@ -506,15 +506,15 @@
 
                     <!-- Info -->
                     <div class="flex-1 min-w-0">
-                      <p class="text-sm font-semibold text-white truncate">{{ tx.description }}</p>
+                      <p class="text-sm font-semibold text-white truncate">{{ tx.description || tx.type }}</p>
                       <div class="flex items-center gap-2 mt-0.5">
-                        <span class="text-[10px] text-[#606060]">{{ walletStore.formatDate(tx.createdAt) }}</span>
+                        <span class="text-[10px] text-[#606060]">{{ walletStore.formatDate(tx.createdAt || tx.created_at) }}</span>
                         <span class="w-1 h-1 rounded-full bg-[#333]" />
-                        <span class="text-[10px] text-[#606060]">{{ tx.method }}</span>
+                        <span class="text-[10px] text-[#606060]">{{ tx.method || '-' }}</span>
                         <span class="w-1 h-1 rounded-full bg-[#333]" />
                         <span
                           class="text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
-                          :class="txStatusClass(tx.status)"
+                          :class="walletStore.getStatusBadge(tx.status)"
                         >
                           {{ tx.status }}
                         </span>
@@ -529,9 +529,9 @@
                           ? 'text-[#22C55E]'
                           : 'text-[#EF4444]'"
                       >
-                        {{ ['deposit', 'win', 'bonus'].includes(tx.type) ? '+' : '-' }}TZS {{ tx.amount.toLocaleString() }}
+                        {{ ['deposit', 'win', 'bonus'].includes(tx.type) ? '+' : '-' }}TZS {{ Number(tx.amount).toLocaleString() }}
                       </p>
-                      <p class="text-[10px] text-[#606060] mt-0.5">#{{ tx.ref }}</p>
+                      <p class="text-[10px] text-[#606060] mt-0.5">#{{ tx.ref || tx.id }}</p>
                     </div>
                   </div>
 
@@ -663,25 +663,27 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
-import { storeToRefs }    from 'pinia'
-import AppButton          from '../components/ui/AppButton.vue'
-import AppInput           from '../components/ui/AppInput.vue'
-import AppModal           from '../components/ui/AppModal.vue'
-import { useWalletStore } from '../stores/useWalletStore'
+import { storeToRefs } from 'pinia'
+import AppButton from '../components/ui/AppButton.vue'
+import AppInput from '../components/ui/AppInput.vue'
+import AppModal from '../components/ui/AppModal.vue'
+import { useWalletStore } from '../stores/useWalletStore.js'
 
 // ---- Store ----
 const walletStore = useWalletStore()
 const { isDepositing, isWithdrawing, error, successMessage: storeSuccessMessage } = storeToRefs(walletStore)
 
 // ---- Fetch transactions on mount ----
-onMounted(() => walletStore.fetchTransactions())
+onMounted(() => {
+  walletStore.fetchTransactions()
+})
 
 // ---- Tabs ----
 const activeTab = ref('deposit')
 const tabs = [
-  { id: 'deposit',      icon: '⬇️', label: 'Deposit'      },
-  { id: 'withdraw',     icon: '⬆️', label: 'Withdraw'     },
-  { id: 'transactions', icon: '📋', label: 'Transactions'  },
+  { id: 'deposit', icon: '⬇️', label: 'Deposit' },
+  { id: 'withdraw', icon: '⬆️', label: 'Withdraw' },
+  { id: 'transactions', icon: '📋', label: 'Transactions' },
 ]
 
 // ---- Balance visibility ----
@@ -690,28 +692,28 @@ const balanceVisible = ref(true)
 // ---- Payment methods ----
 const selectedMethod = ref('mpesa')
 const paymentMethods = [
-  { id: 'mpesa',       name: 'M-Pesa',       icon: '📱', bg: '#00a651', popular: true  },
-  { id: 'tigopesa',    name: 'Tigo Pesa',    icon: '📲', bg: '#0099d6', popular: false },
+  { id: 'mpesa', name: 'M-Pesa', icon: '📱', bg: '#00a651', popular: true },
+  { id: 'tigopesa', name: 'Tigo Pesa', icon: '📲', bg: '#0099d6', popular: false },
   { id: 'airtelmoney', name: 'Airtel Money', icon: '💳', bg: '#e40000', popular: false },
-  { id: 'halopesa',    name: 'HaloPesa',     icon: '🏦', bg: '#7b2d8b', popular: false },
+  { id: 'halopesa', name: 'HaloPesa', icon: '🏦', bg: '#7b2d8b', popular: false },
 ]
 
 // ---- Quick amounts ----
 const quickAmounts = [1000, 5000, 10000, 20000, 50000, 100000]
 
 // ---- Deposit form ----
-const depositForm   = ref({ phone: '', amount: '', promoCode: '' })
+const depositForm = ref({ phone: '', amount: '', promoCode: '' })
 const depositErrors = ref({ phone: '', amount: '' })
 const checkingPromo = ref(false)
-const promoStatus   = ref(null)       // null | 'valid' | 'invalid'
-const promoBonus    = ref(0)
+const promoStatus = ref(null) // null | 'valid' | 'invalid'
+const promoBonus = ref(0)
 const promoDescription = ref('')
 
 const handleDeposit = async () => {
   depositErrors.value = { phone: '', amount: '' }
 
   // Client-side validation
-  if (!depositForm.value.phone && ['mpesa', 'tigopesa', 'airtelmoney', 'halopesa'].includes(selectedMethod.value)) {
+  if (['mpesa', 'tigopesa', 'airtelmoney', 'halopesa'].includes(selectedMethod.value) && !depositForm.value.phone) {
     depositErrors.value.phone = 'Phone number is required'
     return
   }
@@ -721,17 +723,17 @@ const handleDeposit = async () => {
   }
 
   const result = await walletStore.deposit({
-    amount:    Number(depositForm.value.amount),
-    method:    selectedMethod.value,
-    phone:     depositForm.value.phone,
+    amount: Number(depositForm.value.amount),
+    method: selectedMethod.value,
+    phone: depositForm.value.phone,
     promoCode: depositForm.value.promoCode,
   })
 
   if (result.success) {
     showSuccessModal.value = true
-    depositForm.value      = { phone: '', amount: '', promoCode: '' }
-    promoStatus.value      = null
-    promoBonus.value       = 0
+    depositForm.value = { phone: '', amount: '', promoCode: '' }
+    promoStatus.value = null
+    promoBonus.value = 0
     promoDescription.value = ''
   }
 }
@@ -740,17 +742,17 @@ const checkPromoCode = async () => {
   if (!depositForm.value.promoCode) return
   checkingPromo.value = true
   const result = await walletStore.checkPromoCode(depositForm.value.promoCode)
-  promoStatus.value      = result.valid ? 'valid' : 'invalid'
-  promoBonus.value       = result.bonus || 0
+  promoStatus.value = result.valid ? 'valid' : 'invalid'
+  promoBonus.value = result.bonus || 0
   promoDescription.value = result.description || ''
-  checkingPromo.value    = false
+  checkingPromo.value = false
 }
 
 // ---- Withdraw form ----
-const withdrawForm   = ref({ phone: '', amount: '', method: 'mpesa' })
+const withdrawForm = ref({ phone: '', amount: '', method: 'mpesa' })
 const withdrawErrors = ref({ phone: '', amount: '', pin: '' })
-const pin            = ref(['', '', '', ''])
-const pinInputs      = ref([])
+const pin = ref(['', '', '', ''])
+const pinInputs = ref([])
 
 const onPinInput = (index, event) => {
   const val = event.target.value.replace(/\D/g, '')
@@ -789,19 +791,18 @@ const handleWithdraw = async () => {
   const result = await walletStore.withdraw({
     amount: Number(withdrawForm.value.amount),
     method: withdrawForm.value.method,
-    phone:  withdrawForm.value.phone,
-    pin:    pin.value.join(''),
+    phone: withdrawForm.value.phone,
+    pin: pin.value.join(''),
   })
 
   if (result.success) {
     showSuccessModal.value = true
-    withdrawForm.value     = { phone: '', amount: '', method: 'mpesa' }
-    pin.value              = ['', '', '', '']
+    withdrawForm.value = { phone: '', amount: '', method: 'mpesa' }
+    pin.value = ['', '', '', '']
   }
 }
 
 // ---- Success modal ----
-// Watch store successMessage to auto-open modal
 const showSuccessModal = ref(false)
 
 watch(storeSuccessMessage, (val) => {
@@ -814,69 +815,72 @@ const closeSuccessModal = () => {
 }
 
 // ---- Transactions ----
-const txFilter     = ref('all')
+const txFilter = ref('all')
 const txDateFilter = ref('all')
 
 const txFilters = [
-  { id: 'all',        label: 'All'           },
-  { id: 'deposit',    label: '⬇ Deposits'    },
+  { id: 'all', label: 'All' },
+  { id: 'deposit', label: '⬇ Deposits' },
   { id: 'withdrawal', label: '⬆ Withdrawals' },
-  { id: 'bet',        label: '🎯 Bets'       },
-  { id: 'win',        label: '🏆 Wins'       },
+  { id: 'bet', label: '🎯 Bets' },
+  { id: 'win', label: '🏆 Wins' },
 ]
 
 const filteredTransactions = computed(() => {
   let list = walletStore.recentTransactions
-  if (txFilter.value !== 'all') list = list.filter(t => t.type === txFilter.value)
+  if (txFilter.value !== 'all') {
+    list = list.filter(t => t.type === txFilter.value)
+  }
   return list
 })
 
 // ---- TX helpers ----
 const txIcon = (type) => ({
-  deposit:    '⬇️',
+  deposit: '⬇️',
   withdrawal: '⬆️',
-  bet:        '🎯',
-  win:        '🏆',
-  bonus:      '🎁',
+  bet: '🎯',
+  win: '🏆',
+  bonus: '🎁',
 }[type] || '💳')
 
 const txIconBg = (type) => ({
-  deposit:    'bg-[#22C55E]/15',
+  deposit: 'bg-[#22C55E]/15',
   withdrawal: 'bg-[#EF4444]/15',
-  bet:        'bg-[#A32D2D]/15',
-  win:        'bg-[#F59E0B]/15',
-  bonus:      'bg-[#F59E0B]/15',
+  bet: 'bg-[#A32D2D]/15',
+  win: 'bg-[#F59E0B]/15',
+  bonus: 'bg-[#F59E0B]/15',
 }[type] || 'bg-[#1E1E1E]')
-
-const txStatusClass = (status) => ({
-  completed:  'bg-[#22C55E]/15 text-[#22C55E]',
-  active:     'bg-[#F59E0B]/15 text-[#F59E0B]',
-  processing: 'bg-[#F59E0B]/15 text-[#F59E0B]',
-  lost:       'bg-[#EF4444]/15 text-[#EF4444]',
-  failed:     'bg-[#EF4444]/15 text-[#EF4444]',
-}[status?.toLowerCase()] || 'bg-[#1E1E1E] text-[#606060]')
 
 // ---- Sidebar stats ----
 const walletStats = computed(() => [
   { label: 'Total Deposited', icon: '⬇️', iconBg: 'bg-[#22C55E]/15', value: 'TZS ' + (walletStore.totalDeposited / 1000).toFixed(0) + 'K', color: 'text-[#22C55E]' },
   { label: 'Total Withdrawn', icon: '⬆️', iconBg: 'bg-[#EF4444]/15', value: 'TZS ' + (walletStore.totalWithdrawn / 1000).toFixed(0) + 'K', color: 'text-[#EF4444]' },
-  { label: 'Total Staked',    icon: '🎯', iconBg: 'bg-[#A32D2D]/15', value: 'TZS 230K',  color: 'text-white'     },
-  { label: 'Total Winnings',  icon: '🏆', iconBg: 'bg-[#F59E0B]/15', value: 'TZS 438K',  color: 'text-[#F59E0B]' },
-  { label: 'Net Profit',      icon: '📈', iconBg: 'bg-[#22C55E]/15', value: '+TZS 132K', color: 'text-[#22C55E]' },
+  { label: 'Total Staked', icon: '🎯', iconBg: 'bg-[#A32D2D]/15', value: 'TZS 230K', color: 'text-white' },
+  { label: 'Total Winnings', icon: '🏆', iconBg: 'bg-[#F59E0B]/15', value: 'TZS 438K', color: 'text-[#F59E0B]' },
+  { label: 'Net Profit', icon: '📈', iconBg: 'bg-[#22C55E]/15', value: '+TZS 132K', color: 'text-[#22C55E]' },
 ])
 
 // ---- Security ----
 const securityItems = [
-  { label: 'Phone verified',      done: true  },
-  { label: 'Email verified',      done: false },
-  { label: '2FA enabled',         done: false },
-  { label: 'KYC completed',       done: true  },
-  { label: 'Transaction PIN set', done: true  },
+  { label: 'Phone verified', done: true },
+  { label: 'Email verified', done: false },
+  { label: '2FA enabled', done: false },
+  { label: 'KYC completed', done: true },
+  { label: 'Transaction PIN set', done: true },
 ]
 </script>
 
 <style scoped>
-.tab-enter-active, .tab-leave-active { transition: all 0.2s ease; }
-.tab-enter-from { opacity: 0; transform: translateY(8px);  }
-.tab-leave-to   { opacity: 0; transform: translateY(-8px); }
+.tab-enter-active,
+.tab-leave-active {
+  transition: all 0.2s ease;
+}
+.tab-enter-from {
+  opacity: 0;
+  transform: translateY(8px);
+}
+.tab-leave-to {
+  opacity: 0;
+  transform: translateY(-8px);
+}
 </style>
