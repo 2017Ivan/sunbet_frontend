@@ -1,6 +1,6 @@
 <template lang="">
   <!-- ===== FOOTER ===== -->
-<footer class="bg-[#0A0A0A] border-t border-[#1A1A1A]  max-w-screen-xl mx-auto px-4">
+<footer class="bg-[#0A0A0A] border-t border-[#1A1A1A]  max-w-screen-xl mx-auto">
   <!-- Main Footer -->
   <div class="max-w-screen-xl mx-auto px-4  pb-6">
     
@@ -42,7 +42,7 @@
 
 
 
-      <div class="grid grid-cols-2  gap-6 md:gap-8">
+      <div class="grid grid-cols-2  gap-2">
   <!-- Quick Links -->
   <div>
     <h4 class="text-white font-semibold text-sm mb-4 flex items-center gap-2">
@@ -253,7 +253,7 @@
     </div>
   </div>
      <!-- ===== DOWNLOAD APP BANNER ===== -->
-      <section class="max-w-screen-xl mx-auto px-4 pb-10">
+      <section class=" mx-auto px-4 pb-10">
         <div class="bg-[#161616] border border-[#2A2A2A] rounded-[20px] p-6 sm:p-8 flex flex-col sm:flex-row items-center gap-6">
           <div class="text-5xl sm:text-6xl flex-shrink-0">📱</div>
           <div class="flex-1 text-center sm:text-left">

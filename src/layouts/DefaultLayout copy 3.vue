@@ -80,7 +80,6 @@
               </div>
             </div>
 
-
             <!-- Mfano wa sehemu ya kuweka dau (Stake Box) -->
             <div class="mt-4 pt-4 border-t border-[#2A2A2A] space-y-3">
               <div class="flex justify-between text-sm">
