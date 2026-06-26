@@ -15,7 +15,7 @@
 
       <div 
         ref="scrollContainer"
-        class="flex gap-3 overflow-x-auto pb-3 scrollbar-hide -mx-3 sm:-mx-4 px-3 sm:px-4 select-none functionality-scroll"
+        class="flex  gap-3 overflow-x-auto pb-3 scrollbar-hide -mx-3 sm:-mx-4 px-3 sm:px-4 select-none functionality-scroll"
         @mouseenter="pauseAutoScroll"
         @mouseleave="resumeAutoScroll"
         @touchstart="pauseAutoScroll"
@@ -24,7 +24,7 @@
         <div
           v-for="(winner, i) in duplicatedWinners"
           :key="i"
-          class="flex-shrink-0 w-[280px] sm:w-[320px] flex items-center gap-2 sm:gap-3 bg-[#161616] border border-[#2A2A2A] rounded-br-[26px] px-3 sm:px-4 py-2.5 sm:py-6 hover:border-[#A32D2D]/30 hover:bg-[#1A1A1A] transition-all duration-300 group"
+          class="flex-col flex-shrink-0 flex items-start gap-2 sm:gap-3 bg-[#161616] border border-[#2A2A2A] rounded-br-[30px] px-3 sm:px-4 py-2.5 sm:py-6 hover:border-[#A32D2D]/30 hover:bg-[#1A1A1A] transition-all duration-300 group"
         >
         
 
@@ -33,7 +33,7 @@
           <!-- Info - Show Phone Number instead of Name -->
           <div class="flex-1 min-w-0">
             <p class="text-xs sm:text-sm font-semibold text-white truncate">{{ getMaskedPhone(i) }}</p>
-            <p class="text-[10px] sm:text-xs text-[#606060] truncate">{{ getWinnerBet(i) }} • {{ getWinnerSport(i) }}</p>
+            <!-- <p class="text-[10px] sm:text-xs text-[#606060] truncate">{{ getWinnerBet(i) }} • {{ getWinnerSport(i) }}</p> -->
           </div>
 
           <!-- Amount -->
