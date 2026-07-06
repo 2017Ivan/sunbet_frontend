@@ -1,4 +1,4 @@
-// services/authService.js
+// services/auth/authService.js
 import api from '../api'
 
 const authService = {
@@ -40,6 +40,8 @@ const authService = {
         phone_number,
         password
       })
+
+      console.log('Login response:', response.data) // Onyesha data ya response kwenye console
       
       // Backend inarudisha: { message, data: { id, phone_number, accessToken, refreshToken } }
       if (response.data && response.data.data) {

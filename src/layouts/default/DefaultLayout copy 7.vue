@@ -1,10 +1,7 @@
 <template>
-  <div class="min-h-screen bg-white lg:px-47">
-    <!-- Header - Pitisha auth props -->
+  <div class="min-h-screen bg-white lg:px-45">
+    <!-- Header -->
     <Header 
-      :is-logged-in="isLoggedIn"
-      :user="user"
-      :balance="balance"
       @toggle-sidebar="toggleMobileSidebar"
       @logout="handleLogout"
     />
@@ -43,7 +40,7 @@
       @toggle-betslip="toggleBetSlip"
     />
 
-    <!-- Mobile Sidebar - Pitisha auth props -->
+    <!-- Mobile Sidebar -->
     <MobileSidebar
       :open="isMobileSidebarOpen"
       :is-logged-in="isLoggedIn"
@@ -76,7 +73,7 @@ import MobileSidebar from '../../components/main components/MobileSidebar/Mobile
 const authStore = useAuthStore()
 const betStore = useBetStore()
 
-// 👇 Auth state - computed from store
+// Auth state
 const isLoggedIn = computed(() => authStore.isLoggedIn)
 const user = computed(() => authStore.user)
 const balance = computed(() => authStore.user?.balance || 0)

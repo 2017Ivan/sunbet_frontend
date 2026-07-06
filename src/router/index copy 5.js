@@ -256,25 +256,21 @@ const router = createRouter({
 });
 
 // ── Navigation guards with RBAC ──────────────────────────────────────────────
-// router/index.js - Navigation guard
 router.beforeEach(async (to, from, next) => {
   document.title = to.meta.title ? `${to.meta.title} — SunBet` : "SunBet";
 
   const authStore = useAuthStore();
   const token = localStorage.getItem('access_token');
   
-  // ALWAYS check token and initialize if needed
-  if (token) {
-    // If store not initialized OR store says not logged in but token exists
-    if (!authStore.initialized || !authStore.isLoggedIn) {
-      console.log('⏳ Initializing auth store...');
-      await authStore.initialize();
-    }
-  } else {
-    // No token, clear store if needed
-    if (authStore.isLoggedIn) {
-      authStore.clearAuth();
-    }
+  // Initialize store if not initialized and token exists
+  if (!authStore.initialized && token) {
+    console.log('⏳ Store not initialized, initializing...');
+    await authStore.initialize();
+  }
+  
+  // If no token, clear store
+  if (!token && authStore.isLoggedIn) {
+    authStore.clearAuth();
   }
 
   const isLoggedIn = authStore.isLoggedIn;
@@ -284,10 +280,12 @@ router.beforeEach(async (to, from, next) => {
 
   // ── 1. Guest routes (login/register) ──────────────────────────────────────
   if (to.meta.guest) {
+    // If user is logged in, redirect to home
     if (isLoggedIn) {
       console.log("⛔ Guest route but user logged in, redirecting to home");
       return next({ name: "home" });
     }
+    // Allow access to login/register pages
     return next();
   }
 
@@ -316,6 +314,8 @@ router.beforeEach(async (to, from, next) => {
       
       if (userRole === 'AGENT') {
         return next({ name: 'dashboard' });
+      } else if (userRole === 'USER') {
+        return next({ name: 'home' });
       } else {
         return next({ name: 'home' });
       }

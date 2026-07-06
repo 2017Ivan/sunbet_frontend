@@ -15,12 +15,13 @@
         :id="inputId"
         v-bind="$attrs"
         :type="currentType"
-        :value="displayValue"
+        :value="modelValue"
         :placeholder="placeholder"
         :disabled="disabled"
         :readonly="readonly"
         :class="inputClasses"
-        @input="handleInput"
+        :style="inputStyles"
+        @input="$emit('update:modelValue', $event.target.value)"
         @focus="focused = true"
         @blur="focused = false"
       />
@@ -74,11 +75,9 @@ const props = defineProps({
     type: String,
     default: 'md',
   },
-  // New prop: phone input mode
-  phone: { type: Boolean, default: false },
 })
 
-const emit = defineEmits(['update:modelValue'])
+defineEmits(['update:modelValue'])
 
 const inputId = useId()
 const focused = ref(false)
@@ -94,11 +93,11 @@ const sizes = {
   lg: 'h-13 text-base px-4',
 }
 
-// ─── INPUT CLASSES ────────────────────────────────────────────────────────
+// Separate padding for left icon to ensure text doesn't go under it
 const inputClasses = computed(() => {
   let classes = [
-    'w-full rounded-[10px]  bg-[#1E1E1E] border transition-all duration-200',
-    'text-[#F0F0F0] pl-8 placeholder:text-[#606060]',
+    'w-full rounded-[10px] bg-[#1E1E1E] border transition-all duration-200',
+    'text-[#F0F0F0] placeholder:text-[#606060]',
     'focus:outline-none',
     sizes[props.size] || sizes.md,
     props.error
@@ -107,74 +106,15 @@ const inputClasses = computed(() => {
     props.disabled ? 'opacity-50 cursor-not-allowed' : '',
   ]
 
-  // Add padding for left icon
+  // Add padding for icons - use pl-10 for standard icons, pl-12 for larger ones
   if (props.$slots?.['icon-left']) {
-    classes.push('pl-10')
-  } else {
-    classes.push('pl-4')
+    classes.push('pl-11') // Extra padding to avoid text going under icon
   }
 
-  // Add padding for right icon or password toggle
   if (props.type === 'password' || props.$slots?.['icon-right']) {
     classes.push('pr-10')
-  } else {
-    classes.push('pr-4')
   }
 
-  return classes.join(' ')
+  return classes
 })
-
-// ─── PHONE NUMBER HANDLING ──────────────────────────────────────────────
-const displayValue = computed(() => {
-  if (!props.phone) return props.modelValue
-  
-  // If modelValue is number, convert to string
-  let value = String(props.modelValue || '')
-  
-  // Remove all non-digit characters
-  value = value.replace(/\D/g, '')
-  
-  // If it starts with 255, remove it
-  if (value.startsWith('255')) {
-    value = value.substring(3)
-  }
-  
-  // If it starts with 0, remove it
-  if (value.startsWith('0')) {
-    value = value.substring(1)
-  }
-  
-  // Limit to 9 digits
-  if (value.length > 9) {
-    value = value.substring(0, 9)
-  }
-  
-  return value
-})
-
-const handleInput = (event) => {
-  let value = event.target.value
-  
-  if (props.phone) {
-    // Remove all non-digit characters
-    value = value.replace(/\D/g, '')
-    
-    // If it starts with 255, remove it
-    if (value.startsWith('255')) {
-      value = value.substring(3)
-    }
-    
-    // If it starts with 0, remove it
-    if (value.startsWith('0')) {
-      value = value.substring(1)
-    }
-    
-    // Limit to 9 digits
-    if (value.length > 9) {
-      value = value.substring(0, 9)
-    }
-  }
-  
-  emit('update:modelValue', value)
-}
 </script>

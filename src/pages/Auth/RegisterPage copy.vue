@@ -101,10 +101,8 @@
   </div>
 </template>
 
-
-<!-- pages/Auth/RegisterPage.vue -->
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../../stores/auth/authStore.js'
 import AppInput from '../../components/ui/AppInput.vue'
@@ -188,35 +186,12 @@ const handleRegister = async () => {
     )
 
     console.log('📨 Register result:', result)
-    console.log('📊 AuthStore state:', {
-      isLoggedIn: authStore.isLoggedIn,
-      initialized: authStore.initialized,
-      user: authStore.user
-    })
 
     if (result.success) {
       console.log('✅ Registration successful!')
-      
-      // 👇 Force re-initialize to make sure store is updated
-      if (!authStore.isLoggedIn) {
-        console.warn('⚠️ Store says not logged in, re-initializing...')
-        await authStore.initialize()
-        console.log('📊 After re-init:', {
-          isLoggedIn: authStore.isLoggedIn,
-          initialized: authStore.initialized
-        })
-      }
-      
-      // 👇 Small delay to let store update
-      await new Promise(resolve => setTimeout(resolve, 100))
-      
       const redirect = route.query.redirect || '/'
-      console.log('🔄 Redirecting to:', redirect)
-      
-      // 👇 Use replace instead of push
-      router.replace(redirect)
+      router.push(redirect)
     } else {
-      console.log('❌ Registration failed:', result.message)
       registerError.value = result.message || 'Registration failed. Please try again.'
       
       if (result.message?.toLowerCase().includes('phone') || 
@@ -252,15 +227,5 @@ const passwordStrength = computed(() => {
     4: { label: 'Strong 💪', color: 'bg-[#22C55E]', textColor: 'text-[#22C55E]' },
   }
   return { score, ...map[score] }
-})
-
-// ---- Check if already logged in ----
-onMounted(() => {
-  console.log('🔍 Register page mounted')
-  
-  if (authStore.isLoggedIn) {
-    console.log('✅ Already logged in, redirecting to home')
-    router.replace('/')
-  }
 })
 </script>

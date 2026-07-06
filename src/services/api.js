@@ -3,8 +3,7 @@ import axios from 'axios'
 // http://13.140.157.161:5000/api
 // https://vatesbet.com//api/api
 // http://localhost:5000/api
-// https://boombet365.com/api
-// https://sunbeting.com//api
+// https://sunbeting.com/api
 // Create axios instance
 const api = axios.create({
   baseURL: 'https://sunbeting.com/api',

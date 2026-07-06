@@ -24,10 +24,10 @@
           </h1>
           <p class="flex items-center gap-2 text-xs text-gray-400 mt-1">
             <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-            <!-- <span v-if="user?.role" class="px-2 py-0.5 rounded-full text-[10px] font-bold"
+            <span v-if="user?.role" class="px-2 py-0.5 rounded-full text-[10px] font-bold"
               :class="user.role === 'ADMIN' ? 'bg-purple-500/20 text-purple-400 border border-purple-500/20' : 'bg-rose-500/20 text-rose-400 border border-rose-500/20'">
               {{ user.role }}
-            </span> -->
+            </span>
             Member since {{ memberSince }}
           </p>
         </div>
@@ -45,7 +45,7 @@
           </div>
           <div class="w-px h-8 bg-white/10"></div>
           <div class="text-center">
-            <span class="block font-mono font-black text-rose-400 text-sm">{{ formattedBalance }}</span>
+            <span class="block font-mono font-black text-rose-400 text-sm">TZS {{ userBalance.toLocaleString() }}</span>
             <span class="block text-[10px] text-gray-500 uppercase tracking-widest mt-0.5">Balance</span>
           </div>
         </div>
@@ -62,7 +62,7 @@
         <div class="bg-gradient-to-br from-gray-800 to-gray-900 border border-rose-400/20 rounded-2xl p-5 shadow-[0_0_32px_rgba(244,63,94,0.05)]">
           <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Account balance</p>
           <p class="font-mono font-black text-rose-400 text-xl mb-4 [text-shadow:0_0_20px_rgba(244,63,94,0.3)]">
-            {{ formattedBalance }}
+            TZS {{ userBalance.toLocaleString() }}
           </p>
           <div class="flex gap-2">
             <RouterLink to="/deposite"
@@ -299,15 +299,14 @@ const loading = ref(true)
 // ---- User Data from Store ----
 const user = computed(() => authStore.user)
 const isLoggedIn = computed(() => authStore.isLoggedIn)
-
-// 👇 USE formattedBalance GETTER FROM STORE
-const formattedBalance = computed(() => authStore.formattedBalance)
+const userBalance = computed(() => authStore.user?.balance)
 
 // ---- Display Name ----
 const displayName = computed(() => {
   if (user.value?.name) return user.value.name
   if (user.value?.username) return user.value.username
   if (user.value?.phone_number) {
+    // Format phone number for display
     const phone = user.value.phone_number
     if (phone.startsWith('255')) {
       return '0' + phone.substring(3)
@@ -405,6 +404,7 @@ function initializeFormData() {
 async function updateProfile() {
   updatingProfile.value = true
   try {
+    // TODO: Implement update profile API
     console.log('Updating profile:', profileForm.value)
     alert('Profile updated successfully!')
   } catch (error) {
@@ -432,6 +432,7 @@ async function changeUserPassword() {
   
   updatingPassword.value = true
   try {
+    // TODO: Implement change password API
     console.log('Changing password...')
     alert('Password changed successfully!')
     passwordForm.value = { current_password: '', new_password: '', confirm_password: '' }
@@ -457,11 +458,14 @@ async function confirmLogout() {
 async function loadUserData() {
   loading.value = true
   try {
+    // Refresh user data from store
     await authStore.fetchUserProfile()
     await authStore.fetchUserBalance()
     
-    stats.value.balance = authStore.userBalance
+    // Update stats with real balance
+    stats.value.balance = userBalance.value
     
+    // Initialize form with user data
     initializeFormData()
   } catch (error) {
     console.error('Error loading user data:', error)
@@ -476,14 +480,16 @@ onMounted(() => {
   console.log('📊 Auth state:', {
     isLoggedIn: isLoggedIn.value,
     user: user.value,
-    formattedBalance: formattedBalance.value
+    balance: userBalance.value
   })
   
+  // If not logged in, redirect to login
   if (!isLoggedIn.value) {
     router.push('/login')
     return
   }
   
+  // Load user data
   loadUserData()
 })
 </script>

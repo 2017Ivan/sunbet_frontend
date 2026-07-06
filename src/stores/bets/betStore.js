@@ -1,4 +1,4 @@
-// store/betStore.js
+// store/bets/betStore.js
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import betService from '../../services/bets/betService'

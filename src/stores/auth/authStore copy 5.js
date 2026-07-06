@@ -52,7 +52,7 @@ export const useAuthStore = defineStore('auth', {
       return state.user.role === role
     },
     
-    // Ensure balance is always a number
+    // 👇 FIX: Ensure balance is always a number
     userBalance: (state) => {
       const balance = state.user.balance
       if (balance === null || balance === undefined) return 0
@@ -65,19 +65,16 @@ export const useAuthStore = defineStore('auth', {
       return numBalance >= amount
     },
     
-    // Format balance with 2 decimal places
+    // 👇 FIX: Format balance with commas
     formattedBalance: (state) => {
       const balance = state.user.balance
-      if (balance === null || balance === undefined) return 'TZS 0.00'
+      if (balance === null || balance === undefined) return 'TZS 0'
       
       // Ensure it's a number
       const numBalance = typeof balance === 'string' ? parseFloat(balance) : balance
       
-      // Format with commas and 2 decimal places
-      return `TZS ${numBalance.toLocaleString('en-US', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      })}`
+      // Format with commas and no decimals
+      return `TZS ${numBalance.toLocaleString()}`
     }
   },
   
@@ -118,7 +115,7 @@ export const useAuthStore = defineStore('auth', {
           if (decoded) {
             this.user.id = decoded.id || decoded.userId || decoded.sub
             this.user.role = decoded.role || 'USER'
-            this.user.balance = 0
+            this.user.balance = 0 // 👈 Initialize as number
             this.isLoggedIn = true
             this.accessToken = token
             this.initialized = true
@@ -204,7 +201,7 @@ export const useAuthStore = defineStore('auth', {
           this.user.id = decoded.id || decoded.userId || decoded.sub || result.user?.id
           this.user.phone_number = phone_number
           this.user.role = decoded.role || 'USER'
-          this.user.balance = 0
+          this.user.balance = 0 // 👈 Initialize as number
           this.isLoggedIn = true
           this.initialized = true
           
@@ -312,6 +309,8 @@ export const useAuthStore = defineStore('auth', {
         console.log('💰 Balance response:', result)
         
         if (result.success) {
+          // 👇 CONVERT TO NUMBER
+          
           const balance = result.balance || result.data?.balance || 0
           this.user.balance = typeof balance === 'string' ? parseFloat(balance) : balance
           console.log('💰 Balance saved as number:', this.user.balance)

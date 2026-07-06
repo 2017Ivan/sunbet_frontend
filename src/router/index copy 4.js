@@ -1,4 +1,3 @@
-// router/index.js
 import { createRouter, createWebHistory } from "vue-router";
 import { useAuthStore } from "../stores/auth/authStore.js";
 
@@ -9,6 +8,9 @@ import AdminLayout from "../layouts/admin/AdminLayout.vue";
 
 // ── Pages (lazy loaded) ───────────────────────────────────────────────────────
 const HomePage = () => import("../pages/home/HomePage.vue");
+const AuthPage = () => import("../pages/Auth/AuthLoginAndRegister.vue");
+// const LoginPage = () => import("../pages/Auth/Login.vue");
+// const RegisterPage = () => import("../pages/Auth/Register.vue");
 const DashboardPage = () => import("../pages/Dashboard/DashboardPage.vue");
 const SportsPage = () => import("../pages/sport/SportsPage.vue");
 const LivePage = () => import("../pages/live/LivePage.vue");
@@ -25,12 +27,15 @@ const ProfilePage = () => import("../pages/profile/ProfilePage.vue");
 const DepositePage = () => import("../pages/money/deposite/Deposit.vue");
 const WithdrawPage = () => import("../pages/money/withdraw/Withdraw.vue");
 
+// ❌ ONDOA HII - hatuitumii tena kama page
+// const BetSlipPage = () => import("../components/betting/betslip/BetSlip.vue/index.js");
+
 // ── Routes ────────────────────────────────────────────────────────────────────
 const routes = [
   // ════════════════════════════════════════════════════════════════════
   // 1. AUTH ROUTES (no main layout)
   // ════════════════════════════════════════════════════════════════════
-  {
+    { 
     path: "/auth",
     component: AuthLayout,
     children: [
@@ -263,18 +268,15 @@ router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore();
   const token = localStorage.getItem('access_token');
   
-  // ALWAYS check token and initialize if needed
-  if (token) {
-    // If store not initialized OR store says not logged in but token exists
-    if (!authStore.initialized || !authStore.isLoggedIn) {
-      console.log('⏳ Initializing auth store...');
-      await authStore.initialize();
-    }
-  } else {
-    // No token, clear store if needed
-    if (authStore.isLoggedIn) {
-      authStore.clearAuth();
-    }
+  // Initialize store if not initialized and token exists
+  if (!authStore.initialized && token) {
+    console.log('⏳ Store not initialized, initializing...');
+    await authStore.initialize();
+  }
+  
+  // If no token, clear store
+  if (!token && authStore.isLoggedIn) {
+    authStore.clearAuth();
   }
 
   const isLoggedIn = authStore.isLoggedIn;
@@ -283,20 +285,20 @@ router.beforeEach(async (to, from, next) => {
   console.log(`🔐 Navigation to: ${to.path} | isLoggedIn: ${isLoggedIn} | Role: ${userRole} | Token: ${!!token} | initialized: ${authStore.initialized}`);
 
   // ── 1. Guest routes (login/register) ──────────────────────────────────────
-  if (to.meta.guest) {
-    if (isLoggedIn) {
-      console.log("⛔ Guest route but user logged in, redirecting to home");
-      return next({ name: "home" });
-    }
-    return next();
+  if (to.meta.guest && isLoggedIn) {
+    console.log("⛔ Guest route but user logged in, redirecting to home");
+    return next({ name: "home" });
   }
 
   // ── 2. Protected routes - check authentication ────────────────────────────
   if (to.meta.requiresAuth && !isLoggedIn) {
     console.log("🔒 Protected route requires auth, redirecting to login");
     return next({ 
-      name: "login", 
-      query: { redirect: to.fullPath } 
+      name: "auth", 
+      query: { 
+        tab: "login", 
+        redirect: to.fullPath 
+      } 
     });
   }
 
@@ -306,8 +308,11 @@ router.beforeEach(async (to, from, next) => {
     
     if (!isLoggedIn) {
       return next({ 
-        name: "login", 
-        query: { redirect: to.fullPath } 
+        name: "auth", 
+        query: { 
+          tab: "login", 
+          redirect: to.fullPath 
+        } 
       });
     }
     
@@ -316,6 +321,8 @@ router.beforeEach(async (to, from, next) => {
       
       if (userRole === 'AGENT') {
         return next({ name: 'dashboard' });
+      } else if (userRole === 'USER') {
+        return next({ name: 'home' });
       } else {
         return next({ name: 'home' });
       }
@@ -326,5 +333,4 @@ router.beforeEach(async (to, from, next) => {
 
   next();
 });
-
 export default router;

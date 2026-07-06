@@ -1,4 +1,3 @@
-// loginAndRegister.vue 
 <template>
   <div>
     <div class="flex gap-1 p-1 bg-[#161616] rounded-[14px] mb-8 border border-[#2A2A2A]">
@@ -26,11 +25,9 @@
           <AppInput
             v-model="loginForm.phone"
             label="Phone Number"
-            placeholder="Enter 9 digit number"
+            placeholder="+255 7XX XXX XXX"
             type="tel"
             required
-            :phone="true"
-            hint="Enter 9 digits (e.g., 798764567)"
             :error="loginErrors.phone"
           >
             <template #icon-left>
@@ -92,6 +89,10 @@
           >
             Login to SunBet
           </AppButton>
+
+       
+
+       
         </form>
 
         <p class="text-center text-sm text-[#606060] mt-6">
@@ -112,11 +113,10 @@
           <AppInput
             v-model="registerForm.phone"
             label="Phone Number"
-            placeholder="Enter 9 digit number"
+            placeholder="+255 7XX XXX XXX"
             type="tel"
             required
-            :phone="true"
-            hint="Enter 9 digits without 0 or 255 (e.g., 798764567)"
+            hint="This will be your login username"
             :error="registerErrors.phone"
           >
             <template #icon-left>
@@ -217,6 +217,7 @@ const route = useRoute()
 const authStore = useAuthStore()
 
 // ---- Active Tab ----
+// Sasa inaangalia query parameter 'tab'
 const activeTab = ref('Login')
 
 // ---- Loading State ----
@@ -241,28 +242,6 @@ const registerForm = ref({
   agreed: false,
 })
 const registerErrors = ref({ phone: '', password: '', agreed: '' })
-
-// ---- Validation Functions ----
-const validatePhone = (phone) => {
-  if (!phone) return 'Phone number is required'
-  
-  // Remove all non-digit characters
-  const cleaned = String(phone).replace(/\D/g, '')
-  
-  // Check if exactly 9 digits
-  if (cleaned.length !== 9) {
-    return 'Phone number must be exactly 9 digits'
-  }
-  
-  // Check if it starts with valid prefix (Tanzanian numbers)
-  // Common prefixes: 6, 7, 4 (for Vodacom, Airtel, Tigo, etc.)
-  const validPrefixes = ['6', '7', '4']
-  if (!validPrefixes.includes(cleaned[0])) {
-    return 'Phone number must start with 6, 7, or 4'
-  }
-  
-  return null
-}
 
 // ---- Function ya ku-set active tab kutoka URL ----
 const setTabFromQuery = () => {
@@ -299,10 +278,12 @@ const handleLogin = async () => {
   loginError.value = ''
   let valid = true
 
-  // Validate phone (only 9 digits)
-  const phoneError = validatePhone(loginForm.value.phone)
-  if (phoneError) {
-    loginErrors.value.phone = phoneError
+  // Validate phone
+  if (!loginForm.value.phone) {
+    loginErrors.value.phone = 'Phone number is required'
+    valid = false
+  } else if (loginForm.value.phone.length < 9) {
+    loginErrors.value.phone = 'Please enter a valid phone number'
     valid = false
   }
 
@@ -320,7 +301,6 @@ const handleLogin = async () => {
   loading.value = true
   
   try {
-    // Send phone as is (9 digits without 255)
     const result = await authStore.login(
       loginForm.value.phone,
       loginForm.value.password
@@ -335,9 +315,7 @@ const handleLogin = async () => {
       loginError.value = result.message || 'Login failed. Please try again.'
       
       // Handle specific errors
-      if (result.message?.toLowerCase().includes('phone') || 
-          result.message?.toLowerCase().includes('number') ||
-          result.message?.toLowerCase().includes('not found')) {
+      if (result.message?.toLowerCase().includes('phone')) {
         loginErrors.value.phone = result.message
       } else if (result.message?.toLowerCase().includes('password')) {
         loginErrors.value.password = result.message
@@ -357,10 +335,12 @@ const handleRegister = async () => {
   registerError.value = ''
   let valid = true
 
-  // Validate phone (only 9 digits)
-  const phoneError = validatePhone(registerForm.value.phone)
-  if (phoneError) {
-    registerErrors.value.phone = phoneError
+  // Validate phone
+  if (!registerForm.value.phone) {
+    registerErrors.value.phone = 'Phone number is required'
+    valid = false
+  } else if (registerForm.value.phone.length < 9) {
+    registerErrors.value.phone = 'Please enter a valid phone number'
     valid = false
   }
 
@@ -384,7 +364,6 @@ const handleRegister = async () => {
   loading.value = true
 
   try {
-    // Send phone as is (9 digits without 255)
     const result = await authStore.register(
       registerForm.value.phone,
       registerForm.value.password
@@ -400,8 +379,7 @@ const handleRegister = async () => {
       
       // Handle specific errors
       if (result.message?.toLowerCase().includes('phone') || 
-          result.message?.toLowerCase().includes('exists') ||
-          result.message?.toLowerCase().includes('number')) {
+          result.message?.toLowerCase().includes('exists')) {
         registerErrors.value.phone = result.message
       } else if (result.message?.toLowerCase().includes('password')) {
         registerErrors.value.password = result.message
@@ -419,7 +397,7 @@ const handleRegister = async () => {
 const passwordStrength = computed(() => {
   const p = registerForm.value.password
   let score = 0
-  if (p.length >= 4) score++
+  if (p.length >= 8) score++
   if (/[A-Z]/.test(p)) score++
   if (/[0-9]/.test(p)) score++
   if (/[^A-Za-z0-9]/.test(p)) score++

@@ -24,10 +24,6 @@
           </h1>
           <p class="flex items-center gap-2 text-xs text-gray-400 mt-1">
             <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-            <!-- <span v-if="user?.role" class="px-2 py-0.5 rounded-full text-[10px] font-bold"
-              :class="user.role === 'ADMIN' ? 'bg-purple-500/20 text-purple-400 border border-purple-500/20' : 'bg-rose-500/20 text-rose-400 border border-rose-500/20'">
-              {{ user.role }}
-            </span> -->
             Member since {{ memberSince }}
           </p>
         </div>
@@ -45,7 +41,7 @@
           </div>
           <div class="w-px h-8 bg-white/10"></div>
           <div class="text-center">
-            <span class="block font-mono font-black text-rose-400 text-sm">{{ formattedBalance }}</span>
+            <span class="block font-mono font-black text-rose-400 text-sm">TZS {{ stats.balance.toLocaleString() }}</span>
             <span class="block text-[10px] text-gray-500 uppercase tracking-widest mt-0.5">Balance</span>
           </div>
         </div>
@@ -62,7 +58,7 @@
         <div class="bg-gradient-to-br from-gray-800 to-gray-900 border border-rose-400/20 rounded-2xl p-5 shadow-[0_0_32px_rgba(244,63,94,0.05)]">
           <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Account balance</p>
           <p class="font-mono font-black text-rose-400 text-xl mb-4 [text-shadow:0_0_20px_rgba(244,63,94,0.3)]">
-            {{ formattedBalance }}
+            TZS {{ stats.balance.toLocaleString() }}
           </p>
           <div class="flex gap-2">
             <RouterLink to="/deposite"
@@ -156,9 +152,7 @@
               type="tel"
               placeholder="+255 7XX XXX XXX"
               class="w-full bg-gray-900/60 border border-gray-700 text-gray-100 rounded-xl text-sm py-3 px-4 outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-400/20 transition-all"
-              readonly
             />
-            <p class="text-[10px] text-gray-500 mt-1">Phone number cannot be changed</p>
           </div>
 
           <div>
@@ -281,7 +275,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../../stores/auth/authStore.js'
 
@@ -294,30 +288,17 @@ const logoutModal = ref(false)
 const updatingProfile = ref(false)
 const updatingPassword = ref(false)
 const passwordError = ref('')
-const loading = ref(true)
 
-// ---- User Data from Store ----
+// ---- User Data ----
 const user = computed(() => authStore.user)
-const isLoggedIn = computed(() => authStore.isLoggedIn)
 
-// 👇 USE formattedBalance GETTER FROM STORE
-const formattedBalance = computed(() => authStore.formattedBalance)
-
-// ---- Display Name ----
 const displayName = computed(() => {
   if (user.value?.name) return user.value.name
   if (user.value?.username) return user.value.username
-  if (user.value?.phone_number) {
-    const phone = user.value.phone_number
-    if (phone.startsWith('255')) {
-      return '0' + phone.substring(3)
-    }
-    return phone
-  }
+  if (user.value?.phone_number) return user.value.phone_number
   return 'User'
 })
 
-// ---- User Initials ----
 const userInitials = computed(() => {
   if (!displayName.value || displayName.value === 'User') return 'U'
   const names = displayName.value.split(' ')
@@ -327,21 +308,20 @@ const userInitials = computed(() => {
   return displayName.value.substring(0, 2).toUpperCase()
 })
 
-// ---- Member Since ----
 const memberSince = computed(() => {
-  if (!user.value?.created_at) return 'N/A'
-  const date = new Date(user.value.created_at)
+  if (!user.value?.createdAt) return 'N/A'
+  const date = new Date(user.value.createdAt)
   return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
 })
 
 // ---- Stats ----
 const stats = ref({
-  balance: 0,
-  bets: 0,
-  wins: 0,
-  winRate: 0,
-  streak: 0,
-  points: 0
+  balance: 2450000,
+  bets: 156,
+  wins: 89,
+  winRate: 57,
+  streak: 5,
+  points: 4850
 })
 
 // ---- Tabs ----
@@ -358,7 +338,7 @@ const quickLinks = computed(() => {
     { to: '/transactions', icon: '💳', label: 'Transactions' },
     { to: '/promotions', icon: '🎁', label: 'Promotions' },
   ]
-  if (user.value?.role === 'ADMIN') {
+  if (user.value && user.value.role === 'ADMIN') {
     links.push({ to: '/admin', icon: '🛠️', label: 'Admin Panel' })
   }
   return links
@@ -405,11 +385,8 @@ function initializeFormData() {
 async function updateProfile() {
   updatingProfile.value = true
   try {
-    console.log('Updating profile:', profileForm.value)
-    alert('Profile updated successfully!')
-  } catch (error) {
-    console.error('Update profile error:', error)
-    alert('Failed to update profile')
+    const result = await authStore.updateProfile(profileForm.value)
+    if (!result.success) alert(result.error || 'Failed to update')
   } finally {
     updatingProfile.value = false
   }
@@ -425,19 +402,17 @@ async function changeUserPassword() {
     passwordError.value = 'Password must be at least 6 characters'
     return
   }
-  if (!passwordForm.value.current_password) {
-    passwordError.value = 'Current password is required'
-    return
-  }
-  
   updatingPassword.value = true
   try {
-    console.log('Changing password...')
-    alert('Password changed successfully!')
-    passwordForm.value = { current_password: '', new_password: '', confirm_password: '' }
-  } catch (error) {
-    console.error('Change password error:', error)
-    passwordError.value = error.message || 'Failed to change password'
+    const result = await authStore.changePassword(
+      passwordForm.value.current_password,
+      passwordForm.value.new_password
+    )
+    if (result.success) {
+      passwordForm.value = { current_password: '', new_password: '', confirm_password: '' }
+    } else {
+      passwordError.value = result.error || 'Failed to change password'
+    }
   } finally {
     updatingPassword.value = false
   }
@@ -448,44 +423,12 @@ function resetProfileForm() {
 }
 
 async function confirmLogout() {
-  logoutModal.value = false
   await authStore.logout()
-  router.push('/login')
+  router.push('/')
 }
 
-// ---- Load user data ----
-async function loadUserData() {
-  loading.value = true
-  try {
-    await authStore.fetchUserProfile()
-    await authStore.fetchUserBalance()
-    
-    stats.value.balance = authStore.userBalance
-    
-    initializeFormData()
-  } catch (error) {
-    console.error('Error loading user data:', error)
-  } finally {
-    loading.value = false
-  }
-}
-
-// ---- Check auth on mount ----
-onMounted(() => {
-  console.log('🔍 Profile page mounted')
-  console.log('📊 Auth state:', {
-    isLoggedIn: isLoggedIn.value,
-    user: user.value,
-    formattedBalance: formattedBalance.value
-  })
-  
-  if (!isLoggedIn.value) {
-    router.push('/login')
-    return
-  }
-  
-  loadUserData()
-})
+// ---- Initialize ----
+initializeFormData()
 </script>
 
 <style scoped>

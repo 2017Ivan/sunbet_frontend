@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 pb-10">
+  <div class="min-h-screen bg-white pb-10">
 
     <!-- ══ SPORTS FILTER TABS ══ -->
     <div class="sticky top-0 z-20 bg-white border-b border-gray-200 shadow-sm">
@@ -23,7 +23,7 @@
     </div>
 
     <!-- ══ SPORTS CONTENT ══ -->
-    <div class="max-w-7xl mx-auto px-2 mt-3">
+    <div class="max-w-7xl mx-auto  mt-3">
 
      
 
@@ -34,7 +34,7 @@
         class="mb-0"
       >
         <!-- League Header -->
-        <div class="sticky top-12 z-10 py-2 pl-1 bg-gradient-to-b from-gray-200 via-gray-400 to-gray-200 backdrop-blur-sm">
+        <div class="sticky top-12 z-10 py-2 pl-1 bg-gradient-to-b from-gray-400 via-gray-700/0  to-gray-400 backdrop-blur-sm">
           <div class="flex items-center justify-between">
             <span class="text-xs font-bold text-gray-800 truncate">{{ leagueName }}</span>
 

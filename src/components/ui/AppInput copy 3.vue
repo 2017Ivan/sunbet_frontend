@@ -1,3 +1,4 @@
+// AppInput.vue
 <template>
   <div class="flex flex-col gap-1.5">
     <label v-if="label" :for="inputId" class="text-xs font-medium text-[#A0A0A0] tracking-wide">
@@ -7,7 +8,7 @@
 
     <div class="relative flex items-center">
       <!-- Left icon -->
-      <div v-if="$slots['icon-left']" class="absolute left-3 text-[#606060] flex items-center pointer-events-none">
+      <div v-if="$slots['icon-left']" class="absolute left-2 text-[#606060] flex items-center pointer-events-none">
         <slot name="icon-left" />
       </div>
 
@@ -20,6 +21,7 @@
         :disabled="disabled"
         :readonly="readonly"
         :class="inputClasses"
+        :style="inputStyles"
         @input="handleInput"
         @focus="focused = true"
         @blur="focused = false"
@@ -94,11 +96,11 @@ const sizes = {
   lg: 'h-13 text-base px-4',
 }
 
-// ─── INPUT CLASSES ────────────────────────────────────────────────────────
+// Separate padding for left icon to ensure text doesn't go under it
 const inputClasses = computed(() => {
   let classes = [
-    'w-full rounded-[10px]  bg-[#1E1E1E] border transition-all duration-200',
-    'text-[#F0F0F0] pl-8 placeholder:text-[#606060]',
+    'w-full rounded-[10px]  pl-10 bg-[#1E1E1E] border transition-all duration-200',
+    'text-[#F0F0F0] placeholder:text-[#606060]',
     'focus:outline-none',
     sizes[props.size] || sizes.md,
     props.error
@@ -107,21 +109,16 @@ const inputClasses = computed(() => {
     props.disabled ? 'opacity-50 cursor-not-allowed' : '',
   ]
 
-  // Add padding for left icon
+  // Add padding for icons - use pl-10 for standard icons, pl-12 for larger ones
   if (props.$slots?.['icon-left']) {
-    classes.push('pl-10')
-  } else {
-    classes.push('pl-4')
+    classes.push('pl-11') // Extra padding to avoid text going under icon
   }
 
-  // Add padding for right icon or password toggle
   if (props.type === 'password' || props.$slots?.['icon-right']) {
     classes.push('pr-10')
-  } else {
-    classes.push('pr-4')
   }
 
-  return classes.join(' ')
+  return classes
 })
 
 // ─── PHONE NUMBER HANDLING ──────────────────────────────────────────────

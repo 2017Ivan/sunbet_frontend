@@ -1,6 +1,6 @@
 <template>
   <div class="h-full py-8 bg-[#0D0D0D]">
-    <div class="max-w-4xl mx-auto px-4">
+    <div class="max-w-4xl mx-auto px-4 ">
       
       <!-- Header -->
       <div class="mb-6">
@@ -13,7 +13,7 @@
         <button
           v-for="tab in tabs"
           :key="tab.key"
-          @click="switchTab(tab.key)"
+          @click="activeTab = tab.key"
           class="flex-1 px-4 py-2.5 text-sm font-semibold rounded-lg transition-all duration-200 whitespace-nowrap"
           :class="activeTab === tab.key
             ? 'bg-gradient-to-r from-rose-600 to-rose-700 text-white shadow-lg shadow-rose-600/25'
@@ -32,16 +32,8 @@
         </button>
       </div>
 
-      <!-- Loading -->
-      <div v-if="isLoadingBets" class="bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-8">
-        <div class="flex items-center justify-center gap-3">
-          <div class="w-5 h-5 border-2 border-rose-500 border-t-transparent rounded-full animate-spin"></div>
-          <span class="text-[#606060]">Loading bets...</span>
-        </div>
-      </div>
-
       <!-- Content -->
-      <div v-else class="bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-4 min-h-[400px]">
+      <div class="bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-4 min-h-[400px]">
         <!-- Open Bets -->
         <div v-if="activeTab === 'open'">
           <div v-if="openBets.length === 0" class="text-center py-12">
@@ -66,26 +58,26 @@
         </div>
 
         <!-- Settled Bets -->
-        <div v-if="activeTab === 'settled'">
-          <div v-if="settledBets.length === 0" class="text-center py-12">
-            <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-[#0D0D0D] flex items-center justify-center">
-              <svg class="w-8 h-8 text-[#333]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-              </svg>
-            </div>
-            <p class="text-[#606060] font-medium">No settled bets</p>
-            <p class="text-xs text-[#606060] mt-1">Completed bets will appear here</p>
-          </div>
-          <div v-else class="space-y-3">
-            <BetCard
-              v-for="bet in settledBets"
-              :key="bet.id"
-              :bet="bet"
-              status="settled"
-              @click="goToBetDetail(bet.id)"
-            />
-          </div>
-        </div>
+<div v-if="activeTab === 'settled'">
+  <div v-if="settledBets.length === 0" class="text-center py-4">
+    <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-[#0D0D0D] flex items-center justify-center">
+      <svg class="w-8 h-8 text-[#333]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+    </div>
+    <p class="text-[#606060] font-medium">No settled bets</p>
+    <p class="text-xs text-[#606060] mt-1">Completed bets will appear here</p>
+  </div>
+  <div v-else class="space-y-3">
+    <BetCard
+      v-for="bet in settledBets"
+      :key="bet.id"
+      :bet="bet"
+      status="settled"
+      @click="goToBetDetail(bet.id)"
+    />
+  </div>
+</div>
 
         <!-- Virtual Bets -->
         <div v-if="activeTab === 'virtual'">
@@ -123,15 +115,13 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { useBetStore } from '../../stores/bets/betStore.js'
 import BetCard from './component/ BetCard.vue'
 
 const router = useRouter()
-const betStore = useBetStore()
 
-// ---- Tabs ----
+// Tabs
 const tabs = [
   { key: 'open', label: 'Open', badge: true },
   { key: 'settled', label: 'Settled', badge: true },
@@ -140,53 +130,91 @@ const tabs = [
 ]
 
 const activeTab = ref('open')
-const isLoadingBets = ref(false)
 
-// ---- Computed ----
-const openBets = computed(() => {
-  return betStore.userBets.filter(b => b.status === 'open' || b.status === 'pending')
-})
+// ---- Dummy Data ----
+const openBets = ref([
+  {
+    id: 1,
+    event: 'Manchester United vs Liverpool',
+    market: '1X2 - Home',
+    selection: 'Manchester United',
+    odds: 2.15,
+    stake: 5000,
+    potentialWin: 10750,
+    placedAt: '2024-01-15T14:30:00',
+    status: 'open',
+    bookingCode: 'ABC123',
+    selections: [
+      { match: 'Manchester United vs Liverpool', market: '1X2', pick: 'Home', odds: 2.15 },
+      { match: 'Arsenal vs Chelsea', market: 'Over 2.5', pick: 'Over', odds: 1.85 }
+    ]
+  },
+  {
+    id: 2,
+    event: 'Arsenal vs Chelsea',
+    market: 'Over 2.5 Goals',
+    selection: 'Over 2.5',
+    odds: 1.85,
+    stake: 2500,
+    potentialWin: 4625,
+    placedAt: '2024-01-15T16:45:00',
+    status: 'open',
+    bookingCode: 'XYZ789',
+    selections: [
+      { match: 'Arsenal vs Chelsea', market: 'Over 2.5', pick: 'Over', odds: 1.85 }
+    ]
+  }
+])
 
-const settledBets = computed(() => {
-  return betStore.userBets.filter(b => b.status === 'won' || b.status === 'lost' || b.status === 'settled')
-})
+const settledBets = ref([
+  {
+    id: 3,
+    event: 'Real Madrid vs Barcelona',
+    market: '1X2 - Home',
+    selection: 'Real Madrid',
+    odds: 1.95,
+    stake: 10000,
+    potentialWin: 19500,
+    actualWin: 19500,
+    placedAt: '2024-01-14T20:00:00',
+    settledAt: '2024-01-14T22:00:00',
+    status: 'won',
+    result: 'Won',
+    bookingCode: 'DEF456',
+    selections: [
+      { match: 'Real Madrid vs Barcelona', market: '1X2', pick: 'Home', odds: 1.95 }
+    ]
+  },
+  {
+    id: 4,
+    event: 'Bayern Munich vs Dortmund',
+    market: 'Both Teams to Score',
+    selection: 'Yes',
+    odds: 1.75,
+    stake: 3000,
+    potentialWin: 5250,
+    actualWin: 0,
+    placedAt: '2024-01-14T18:30:00',
+    settledAt: '2024-01-14T20:30:00',
+    status: 'lost',
+    result: 'Lost',
+    bookingCode: 'GHI789',
+    selections: [
+      { match: 'Bayern Munich vs Dortmund', market: 'BTTS', pick: 'Yes', odds: 1.75 }
+    ]
+  }
+])
 
+// Methods
 const getBadgeCount = (tabKey) => {
   if (tabKey === 'open') return openBets.value.length
   if (tabKey === 'settled') return settledBets.value.length
   return 0
 }
 
-// ---- Methods ----
-const switchTab = (tab) => {
-  activeTab.value = tab
-}
-
 const goToBetDetail = (betId) => {
   router.push(`/bets/${betId}`)
 }
-
-// ---- Load Bets ----
-const loadBets = async () => {
-  isLoadingBets.value = true
-  try {
-    await betStore.loadUserBets()
-  } catch (error) {
-    console.error('Error loading bets:', error)
-  } finally {
-    isLoadingBets.value = false
-  }
-}
-
-// ---- Watch tab change to reload ----
-watch(activeTab, () => {
-  // Optional: reload when switching tabs
-})
-
-// ---- Mounted ----
-onMounted(() => {
-  loadBets()
-})
 </script>
 
 <style scoped>
@@ -203,14 +231,5 @@ onMounted(() => {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #A32D2D;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-.animate-spin {
-  animation: spin 1s linear infinite;
 }
 </style>

@@ -35,8 +35,7 @@ export const useAuthStore = defineStore('auth', {
     isLoading: false,
     error: null,
     accessToken: null,
-    refreshToken: null,
-    initialized: false
+    refreshToken: null
   }),
   
   getters: {
@@ -51,103 +50,52 @@ export const useAuthStore = defineStore('auth', {
       }
       return state.user.role === role
     },
-    
-    // Ensure balance is always a number
-    userBalance: (state) => {
-      const balance = state.user.balance
-      if (balance === null || balance === undefined) return 0
-      return typeof balance === 'string' ? parseFloat(balance) : balance
-    },
-    
+    userBalance: (state) => state.user.balance,
     hasSufficientBalance: (state) => (amount) => {
-      const balance = state.user.balance
-      const numBalance = typeof balance === 'string' ? parseFloat(balance) : balance
-      return numBalance >= amount
+      return state.user.balance >= amount
     },
-    
-    // Format balance with 2 decimal places
     formattedBalance: (state) => {
-      const balance = state.user.balance
-      if (balance === null || balance === undefined) return 'TZS 0.00'
-      
-      // Ensure it's a number
-      const numBalance = typeof balance === 'string' ? parseFloat(balance) : balance
-      
-      // Format with commas and 2 decimal places
-      return `TZS ${numBalance.toLocaleString('en-US', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      })}`
+      if (state.user.balance === null) return 'TZS 0'
+      return `TZS ${state.user.balance.toLocaleString()}`
     }
   },
   
   actions: {
-    // ── HELPER: Normalize phone for backend ─────────────────────────────────
-    normalizePhoneForBackend(phone) {
-      if (!phone) return ''
-      
-      let cleaned = String(phone).replace(/\D/g, '')
-      
-      if (cleaned.length === 9) {
-        return '255' + cleaned
-      }
-      if (cleaned.startsWith('255') && cleaned.length === 12) {
-        return cleaned
-      }
-      if (cleaned.startsWith('0')) {
-        return '255' + cleaned.substring(1)
-      }
-      if (cleaned.length === 12 && cleaned.startsWith('255')) {
-        return cleaned
-      }
-      return cleaned
-    },
-
     // ── INITIALIZE ──────────────────────────────────────────────────────────
     async initialize() {
       console.log('🔄 Initializing auth store...')
       
       const token = localStorage.getItem('access_token')
-      console.log('🔑 Token from localStorage:', token ? 'exists' : 'not found')
       
       if (token) {
         try {
+          // 👇 DECODE TOKEN FIRST to get role
           const decoded = decodeToken(token)
           console.log('🔓 Decoded token:', decoded)
           
           if (decoded) {
+            // 👇 SET ROLE FROM TOKEN
             this.user.id = decoded.id || decoded.userId || decoded.sub
             this.user.role = decoded.role || 'USER'
-            this.user.balance = 0
             this.isLoggedIn = true
             this.accessToken = token
-            this.initialized = true
             
-            console.log('✅ Store initialized. User:', {
-              id: this.user.id,
-              role: this.user.role,
-              isLoggedIn: this.isLoggedIn
-            })
+            console.log('✅ Role from token:', this.user.role)
             
+            // 👇 FETCH PROFILE - BUT DON'T OVERWRITE ROLE
             await this.fetchUserProfile()
-            await this.fetchUserBalance()
             
-            console.log('✅ Final state after init:', this.$state)
-            return true
+            // Fetch balance
+            await this.fetchUserBalance()
           } else {
-            console.warn('⚠️ Invalid token, clearing auth')
             this.clearAuth()
-            return false
           }
         } catch (error) {
           console.error('❌ Init error:', error)
           this.clearAuth()
-          return false
         }
       } else {
-        console.log('ℹ️ No token found, auth not initialized')
         this.clearAuth()
-        return false
       }
     },
     
@@ -157,10 +105,7 @@ export const useAuthStore = defineStore('auth', {
       this.error = null
       
       try {
-        const normalizedPhone = this.normalizePhoneForBackend(phone_number)
-        console.log('📞 Register - Original:', phone_number, 'Normalized:', normalizedPhone)
-        
-        const result = await authService.register(normalizedPhone, password)
+        const result = await authService.register(phone_number, password)
         
         if (result.success) {
           return await this.login(phone_number, password)
@@ -182,11 +127,8 @@ export const useAuthStore = defineStore('auth', {
       this.error = null
       
       try {
-        const normalizedPhone = this.normalizePhoneForBackend(phone_number)
-        console.log('📞 Login - Original:', phone_number, 'Normalized:', normalizedPhone)
-        
-        const result = await authService.login(normalizedPhone, password)
-        console.log('📨 Login response from service:', result)
+        const result = await authService.login(phone_number, password)
+        console.log('📨 Login response:', result)
         
         if (result.success) {
           const token = result.tokens?.accessToken || result.accessToken || result.token
@@ -198,28 +140,23 @@ export const useAuthStore = defineStore('auth', {
           this.accessToken = token
           this.refreshToken = result.tokens?.refreshToken || null
           
+          // ── DECODE TOKEN to get role ──────────────────────────────────
           const decoded = decodeToken(token)
           console.log('🔓 Decoded token on login:', decoded)
           
-          this.user.id = decoded.id || decoded.userId || decoded.sub || result.user?.id
+          // 👇 SET USER FROM TOKEN (ROLE INAPOTOKA TOKEN)
+          this.user.id = decoded.id || decoded.userId || decoded.sub
           this.user.phone_number = phone_number
           this.user.role = decoded.role || 'USER'
-          this.user.balance = 0
           this.isLoggedIn = true
-          this.initialized = true
           
-          console.log('✅ Login successful. User state:', {
-            id: this.user.id,
-            phone: this.user.phone_number,
-            role: this.user.role,
-            isLoggedIn: this.isLoggedIn,
-            initialized: this.initialized
-          })
+          console.log('✅ Login successful. Role from token:', this.user.role)
           
+          // 👇 FETCH PROFILE - BUT DON'T OVERWRITE ROLE
           await this.fetchUserProfile()
-          await this.fetchUserBalance()
           
-          console.log('✅ Final user state after login:', this.$state)
+          // Fetch balance
+          await this.fetchUserBalance()
           
           return { 
             success: true, 
@@ -260,10 +197,9 @@ export const useAuthStore = defineStore('auth', {
       this.accessToken = null
       this.refreshToken = null
       this.error = null
-      this.initialized = false
     },
     
-    // ── FETCH USER PROFILE ──────────────────────────────────────────────────
+    // ── FETCH USER PROFILE (USI-OVERWRITE ROLE) ──────────────────────────
     async fetchUserProfile() {
       if (!authService.isAuthenticated()) {
         return { success: false, message: 'Not authenticated' }
@@ -276,15 +212,13 @@ export const useAuthStore = defineStore('auth', {
         console.log('📨 Profile response:', result)
         
         if (result.success) {
-          const currentRole = this.user.role
-          const currentId = this.user.id
-          
+          // 👇 UPDATE OTHER FIELDS BUT KEEP ROLE FROM TOKEN
           this.user.phone_number = result.user.phone_number
           this.user.created_at = result.user.created_at
           this.user.updated_at = result.user.updated_at
           
-          this.user.role = currentRole
-          this.user.id = currentId
+          // 👇 USIBADILI ROLE - TAYARI IPO KUTOKA TOKEN
+          // this.user.role = result.user.role || 'USER' // ONDOA HII!
           
           console.log('✅ Profile fetched. Keeping role from token:', this.user.role)
           
@@ -312,9 +246,7 @@ export const useAuthStore = defineStore('auth', {
         console.log('💰 Balance response:', result)
         
         if (result.success) {
-          const balance = result.balance || result.data?.balance || 0
-          this.user.balance = typeof balance === 'string' ? parseFloat(balance) : balance
-          console.log('💰 Balance saved as number:', this.user.balance)
+          this.user.balance = result.balance || result.data?.balance || 0
           return { success: true, balance: this.user.balance }
         } else {
           return { success: false, message: result.message }
@@ -327,7 +259,7 @@ export const useAuthStore = defineStore('auth', {
     
     // ── UPDATE BALANCE LOCALLY ─────────────────────────────────────────────
     updateBalanceLocally(newBalance) {
-      this.user.balance = typeof newBalance === 'string' ? parseFloat(newBalance) : newBalance
+      this.user.balance = newBalance
     },
     
     // ── DEPOSIT ─────────────────────────────────────────────────────────────
@@ -377,9 +309,7 @@ export const useAuthStore = defineStore('auth', {
         
         if (response.data) {
           if (response.data.data && response.data.data.new_balance) {
-            this.user.balance = typeof response.data.data.new_balance === 'string' 
-              ? parseFloat(response.data.data.new_balance) 
-              : response.data.data.new_balance
+            this.user.balance = response.data.data.new_balance
           } else {
             await this.fetchUserBalance()
           }
@@ -406,8 +336,7 @@ export const useAuthStore = defineStore('auth', {
       this.error = null
       
       try {
-        const normalizedPhone = this.normalizePhoneForBackend(phone_number)
-        const result = await authService.forgotPassword(normalizedPhone)
+        const result = await authService.forgotPassword(phone_number)
         return result
       } catch (error) {
         this.error = error.message

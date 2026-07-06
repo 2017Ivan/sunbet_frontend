@@ -36,7 +36,7 @@ export const useAuthStore = defineStore('auth', {
     error: null,
     accessToken: null,
     refreshToken: null,
-    initialized: false
+    initialized: false // 👈 ADD THIS
   }),
   
   getters: {
@@ -51,33 +51,13 @@ export const useAuthStore = defineStore('auth', {
       }
       return state.user.role === role
     },
-    
-    // Ensure balance is always a number
-    userBalance: (state) => {
-      const balance = state.user.balance
-      if (balance === null || balance === undefined) return 0
-      return typeof balance === 'string' ? parseFloat(balance) : balance
-    },
-    
+    userBalance: (state) => state.user.balance,
     hasSufficientBalance: (state) => (amount) => {
-      const balance = state.user.balance
-      const numBalance = typeof balance === 'string' ? parseFloat(balance) : balance
-      return numBalance >= amount
+      return state.user.balance >= amount
     },
-    
-    // Format balance with 2 decimal places
     formattedBalance: (state) => {
-      const balance = state.user.balance
-      if (balance === null || balance === undefined) return 'TZS 0.00'
-      
-      // Ensure it's a number
-      const numBalance = typeof balance === 'string' ? parseFloat(balance) : balance
-      
-      // Format with commas and 2 decimal places
-      return `TZS ${numBalance.toLocaleString('en-US', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      })}`
+      if (state.user.balance === null) return 'TZS 0'
+      return `TZS ${state.user.balance.toLocaleString()}`
     }
   },
   
@@ -86,20 +66,30 @@ export const useAuthStore = defineStore('auth', {
     normalizePhoneForBackend(phone) {
       if (!phone) return ''
       
+      // Remove all non-digit characters
       let cleaned = String(phone).replace(/\D/g, '')
       
+      // If number is 9 digits, add 255
       if (cleaned.length === 9) {
         return '255' + cleaned
       }
+      
+      // If number already has 255 and is 12 digits, keep it
       if (cleaned.startsWith('255') && cleaned.length === 12) {
         return cleaned
       }
+      
+      // If number starts with 0, replace with 255
       if (cleaned.startsWith('0')) {
         return '255' + cleaned.substring(1)
       }
+      
+      // If number has 12 digits but doesn't start with 255 (maybe +255...)
       if (cleaned.length === 12 && cleaned.startsWith('255')) {
         return cleaned
       }
+      
+      // Return as is if we can't normalize
       return cleaned
     },
 
@@ -118,7 +108,6 @@ export const useAuthStore = defineStore('auth', {
           if (decoded) {
             this.user.id = decoded.id || decoded.userId || decoded.sub
             this.user.role = decoded.role || 'USER'
-            this.user.balance = 0
             this.isLoggedIn = true
             this.accessToken = token
             this.initialized = true
@@ -157,12 +146,14 @@ export const useAuthStore = defineStore('auth', {
       this.error = null
       
       try {
+        // Normalize phone for backend
         const normalizedPhone = this.normalizePhoneForBackend(phone_number)
         console.log('📞 Register - Original:', phone_number, 'Normalized:', normalizedPhone)
         
         const result = await authService.register(normalizedPhone, password)
         
         if (result.success) {
+          // After registration, login automatically
           return await this.login(phone_number, password)
         } else {
           this.error = result.message
@@ -182,6 +173,7 @@ export const useAuthStore = defineStore('auth', {
       this.error = null
       
       try {
+        // Normalize phone for backend
         const normalizedPhone = this.normalizePhoneForBackend(phone_number)
         console.log('📞 Login - Original:', phone_number, 'Normalized:', normalizedPhone)
         
@@ -195,16 +187,18 @@ export const useAuthStore = defineStore('auth', {
             throw new Error('No token received from server')
           }
           
+          // SAVE TOKENS
           this.accessToken = token
           this.refreshToken = result.tokens?.refreshToken || null
           
+          // DECODE TOKEN
           const decoded = decodeToken(token)
           console.log('🔓 Decoded token on login:', decoded)
           
+          // SET USER DATA
           this.user.id = decoded.id || decoded.userId || decoded.sub || result.user?.id
           this.user.phone_number = phone_number
           this.user.role = decoded.role || 'USER'
-          this.user.balance = 0
           this.isLoggedIn = true
           this.initialized = true
           
@@ -216,6 +210,7 @@ export const useAuthStore = defineStore('auth', {
             initialized: this.initialized
           })
           
+          // FETCH PROFILE AND BALANCE
           await this.fetchUserProfile()
           await this.fetchUserBalance()
           
@@ -260,7 +255,7 @@ export const useAuthStore = defineStore('auth', {
       this.accessToken = null
       this.refreshToken = null
       this.error = null
-      this.initialized = false
+      this.initialized = false // 👈 RESET INITIALIZED
     },
     
     // ── FETCH USER PROFILE ──────────────────────────────────────────────────
@@ -276,13 +271,16 @@ export const useAuthStore = defineStore('auth', {
         console.log('📨 Profile response:', result)
         
         if (result.success) {
+          // Store current role and id before updating
           const currentRole = this.user.role
           const currentId = this.user.id
           
+          // Update other fields
           this.user.phone_number = result.user.phone_number
           this.user.created_at = result.user.created_at
           this.user.updated_at = result.user.updated_at
           
+          // RESTORE role and id (don't overwrite from profile)
           this.user.role = currentRole
           this.user.id = currentId
           
@@ -302,32 +300,53 @@ export const useAuthStore = defineStore('auth', {
     },
     
     // ── FETCH USER BALANCE ──────────────────────────────────────────────────
-    async fetchUserBalance() {
-      if (!authService.isAuthenticated()) {
-        return { success: false, message: 'Not authenticated' }
-      }
+    // async fetchUserBalance() {
+    //   if (!authService.isAuthenticated()) {
+    //     return { success: false, message: 'Not authenticated' }
+    //   }
       
-      try {
-        const result = await authService.getBalance()
-        console.log('💰 Balance response:', result)
+    //   try {
+    //     const result = await authService.getBalance()
+    //     console.log('💰 Balance response:', result)
         
-        if (result.success) {
-          const balance = result.balance || result.data?.balance || 0
-          this.user.balance = typeof balance === 'string' ? parseFloat(balance) : balance
-          console.log('💰 Balance saved as number:', this.user.balance)
-          return { success: true, balance: this.user.balance }
-        } else {
-          return { success: false, message: result.message }
-        }
-      } catch (error) {
-        this.error = error.message
-        return { success: false, message: error.message }
-      }
-    },
+    //     if (result.success) {
+    //       this.user.balance = result.balance || result.data?.balance || 0.00
+    //       return { success: true, balance: this.user.balance }
+    //     } else {
+    //       return { success: false, message: result.message }
+    //     }
+    //   } catch (error) {
+    //     this.error = error.message
+    //     return { success: false, message: error.message }
+    //   }
+    // },
+async fetchUserBalance() {
+  if (!authService.isAuthenticated()) {
+    return { success: false, message: 'Not authenticated' }
+  }
+  
+  try {
+    const result = await authService.getBalance()
+    console.log('💰 Balance response:', result)
+    
+    if (result.success) {
+      // 👇 CONVERT TO NUMBER - Fix for balance type
+      const balance = result.balance || result.data?.balance || 0
+      this.user.balance = typeof balance === 'string' ? parseFloat(balance) : balance
+      console.log('💰 Balance saved as number:', this.user.balance)
+      return { success: true, balance: this.user.balance }
+    } else {
+      return { success: false, message: result.message }
+    }
+  } catch (error) {
+    this.error = error.message
+    return { success: false, message: error.message }
+  }
+},
     
     // ── UPDATE BALANCE LOCALLY ─────────────────────────────────────────────
     updateBalanceLocally(newBalance) {
-      this.user.balance = typeof newBalance === 'string' ? parseFloat(newBalance) : newBalance
+      this.user.balance = newBalance
     },
     
     // ── DEPOSIT ─────────────────────────────────────────────────────────────
@@ -377,9 +396,7 @@ export const useAuthStore = defineStore('auth', {
         
         if (response.data) {
           if (response.data.data && response.data.data.new_balance) {
-            this.user.balance = typeof response.data.data.new_balance === 'string' 
-              ? parseFloat(response.data.data.new_balance) 
-              : response.data.data.new_balance
+            this.user.balance = response.data.data.new_balance
           } else {
             await this.fetchUserBalance()
           }
