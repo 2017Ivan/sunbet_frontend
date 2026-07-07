@@ -1,7 +1,6 @@
 // HomePage.vue 
-<!-- HomePage.vue -->
 <template>
-  <div class="mx-auto bg-white">
+  <div class=" mx-auto bg-white">
     
     <HeroSection />
     <GamesTabs :games="games" />
@@ -12,33 +11,34 @@
       :key="leagueName"
       class=""
     >
-      <!-- League Header -->
-      <div class="sticky top-0 z-10 py-2 pl-1 bg-gradient-to-b from-gray-400 via-gray-700/0 to-gray-400 backdrop-blur-sm">
+      <!-- League Header - Appears once per league -->
+      <div class="sticky top-0 z-10 py-2 pl-1  bg-gradient-to-b from-gray-400 via-gray-700/0  to-gray-400 backdrop-blur-sm">
         <div class="flex items-center justify-between">
           <span class="text-xs font-bold text-gray-800 truncate">{{ leagueName }}</span>
+         
 
-          <div class="flex gap-1 flex-shrink-0">
-            <span 
-              class="w-12 sm:w-14 text-center text-xs sm:text-sm font-bold text-gray-600 hover:text-white rounded transition-colors duration-200"
-            >
-              1
-            </span>
-            <span 
-              class="w-12 sm:w-14 text-center text-xs sm:text-sm font-bold text-gray-600 hover:text-white rounded transition-colors duration-200"
-            >
+           <div class="flex gap-1 flex-shrink-0">
+              <span 
+                class="w-12 sm:w-14 text-center text-xs sm:text-sm font-bold text-gray-600  hover:text-white rounded transition-colors duration-200"
+              >
+                1
+              </span>
+              <span 
+                class="w-12 sm:w-14  text-center text-xs sm:text-sm font-bold text-gray-600 hover:text-white rounded transition-colors duration-200"
+              >
               x
-            </span>
-            <span 
-              class="w-12 sm:w-14 text-center text-xs sm:text-sm font-bold text-gray-600 hover:text-white rounded transition-colors duration-200"
-            >
-              2
-            </span>
-          </div>
+              </span>
+              <span 
+                class="w-12 sm:w-14  text-center text-xs sm:text-sm font-bold text-gray-600  hover:text-white rounded transition-colors duration-200"
+              >
+                2
+              </span>
+            </div>
         </div>
       </div>
 
       <!-- Matches for this league -->
-      <div class="bg-white overflow-hidden">
+      <div class="bg-white overflow-hidden ">
         <MatchCard 
           v-for="game in matches" 
           :key="game.id"
@@ -48,7 +48,7 @@
     </div>
 
     <!-- View All Button -->
-    <div class="text-center py-1.5 bg-gradient-to-b from-rose-300 via-gray-100/0 to-gray-300 backdrop-blur-sm">
+    <div class="text-center  py-1.5 bg-gradient-to-b from-rose-300 via-gray-100/0  to-gray-300 backdrop-blur-sm">
       <button class="text-gray-500 hover:text-rose-600 font-semibold text-sm transition-colors">
         View All (670) Sports 
       </button>
@@ -65,11 +65,7 @@ import MatchCard from '../../components/betting/match Card/MatchCard.vue'
 import HeroSection from '../../components/ui/HeroSection/HeroCarousel.vue'
 import RecentWinners from '../../components/main components/RecentWinners/RecentWinners.vue'
 import GamesTabs from '../../components/ui/games/ GamesTabs.vue'
-import { useBetStore } from '../../stores/bets/betStore.js'
 
-
-// ---- Initialize Bet Store ----
-const betStore = useBetStore()
 // Sample data - in real app, hii itakuja kutoka API
 const games = ref([
   // ============================================

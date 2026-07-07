@@ -1,11 +1,10 @@
-<!-- DefaultLayout.vue -->
 <template>
-  <div class="min-h-screen bg-white lg:px-45">
-    <!-- Header -->
+  <div class="min-h-screen bg-white lg:px-47">
+    <!-- Header - Pitisha auth props -->
     <Header 
       :is-logged-in="isLoggedIn"
       :user="user"
-      :balance="userBalance"
+      :balance="balance"
       @toggle-sidebar="toggleMobileSidebar"
       @logout="handleLogout"
     />
@@ -13,7 +12,7 @@
     <!-- Main Content Area -->
     <div class="max-w-7xl mx-auto">
       <div class="flex flex-col lg:flex-row">
-        <!-- Main Content - Left Side -->
+        <!-- Main Content - Left Side (Scrollable) -->
         <div class="flex-1 min-w-0 flex flex-col">
           <div class="flex-1">
             <slot name="main">
@@ -21,14 +20,14 @@
             </slot>
           </div>
           
+          <!-- Footer -->
           <div class="lg:pb-0">
             <Footer />
           </div>
         </div>
 
         <!-- Right Sidebar - Desktop only (Fixed/Sticky) -->
-        <div class="hidden lg:block flex-shrink-0 bg-gray-800 border-l border-[#2A2A2A] sticky top-[56px] h-[calc(100vh-56px)] overflow-y-auto"
-             :class="sidebarWidthClass">
+        <div class="hidden lg:block  sm:w-full   flex-shrink-0 bg-gray-800 border-l border-[#2A2A2A] sticky top-[56px] h-[calc(100vh-56px)] overflow-y-auto" :class="sidebarWidthClass">
           <slot name="sidebar">
             <!-- Desktop Bet Slip -->
             <BetSlip mode="desktop" />
@@ -44,12 +43,12 @@
       @toggle-betslip="toggleBetSlip"
     />
 
-    <!-- Mobile Sidebar -->
+    <!-- Mobile Sidebar - Pitisha auth props -->
     <MobileSidebar
       :open="isMobileSidebarOpen"
       :is-logged-in="isLoggedIn"
       :user="user"
-      :balance="userBalance"
+      :balance="balance"
       @close="closeMobileSidebar"
       @logout="handleLogout"
     />
@@ -77,29 +76,29 @@ import MobileSidebar from '../../components/main components/MobileSidebar/Mobile
 const authStore = useAuthStore()
 const betStore = useBetStore()
 
-// ---- Auth state ----
+// 👇 Auth state - computed from store
 const isLoggedIn = computed(() => authStore.isLoggedIn)
 const user = computed(() => authStore.user)
-const userBalance = computed(() => {
-  const balance = authStore.user?.balance
-  if (typeof balance === 'string') {
-    return parseFloat(balance) || 0
-  }
-  return balance || 0
-})
+const balance = computed(() => authStore.user?.balance || 0)
 
-// ---- Bet Slip state ----
-const isBetSlipOpen = ref(false)
-const isMobileSidebarOpen = ref(false)
-const betSlipCount = computed(() => betStore.slipCount)
-const myBetsCount = ref(0)
 
-// ---- Sidebar width ----
 const sidebarWidthClass = computed(() => {
-  return 'w-full lg:w-[300px] xl:w-[360px] 2xl:w-[420px]'
+  // Using Tailwind's responsive classes
+  return 'w-full lg:w-[320px] xl:w-[380px] 2xl:w-[450px]'
 })
 
-// ---- Methods ----
+
+// Bet slip drawer state (mobile only)
+const isBetSlipOpen = ref(false)
+
+// Mobile sidebar state
+const isMobileSidebarOpen = ref(false)
+
+// Computed
+const betSlipCount = computed(() => betStore.slipCount)
+const myBetsCount = ref(0) // Replace with actual store
+
+// Methods
 const toggleMobileSidebar = () => {
   isMobileSidebarOpen.value = !isMobileSidebarOpen.value
 }
@@ -118,7 +117,6 @@ const closeBetSlip = () => {
 
 const handlePlaceBet = (data) => {
   console.log('Bet placed:', data)
-  // Handle bet placement result
 }
 
 const handleLogout = () => {
@@ -128,5 +126,5 @@ const handleLogout = () => {
 </script>
 
 <style scoped>
-/* Custom styles */
+/* Custom styles if needed */
 </style>

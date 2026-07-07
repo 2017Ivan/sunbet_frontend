@@ -1,4 +1,4 @@
-<!-- MatchCard.vue - Simple version -->
+<!-- MatchCard.vue -->
 <template>
   <div class="bg-gray-800 py-2 gap-2 border-b border-gray-100/40">
     
@@ -24,22 +24,19 @@
       <!-- Odds -->
       <div class="flex gap-0.5 flex-shrink-0">
         <button 
-          class="w-12 py-1.5 text-center text-xs font-bold transition-all duration-200 rounded-sm"
-          :class="getButtonClass('home')"
+          class="w-12 py-1.5 text-center text-xs font-bold text-gray-700 bg-gradient-to-b from-white via-gray-300 to-white hover:bg-rose-500 hover:text-white transition-colors duration-200"
           @click="handleOddsClick('home')"
         >
           {{ game.odds.home }}
         </button>
         <button 
-          class="w-12 py-1.5 text-center text-xs font-bold transition-all duration-200 rounded-sm"
-          :class="getButtonClass('draw')"
+          class="w-12 py-1.5 text-center text-xs font-bold text-gray-700 bg-gradient-to-b from-white via-gray-300 to-white hover:bg-rose-500 hover:text-white transition-colors duration-200"
           @click="handleOddsClick('draw')"
         >
           {{ game.odds.draw }}
         </button>
         <button 
-          class="w-12 py-1.5 text-center text-xs font-bold transition-all duration-200 rounded-sm"
-          :class="getButtonClass('away')"
+          class="w-12 py-1.5 text-center text-xs font-bold text-gray-700 bg-gradient-to-b from-white via-gray-300 to-white hover:bg-rose-500 hover:text-white transition-colors duration-200"
           @click="handleOddsClick('away')"
         >
           {{ game.odds.away }}
@@ -63,43 +60,15 @@ const props = defineProps({
 
 const betStore = useBetStore()
 
-// ---- Check if selection is selected ----
-const isSelected = (type) => {
-  const marketKey = type === 'home' ? '1' : type === 'draw' ? 'X' : '2'
-  return betStore.isSelected(props.game.id, marketKey)
-}
-
-// ---- Get button class ----
-const getButtonClass = (type) => {
-  const selected = isSelected(type)
-  
-  if (selected) {
-    // Selected state - Rose color
-    return 'bg-rose-600 text-white border border-rose-500 shadow-lg shadow-rose-600/30 scale-105'
-  }
-  
-  // Default state - Gray gradient
-  return 'bg-gradient-to-b from-gray-100 via-gray-200 to-gray-300 text-gray-700 hover:bg-rose-500 hover:text-white hover:border-rose-400 border border-gray-300/50'
-}
-
 // ---- Handle Odds Click ----
 const handleOddsClick = (type) => {
-  const marketKey = type === 'home' ? '1' : type === 'draw' ? 'X' : '2'
-  const pick = type === 'home' ? props.game.homeTeam : type === 'draw' ? 'Draw' : props.game.awayTeam
-  
-  // If already selected, remove it
-  if (betStore.isSelected(props.game.id, marketKey)) {
-    betStore.removeFromSlip(props.game.id, marketKey)
-    return
-  }
-  
   const selection = {
     matchId: props.game.id,
     matchName: `${props.game.homeTeam} vs ${props.game.awayTeam}`,
     league: props.game.league,
     market: '1X2',
-    marketKey: marketKey,
-    pick: pick,
+    marketKey: type === 'home' ? '1' : type === 'draw' ? 'X' : '2',
+    pick: type === 'home' ? props.game.homeTeam : type === 'draw' ? 'Draw' : props.game.awayTeam,
     odds: props.game.odds[type],
     type: 'sports'
   }

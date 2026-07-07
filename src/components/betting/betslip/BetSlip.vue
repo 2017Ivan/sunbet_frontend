@@ -1,6 +1,7 @@
+// BetSlip.vue 
 <template>
   <!-- Desktop: Sidebar mode -->
-  <div v-if="mode === 'desktop'" class="h-full flex flex-col bg-[#0D0D0D]">
+  <div v-if="mode === 'desktop'" class="h-full flex flex-col bg-gray-700">
     <BetSlipContent 
       @close="$emit('close')" 
       @place-bet="$emit('place-bet', $event)"

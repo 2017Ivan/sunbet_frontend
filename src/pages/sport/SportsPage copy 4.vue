@@ -1,4 +1,4 @@
-<!-- SportsPage.vue -->
+// SportsPage.vue 
 <template>
   <div class="min-h-screen bg-white pb-10">
 
@@ -24,7 +24,9 @@
     </div>
 
     <!-- ══ SPORTS CONTENT ══ -->
-    <div class="max-w-7xl mx-auto mt-3">
+    <div class="max-w-7xl mx-auto  mt-3">
+
+     
 
       <!-- League Groups -->
       <div  
@@ -33,7 +35,7 @@
         class="mb-0"
       >
         <!-- League Header -->
-        <div class="sticky top-12 z-10 py-2 pl-1 bg-gradient-to-b from-gray-400 via-gray-700/0 to-gray-400 backdrop-blur-sm">
+        <div class="sticky top-12 z-10 py-2 pl-1 bg-gradient-to-b from-gray-400 via-gray-700/0  to-gray-400 backdrop-blur-sm">
           <div class="flex items-center justify-between">
             <span class="text-xs font-bold text-gray-800 truncate">{{ leagueName }}</span>
 
@@ -68,12 +70,14 @@
       </div>
 
       <!-- No Matches -->
-      <div v-if="Object.keys(filteredGames).length === 0" class="text-center py-12">
+      <div v-if="Object.keys(filteredGames).length === 0" class="text-center ">
         <div class="text-5xl mb-3">🏟️</div>
         <p class="text-gray-500 text-sm">No matches available for this sport</p>
         <p class="text-gray-400 text-xs mt-1">Check back later for updates</p>
       </div>
 
+      
+      
     </div>
 
   </div>
@@ -84,9 +88,6 @@ import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import MatchCard from '../../components/betting/match Card/MatchCard.vue'
 
-
-// ---- Initialize Bet Store ----
-const betStore = useBetStore()
 const router = useRouter()
 
 // ---- State ----

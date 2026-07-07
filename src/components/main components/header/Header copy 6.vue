@@ -177,7 +177,40 @@
       </div>
     </div>
 
-   
+    <!-- ROW 3: Navigation Menu -->
+    <div class="flex items-center justify-between py-1.5 bg-rose-950">
+      <nav class="flex items-center overflow-x-auto overflow-y-hidden [-ms-overflow-style:none] [scrollbar-width:none] font-bold">
+        <div class="flex items-center justify-center gap-3 px-1 w-full min-w-max py-2">
+          <RouterLink
+            v-for="link in navLinks"
+            :key="link.to"
+            :to="link.to"
+            class="flex items-center gap-1.5 px-0 py-1.5 text-sm font-medium transition-all duration-200 whitespace-nowrap flex-shrink-0"
+            :class="$route.name === link.name
+              ? 'bg-red-900/20 text-red-400'
+              : 'text-gray-400 hover:text-white hover:bg-gray-800'"
+          >
+            <component :is="link.icon" class="w-4 h-4" />
+            {{ link.label }}
+            <span
+              v-if="link.badge"
+              class="px-1.5 py-0.5 text-[10px] font-semibold rounded-full bg-red-600 text-white"
+            >
+              {{ link.badge }}
+            </span>
+          </RouterLink>
+        </div>
+      </nav>
+
+      <div class="hidden lg:flex items-center space-x-4 text-xs text-rose-300 flex-shrink-0">
+        <span class="flex items-center space-x-1">
+          <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+          <span>Live: 24</span>
+        </span>
+        <span>|</span>
+        <span>156 Matches</span>
+      </div>
+    </div>
   </header>
 </template>
 

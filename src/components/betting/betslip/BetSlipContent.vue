@@ -1,3 +1,4 @@
+// BetSlipContent.vue 
 <template>
   <div class="h-full flex flex-col bg-[#0D0D0D]">
     <!-- Header -->
