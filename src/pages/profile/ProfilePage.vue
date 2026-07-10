@@ -51,7 +51,6 @@
           <!-- Balance Header -->
           <div class="flex items-center justify-between mb-3">
             <div class="flex items-center gap-2">
-              <span class="text-lg">💰</span>
               <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Account Balance</p>
             </div>
             <span class="text-[10px] font-mono text-gray-500 bg-gray-900/60 px-3 py-1 rounded-full border border-gray-700/50">
