@@ -13,10 +13,7 @@
     
     <!-- Welcome Section -->
    
-
-    <!-- Divider -->
-    <!-- <div class="w-full max-w-3xl h-px bg-gradient-to-r from-transparent via-gray-700/50 to-transparent"></div> -->
-
+  
     <!-- Balance Card -->
     <div class="w-full max-w-3xl">
       <div class="relative bg-gray-800/20 backdrop-blur-sm  p-6  transition-all duration-300 group">
@@ -54,12 +51,12 @@
           <div class="flex items-center gap-3">
             <RouterLink to="/deposite"
               class="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs font-bold bg-rose-400/10 border border-rose-400/30 text-rose-400 hover:bg-rose-400/20 hover:border-rose-400/50 hover:shadow-[0_0_25px_rgba(244,63,94,0.15)] transition-all duration-300 group">
-              <svg class="w-4 h-4 transition-transform group-hover:scale-110" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+              <svg class="w-4 h-4 transition-transform group-hover:scale-110" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
               Deposit
             </RouterLink>
             <RouterLink to="/withdraw"
               class="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs font-bold bg-gray-700/30 border border-gray-600/50 text-gray-300 hover:bg-gray-700/50 hover:border-gray-500 hover:text-white transition-all duration-300 group">
-              <svg class="w-4 h-4 transition-transform group-hover:scale-110" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+              <svg class="w-4 h-4 transition-transform group-hover:scale-110" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
               Withdraw
             </RouterLink>
           </div>
