@@ -9,20 +9,22 @@
           <rect x="9" y="3" width="6" height="4" rx="2"/>
         </svg>
         <h2 class="text-base font-semibold text-white">Bet Slip</h2>
-        <!-- <span
+        <span
           v-if="currentTabItems.length"
           class="px-2 py-0.5 rounded-full bg-[#A32D2D] text-white text-xs font-bold"
         >
           {{ currentTabItems.length }}
-        </span> -->
+        </span>
       </div>
-       <!-- Balance display -->
-      <!-- <div v-if="isLoggedIn" class="bg-[#1E1E1E] rounded-[10px] px-3 py-2 flex justify-between items-center">
-        <span class="text-[#606060] text-xs">Your Balance</span>
-        <span class="text-[#A32D2D] font-bold text-sm">TZS {{ formatMoney(userBalance) }}</span>
-      </div> -->
-
-       <button
+      <div class="flex items-center gap-2">
+        <button
+          v-if="currentTabItems.length"
+          class="text-xs text-[#606060] hover:text-[#EF4444] transition-colors"
+          @click="handleClearCurrentTab"
+        >
+          Clear {{ activeTab }}
+        </button>
+        <button
           v-if="showCloseButton"
           class="w-8 h-8 rounded-full bg-[#1E1E1E] flex items-center justify-center text-[#606060] hover:text-white transition-colors"
           @click="$emit('close')"
@@ -31,8 +33,7 @@
             <path d="M18 6L6 18M6 6l12 12"/>
           </svg>
         </button>
-      
-      
+      </div>
     </div>
 
     <!-- Sports / Virtuals Tabs -->
@@ -74,26 +75,6 @@
 
     <!-- Bets list -->
     <div v-else class="flex-1 overflow-y-auto py-3 px-4 space-y-2">
-
-    <div class="flex justify-between items-center gap-2 my-4">
-    <button
-          v-if="currentTabItems.length"
-          class="text-xs text-[#606060] hover:text-[#EF4444] transition-colors"
-          
-        >
-        Booking code
-        </button>
-        <button
-          v-if="currentTabItems.length"
-          class="text-xs text-[#606060] hover:text-[#EF4444] transition-colors"
-          @click="handleClearCurrentTab"
-        >
-          Clear BetSlip
-        </button>
-      
-      </div>
-
-
       <div
         v-for="(bet, index) in currentTabItems"
         :key="bet.matchId || index"
@@ -121,14 +102,14 @@
           </div>
         </div>
       </div>
+    </div>
 
-
-       <!-- Footer: Summary + Place bet -->
-    <div v-if="currentTabItems.length" class="border-t border-[#2A2A2A] px-0 py-2 space-y-3 flex-shrink-0">
+    <!-- Footer: Summary + Place bet -->
+    <div v-if="currentTabItems.length" class="border-t border-[#2A2A2A] p-4 space-y-3 flex-shrink-0">
       <!-- Login required warning -->
-      <!-- <div v-if="!isLoggedIn" class="bg-[#A32D2D]/10 border border-[#A32D2D]/20 rounded-[10px] p-3">
+      <div v-if="!isLoggedIn" class="bg-[#A32D2D]/10 border border-[#A32D2D]/20 rounded-[10px] p-3">
         <p class="text-xs text-[#A32D2D] text-center">Please login to place bets</p>
-      </div> -->
+      </div>
 
       <!-- Insufficient balance warning -->
       <div v-if="isLoggedIn && stakeAmount > 0 && !hasEnoughBalance" class="bg-[#EF4444]/10 border border-[#EF4444]/20 rounded-[10px] p-3">
@@ -138,7 +119,7 @@
       </div>
 
       <!-- Bet type tabs -->
-      <!-- <div class="flex gap-1 p-1 bg-[#1E1E1E] rounded-[10px]">
+      <div class="flex gap-1 p-1 bg-[#1E1E1E] rounded-[10px]">
         <button
           v-for="type in ['Single', 'Accumulator']"
           :key="type"
@@ -150,7 +131,7 @@
         >
           {{ type }}
         </button>
-      </div> -->
+      </div>
 
       <!-- Stake input -->
       <div>
@@ -164,12 +145,26 @@
             :disabled="!isLoggedIn"
             class="flex-1 h-10 px-3 rounded-[10px] bg-[#1E1E1E] border border-[#2A2A2A] focus:border-[#A32D2D] text-white text-sm focus:outline-none focus:ring-1 focus:ring-[#A32D2D]/30 disabled:opacity-50 disabled:cursor-not-allowed"
           />
-          
+          <div class="flex gap-1">
+            <button
+              v-for="quick in [500, 1000, 5000]"
+              :key="quick"
+              class="px-2 py-1 rounded-[8px] bg-[#2A2A2A] text-[#A0A0A0] hover:text-white text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              :disabled="!isLoggedIn"
+              @click="stakeAmount = quick"
+            >
+              {{ quick >= 1000 ? `${quick/1000}k` : quick }}
+            </button>
+          </div>
         </div>
         <p v-if="stakeAmount > 0 && stakeAmount < 100" class="text-[#EF4444] text-[10px] mt-1">Minimum stake is TZS 100</p>
       </div>
 
-     
+      <!-- Balance display -->
+      <div v-if="isLoggedIn" class="bg-[#1E1E1E] rounded-[10px] px-3 py-2 flex justify-between items-center">
+        <span class="text-[#606060] text-xs">Your Balance</span>
+        <span class="text-[#A32D2D] font-bold text-sm">TZS {{ formatMoney(userBalance) }}</span>
+      </div>
 
       <!-- Summary -->
       <div class="space-y-1.5 bg-[#1E1E1E] rounded-[10px] px-3 py-2.5">
@@ -194,7 +189,7 @@
         :disabled="!isStakeValid || !hasEnoughBalance || isPlacingBet"
         @click="handlePlaceBet"
       >
-        Place Bet
+        Place Bet — TZS {{ (stakeAmount || 0).toLocaleString() }}
       </AppButton>
 
       <AppButton
@@ -209,9 +204,6 @@
 
       <p class="text-[10px] text-[#606060] text-center">20% Excise Duty · Must be 18+</p>
     </div>
-    </div>
-
-   
   </div>
 </template>
 
