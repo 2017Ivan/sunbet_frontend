@@ -48,7 +48,7 @@
     </div>
 
     <!-- View All Button -->
-    <div class="text-center py-1.5 bg-gradient-to-b from-rose-300 via-gray-100/0 to-gray-300 backdrop-blur-sm">
+    <div class="text-center py-1.5 bg-gradient-to-b from-gray-300 via-gray-100 to-gray-300 backdrop-blur-sm">
       <button class="text-gray-500 hover:text-rose-600 font-semibold text-sm transition-colors">
         View All (670) Sports 
       </button>
@@ -70,7 +70,8 @@ import { useBetStore } from '../../stores/bets/betStore.js'
 
 // ---- Initialize Bet Store ----
 const betStore = useBetStore()
-// Sample data - in real app, hii itakuja kutoka API
+
+
 const games = ref([
   // ============================================
   // BRAZIL - U20 PIAUIENSE (5 games)

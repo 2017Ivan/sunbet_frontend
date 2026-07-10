@@ -1,102 +1,56 @@
 <template>
   <div class="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 pb-10">
-      <!-- ══ HEADER SECTION ══ -->
-<div class="relative overflow-hidden">
-  <!-- Background layers -->
-  <div class="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900"></div>
-  <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_10%_50%,rgba(244,63,94,0.08),transparent_60%)]"></div>
-  <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_90%_80%,rgba(244,63,94,0.04),transparent_50%)]"></div>
-  <div class="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-rose-400/30 to-transparent"></div>
-  <div class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-rose-400/10 to-transparent"></div>
 
-  <div class="relative max-w-7xl mx-auto px-4 py-6 flex flex-col items-center gap-6">
-    
-    <!-- Welcome Section -->
-    <div class="flex items-center justify-between w-full max-w-3xl">
-      <div class="flex items-center gap-4">
+    <!-- ══ HERO SECTION ══ -->
+    <div class="relative overflow-hidden">
+      <!-- Background -->
+      <div class="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900"></div>
+      <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_10%_50%,rgba(244,63,94,0.06),transparent_60%)]"></div>
+      <div class="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-rose-400/20 to-transparent"></div>
+
+      <div class="relative max-w-4xl mx-auto px-4 py-8 flex flex-wrap items-center gap-5">
         <!-- Avatar -->
-          <div class="relative">
-            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-rose-500/20 to-rose-600/10 border-2 border-rose-400/30 flex items-center justify-center shadow-[0_0_30px_rgba(244,63,94,0.15)] hover:shadow-[0_0_40px_rgba(244,63,94,0.25)] transition-all duration-300 group">
-              <svg class="w-6 h-6 text-rose-400 group-hover:scale-110 transition-transform duration-300" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                <circle cx="12" cy="7" r="4"/>
-              </svg>
-            </div>
-            <!-- Online status dot -->
-            <div class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-400 border-2 border-gray-800 rounded-full shadow-[0_0_12px_rgba(52,211,153,0.4)] animate-pulse"></div>
+        <div class="relative flex-shrink-0">
+          <div class="w-[72px] h-[72px] rounded-full bg-gradient-to-br from-gray-700 to-gray-800 border-2 border-rose-400/40 flex items-center justify-center shadow-[0_0_24px_rgba(244,63,94,0.15)]">
+            <span class="font-mono font-black text-rose-400 text-sm">{{ userInitials }}</span>
           </div>
-        
-        <div>
-          <p class="text-gray-400 text-xs font-medium tracking-wide">Welcome back,</p>
-          <p class="text-white font-bold text-lg leading-tight">+{{ user.phone_number }}</p>
+          <div class="absolute inset-[-4px] rounded-full border border-rose-400/20 animate-pulse"></div>
         </div>
-      </div>
-          <div class="text-right">
-          <p class="text-gray-500 text-[10px] font-medium uppercase tracking-wider">Last Login</p>
-          <p class="text-gray-300 text-xs font-semibold">{{ lastLogin }}</p>
+
+        <!-- User Info -->
+        <div class="flex-1 min-w-0">
+          <h1 class="font-['Orbitron',monospace] text-sm font-bold text-white tracking-wide truncate">
+            {{ displayName }}
+          </h1>
+          <p class="flex items-center gap-2 text-xs text-gray-400 mt-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            <!-- <span v-if="user?.role" class="px-2 py-0.5 rounded-full text-[10px] font-bold"
+              :class="user.role === 'ADMIN' ? 'bg-purple-500/20 text-purple-400 border border-purple-500/20' : 'bg-rose-500/20 text-rose-400 border border-rose-500/20'">
+              {{ user.role }}
+            </span> -->
+            Member since {{ memberSince }}
+          </p>
         </div>
-    </div>
 
-    <!-- Divider -->
-    <div class="w-full max-w-3xl h-px bg-gradient-to-r from-transparent via-gray-700/50 to-transparent"></div>
-
-    <!-- Balance Card -->
-    <div class="w-full max-w-3xl">
-      <div class="relative bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-6 shadow-[0_8px_32px_rgba(0,0,0,0.4)] hover:border-rose-400/20 transition-all duration-300 group">
-        <!-- Glow effect -->
-        <div class="absolute -inset-0.5 bg-gradient-to-r from-rose-400/0 via-rose-400/5 to-rose-400/0 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-        
-        <!-- Content -->
-        <div class="relative">
-          <!-- Balance Header -->
-          <div class="flex items-center justify-between mb-3">
-            <div class="flex items-center gap-2">
-              <span class="text-lg">💰</span>
-              <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Account Balance</p>
-            </div>
-            <span class="text-[10px] font-mono text-gray-500 bg-gray-900/60 px-3 py-1 rounded-full border border-gray-700/50">
-              TZS
-            </span>
+        <!-- Stats -->
+        <div class="flex items-center gap-5 bg-white/[0.03] border border-white/[0.06] rounded-xl px-5 py-1">
+          <div class="text-center">
+            <span class="block font-mono font-black text-white text-sm">{{ stats.bets }}</span>
+            <span class="block text-[10px] text-gray-500 uppercase tracking-widest mt-0.5">Bets</span>
           </div>
-
-          <!-- Balance Amount -->
-          <div class="flex items-end gap-2 mb-5">
-            <p class="font-mono font-black text-3xl text-rose-400 [text-shadow:0_0_30px_rgba(244,63,94,0.2)] tracking-tight">
-              {{ formattedBalance }}
-            </p>
-            <p class="text-gray-500 text-xs font-medium pb-1">TZS</p>
+          <div class="w-px h-8 bg-white/10"></div>
+          <div class="text-center">
+            <span class="block font-mono font-black text-emerald-400 text-sm">{{ stats.winRate }}%</span>
+            <span class="block text-[10px] text-gray-500 uppercase tracking-widest mt-0.5">Win Rate</span>
           </div>
-
-          <!-- Action Buttons -->
-          <div class="flex items-center gap-3">
-            <RouterLink to="/deposite"
-              class="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs font-bold bg-rose-400/10 border border-rose-400/30 text-rose-400 hover:bg-rose-400/20 hover:border-rose-400/50 hover:shadow-[0_0_25px_rgba(244,63,94,0.15)] transition-all duration-300 group">
-              <svg class="w-4 h-4 transition-transform group-hover:scale-110" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
-              Deposit
-            </RouterLink>
-            <RouterLink to="/withdraw"
-              class="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs font-bold bg-gray-700/30 border border-gray-600/50 text-gray-300 hover:bg-gray-700/50 hover:border-gray-500 hover:text-white transition-all duration-300 group">
-              <svg class="w-4 h-4 transition-transform group-hover:scale-110" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
-              Withdraw
-            </RouterLink>
-          </div>
-
-          <!-- Phone Number -->
-          <div class="mt-4 pt-4 border-t border-gray-700/50 flex items-center justify-center gap-2">
-            <svg class="w-3.5 h-3.5 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/>
-            </svg>
-            <p class="text-sm font-mono text-gray-400 font-medium tracking-wide">
-              +{{ user.phone_number }}
-            </p>
-            <span class="px-2 py-0.5 rounded-full text-[8px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 uppercase tracking-wider">verified</span>
+          <div class="w-px h-8 bg-white/10"></div>
+          <div class="text-center">
+            <span class="block font-mono font-black text-rose-400 text-sm">{{ formattedBalance }}</span>
+            <span class="block text-[10px] text-gray-500 uppercase tracking-widest mt-0.5">Balance</span>
           </div>
         </div>
       </div>
     </div>
-
-  </div>
-</div>
 
     <!-- ══ MAIN BODY ══ -->
     <div class="max-w-4xl mx-auto px-4 mt-6 grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-5">
@@ -104,7 +58,25 @@
       <!-- ── LEFT SIDEBAR ── -->
       <div class="space-y-4">
 
-       
+        <!-- Balance Card -->
+        <div class="bg-gradient-to-br from-gray-800 to-gray-900 border border-rose-400/20 rounded-2xl p-5 shadow-[0_0_32px_rgba(244,63,94,0.05)]">
+          <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Account balance</p>
+          <p class="font-mono font-black text-rose-400 text-xl mb-4 [text-shadow:0_0_20px_rgba(244,63,94,0.3)]">
+            {{ formattedBalance }}
+          </p>
+          <div class="flex gap-2">
+            <RouterLink to="/deposite"
+              class="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-bold border border-rose-400/30 text-rose-400 hover:bg-rose-400/8 transition-opacity">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+              Deposit
+            </RouterLink>
+            <RouterLink to="/withdraw"
+              class="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-bold border border-rose-400/30 text-rose-400 hover:bg-rose-400/8 transition-colors">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+              Withdraw
+            </RouterLink>
+          </div>
+        </div>
 
         <!-- Quick Links -->
         <div class="bg-gray-800 border border-gray-700 rounded-2xl overflow-hidden">
@@ -361,26 +333,6 @@ const memberSince = computed(() => {
   const date = new Date(user.value.created_at)
   return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
 })
-
-
-const lastLogin = computed(() => {
-  // Kama una last_login kutoka kwa user
-  if (user.value?.last_login) {
-    const date = new Date(user.value.last_login)
-    return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
-  }
-  
-  // Kama hakuna last_login, tumia created_at au current date
-  if (user.value?.created_at) {
-    const date = new Date(user.value.created_at)
-    return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
-  }
-  
-  // Default - tumia mwezi na mwaka wa sasa
-  const now = new Date()
-  return now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
-})
-
 
 // ---- Stats ----
 const stats = ref({

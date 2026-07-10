@@ -1,5 +1,5 @@
 <template>
-  <header class="bg-rose-700 shadow-lg sticky top-0 z-50">
+  <header class="bg-rose-700 shadow-lg sticky top-0 z-50 max-w-7xl mx-auto">
     <!-- ROW 1: Logo + User Actions -->
     <div class="flex items-center justify-between mx-auto px-2 h-14 bg-gradient-to-r from-rose-900 to-rose-950 border-b border-rose-800">
       <div class="flex items-center gap-1">

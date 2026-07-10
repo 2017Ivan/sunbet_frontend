@@ -107,7 +107,7 @@ const handleOddsClick = (type) => {
   console.log('📝 Adding to slip:', selection)
   betStore.addToSlip(selection)
   
-  // Open bet slip
+  // Open bet slipb
   betStore.isOpen = true
 }
 </script>
