@@ -19,7 +19,7 @@
 
     <!-- Balance Card -->
     <div class="w-full max-w-3xl">
-      <div class="relative bg-gray-800/20 backdrop-blur-sm  p-6  transition-all duration-300 group">
+      <div class="relative bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-6 shadow-[0_8px_32px_rgba(0,0,0,0.4)] hover:border-rose-400/20 transition-all duration-300 group">
         <!-- Glow effect -->
         <div class="absolute -inset-0.5 bg-gradient-to-r from-rose-400/0 via-rose-400/5 to-rose-400/0 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
         
