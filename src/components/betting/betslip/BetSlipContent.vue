@@ -17,10 +17,10 @@
         </span> -->
       </div>
        <!-- Balance display -->
-      <!-- <div v-if="isLoggedIn" class="bg-[#1E1E1E] rounded-[10px] px-3 py-2 flex justify-between items-center">
-        <span class="text-[#606060] text-xs">Your Balance</span>
-        <span class="text-[#A32D2D] font-bold text-sm">TZS {{ formatMoney(userBalance) }}</span>
-      </div> -->
+      <div v-if="isLoggedIn" class="bg-[#1E1E1E] rounded-[10px] px-3 py-2 flex justify-between items-center">
+        <!-- <span class="text-[#606060] text-xs">Your Balance</span> -->
+        <span class="text-[#A32D2D] font-bold text-xs">TZS {{ formatMoney(userBalance) }}</span>
+      </div>
 
        <button
           v-if="showCloseButton"
