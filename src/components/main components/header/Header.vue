@@ -71,7 +71,7 @@
             to="/wallet"
             class="flex items-center gap-1.5  px-2  py-1.5 sm:py-2 rounded-[8px] sm:rounded-[10px] bg-[#1E1E1E] border border-[#A32D2D]/40 hover:border-[#A32D2D] transition-colors"
           >
-            <span class="text-[9px] text-[#606060] font-medium xs:inline">TZS</span>
+            <span class="text-[9px] text-gray-300 font-medium xs:inline">TZS</span>
             <span class="text-xs font-bold text-[#A32D2D]">{{ formattedBalance }}</span>
           </RouterLink>
 

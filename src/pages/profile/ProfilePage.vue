@@ -113,38 +113,7 @@
           </button>
         </div>
 
-        <!-- ── OVERVIEW TAB ── -->
-        <div v-if="activeTab === 'overview'" class="p-5 space-y-5">
-
-          <!-- Stat Cards -->
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div v-for="s in statCards" :key="s.label"
-              class="bg-gray-900 border border-gray-700 rounded-xl p-3 text-center hover:border-rose-400/20 transition-colors">
-              <div class="text-xl mb-1">{{ s.icon }}</div>
-              <div class="font-mono font-black text-sm mb-0.5" :class="s.color || 'text-white'">{{ s.value }}</div>
-              <div class="text-[10px] text-gray-500 uppercase tracking-wide">{{ s.label }}</div>
-            </div>
-          </div>
-
-          <!-- Recent Activity -->
-          <div>
-            <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-3">Recent Activity</p>
-            <div class="space-y-2">
-              <div v-for="act in recentActivity" :key="act.title"
-                class="flex items-center gap-3 p-3 bg-gray-900 border border-gray-700 rounded-xl hover:border-gray-600 transition-colors">
-                <div class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
-                  :class="act.iconBg">
-                  <span class="text-sm">{{ act.icon }}</span>
-                </div>
-                <div class="flex-1 min-w-0">
-                  <p class="text-xs font-semibold text-white truncate">{{ act.title }}</p>
-                  <p class="text-[10px] text-gray-500 mt-0.5">{{ act.time }}</p>
-                </div>
-                <span class="font-mono text-xs font-black flex-shrink-0" :class="act.amountColor">{{ act.amount }}</span>
-              </div>
-            </div>
-          </div>
-        </div>
+    
 
         <!-- ── SETTINGS TAB ── -->
         <div v-if="activeTab === 'settings'" class="p-5 space-y-4">
@@ -365,7 +334,6 @@ const stats = ref({
 
 // ---- Tabs ----
 const tabs = [
-  { id: 'overview', label: 'Overview', icon: '📊' },
   { id: 'settings', label: 'Settings', icon: '⚙️' },
   { id: 'security', label: 'Security', icon: '🔒' },
 ]
