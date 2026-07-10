@@ -86,7 +86,7 @@ import MatchCard from '../../components/betting/match Card/MatchCard.vue'
 
 
 // ---- Initialize Bet Store ----
-const betStore = useBetStore()
+// const betStore = useBetStore()
 const router = useRouter()
 
 // ---- State ----
