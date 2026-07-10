@@ -9,29 +9,32 @@
           <rect x="9" y="3" width="6" height="4" rx="2"/>
         </svg>
         <h2 class="text-base font-semibold text-white">Bet Slip</h2>
-        <!-- <span
-          v-if="currentTabItems.length"
-          class="px-2 py-0.5 rounded-full bg-[#A32D2D] text-white text-xs font-bold"
-        >
-          {{ currentTabItems.length }}
-        </span> -->
+  
       </div>
       <div class="flex items-center gap-2">
          <!-- Balance display -->
       <div v-if="isLoggedIn" class="pr-2 py-2 flex justify-between items-center">
-        <!-- <span class="text-[#606060] text-xs">Your Balance</span> -->
         <span class="text-[#A32D2D] font-bold text-xs">TZS {{ formatMoney(userBalance) }}</span>
       </div>
 
-       <button
+       <!-- <button
           v-if="showCloseButton"
-          class="w-8 h-8 rounded-full bg-[#1E1E1E] flex items-center justify-center text-[#606060] hover:text-white transition-colors"
+          class="w-5 h-5  flex items-center justify-center text-white hover:text-white transition-colors"
           @click="$emit('close')"
         >
           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <path d="M18 6L6 18M6 6l12 12"/>
           </svg>
-        </button>
+        </button> -->
+        <button
+    v-if="showCloseButton"
+    class="absolute top-2 -right-0 rounded-full bg-[#1E1E1E] w-5 h-5 flex items-center justify-center text-white hover:text-white transition-colors"
+    @click="$emit('close')"
+  >
+    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <path d="M18 6L6 18M6 6l12 12"/>
+    </svg>
+  </button>
       
       </div>
       
