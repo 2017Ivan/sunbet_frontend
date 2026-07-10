@@ -31,9 +31,12 @@ export const useBetStore = defineStore('bet', () => {
   const slipCount = computed(() => slip.value.length)
   const totalOdds = computed(() => slip.value.reduce((acc, b) => acc * (b.odds || 1), 1))
 
+   
+
   const potentialWin_1 = computed(() => stake.value * (totalOdds.value - 1))
-  const tax = computed(() => potentialWin_1.value * 0.12)
-  const potentialWin = computed(() => potentialWin_1.value - (tax.value + stake.value))
+
+  const tax = computed(() => potentialWin_1.value * 0.12);
+  const potentialWin = computed(() => potentialWin_1.value - (tax.value + stake.value));
 
   const canPlaceBet = computed(() => slipCount.value > 0 && stake.value >= 125000)
   const isStakeValid = computed(() => stake.value >= 125000)
@@ -380,11 +383,4 @@ export const useBetStore = defineStore('bet', () => {
     // Admin actions
     loadAdminBets,
     settleBet
-  }
-}, {
-  persist: {
-    key: 'bet-store',
-    storage: localStorage,
-    paths: ['slip', 'stake', 'isOpen', 'betType']
-  }
-})
+  }})

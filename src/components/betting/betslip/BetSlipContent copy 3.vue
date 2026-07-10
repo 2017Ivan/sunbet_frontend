@@ -48,68 +48,24 @@
       </button>
     </div>
 
-    <!-- ============ EMPTY STATE WITH LOAD CODE ============ -->
-    <div v-if="!currentTabItems.length" class="flex-1 flex flex-col items-center justify-center gap-4 px-6 py-8">
-      <!-- Empty Icon -->
+    <!-- Empty state -->
+    <div v-if="!currentTabItems.length" class="flex-1 flex flex-col items-center justify-center gap-4 px-6">
       <div class="w-20 h-20 rounded-full bg-[#1E1E1E] flex items-center justify-center">
         <svg class="w-10 h-10 text-[#333]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
           <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
           <rect x="9" y="3" width="6" height="4" rx="2"/>
         </svg>
       </div>
-
       <div class="text-center">
         <p class="text-sm font-medium text-[#A0A0A0]">{{ activeTab }} bet slip is empty</p>
-        <p class="text-xs text-[#606060] mt-1">Load a booking code or click on odds to add selections</p>
+        <p class="text-xs text-[#606060] mt-1">Click on odds to add selections</p>
       </div>
-
-      <!-- Load Booking Code Input - Always visible when empty -->
-      <div class="w-full max-w-xs space-y-3 mt-2">
-        <div class="flex gap-2">
-          <input
-            v-model="loadCodeInput"
-            type="text"
-            placeholder="Enter code e.g. ABC123"
-            maxlength="6"
-            class="flex-1 min-w-0 h-10 px-3 rounded-xl bg-[#1E1E1E] border border-[#2A2A2A] focus:border-[#A32D2D] text-white text-sm uppercase tracking-wider focus:outline-none focus:ring-1 focus:ring-[#A32D2D]/30 transition-all placeholder:text-[#606060]"
-            @input="handleLoadCodeInput"
-            @keyup.enter="handleLoadCodeFromEmpty"
-          />
-          <button
-            class="px-4 py-2 rounded-xl text-sm font-bold bg-[#A32D2D] text-white hover:bg-[#8B2424] transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
-            :disabled="!isLoadCodeValid || isLoadingCode"
-            @click="handleLoadCodeFromEmpty"
-          >
-            <span v-if="isLoadingCode" class="flex items-center gap-2">
-              <svg class="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
-              </svg>
-              Loading...
-            </span>
-            <span v-else>Load</span>
-          </button>
-        </div>
-
-       
-
-        <!-- Load error -->
-        <div v-if="loadError" class="bg-[#EF4444]/10 border border-[#EF4444]/20 rounded-xl p-2">
-          <p class="text-xs text-[#EF4444] text-center">{{ loadError }}</p>
-        </div>
-
-        <div class="flex items-center gap-2 text-[10px] text-[#606060] justify-center">
-          <span class="w-8 h-px bg-[#2A2A2A]"></span>
-          <span>or</span>
-          <span class="w-8 h-px bg-[#2A2A2A]"></span>
-        </div>
-
-        <AppButton variant="outline" size="sm" fullWidth @click="handleBrowseSports">
-          Browse {{ activeTab }}
-        </AppButton>
-      </div>
+      <AppButton variant="outline" size="sm" @click="handleBrowseSports">
+        Browse {{ activeTab }}
+      </AppButton>
     </div>
 
-    <!-- ============ BETS LIST (With selections) ============ -->
+    <!-- Bets list -->
     <div v-else class="flex-1 overflow-y-auto py-3 px-4 space-y-2">
       <!-- Actions row -->
       <div class="flex justify-between items-center gap-2 mb-3">
@@ -121,7 +77,7 @@
             <rect x="2" y="4" width="20" height="16" rx="2"/>
             <path d="M8 12h8"/>
           </svg>
-          Create Booking Code
+          Booking Code
         </button>
         <button
           class="text-xs text-[#606060] hover:text-[#EF4444] transition-colors"
@@ -249,7 +205,6 @@ import { useRouter } from 'vue-router'
 import { useToast } from 'vue-toastification'
 import { useAuthStore } from '../../../stores/auth/authStore.js'
 import { useBetStore } from '../../../stores/bets/betStore.js'
-import { useBookingCodeStore } from '../../../stores/bookingcode/bookingCodeStore.js'
 import AppButton from '../../../components/ui/AppButton.vue'
 import BookingCodeModal from '../../betting/bookingcode/BookingCodeModal.vue'
 
@@ -266,7 +221,6 @@ const router = useRouter()
 const toast = useToast()
 const authStore = useAuthStore()
 const betStore = useBetStore()
-const bookingCodeStore = useBookingCodeStore()
 
 // ---- Local State ----
 const activeTab = ref('Sports')
@@ -274,11 +228,6 @@ const stakeAmount = ref(0)
 const betType = ref('Single')
 const isPlacingBet = ref(false)
 const showBookingCodeModal = ref(false)
-
-// ---- Load Code State (Empty State) ----
-const loadCodeInput = ref('')
-const isLoadingCode = ref(false)
-const loadError = ref('')
 
 // ---- Segregating Items based on Tab ----
 const sportsItems = computed(() => {
@@ -319,12 +268,6 @@ const isStakeValid = computed(() => stakeAmount.value >= 100)
 const hasEnoughBalance = computed(() => {
   if (!isLoggedIn.value) return false
   return userBalance.value >= stakeAmount.value
-})
-
-// ---- Load Code Validation ----
-const isLoadCodeValid = computed(() => {
-  const code = loadCodeInput.value.trim().toUpperCase()
-  return code.length === 6 && /^[A-Z0-9]{6}$/.test(code)
 })
 
 // ---- Methods ----
@@ -412,73 +355,7 @@ const handleLoginRedirect = () => {
   router.push('/auth/login')
 }
 
-// ---- Load Code Methods (Empty State) ----
-const handleLoadCodeInput = (e) => {
-  const value = e.target.value.toUpperCase()
-  loadCodeInput.value = value.replace(/[^A-Z0-9]/g, '')
-  loadError.value = ''
-}
-
-const handlePasteFromClipboard = async () => {
-  try {
-    const text = await navigator.clipboard.readText()
-    const cleanCode = text.trim().toUpperCase().replace(/[^A-Z0-9]/g, '')
-    if (cleanCode.length === 6) {
-      loadCodeInput.value = cleanCode
-      // Auto load after paste
-      await handleLoadCodeFromEmpty()
-    } else {
-      loadError.value = 'Invalid code format in clipboard'
-    }
-  } catch (error) {
-    loadError.value = 'Unable to read clipboard'
-  }
-}
-
-const handleLoadCodeFromEmpty = async () => {
-  if (!isLoadCodeValid.value) {
-    loadError.value = 'Enter a valid 6-character code (letters and numbers only)'
-    return
-  }
-
-  isLoadingCode.value = true
-  loadError.value = ''
-
-  const code = loadCodeInput.value.trim().toUpperCase()
-
-  try {
-    const result = await bookingCodeStore.loadBookingCode(code)
-    if (result.success) {
-      loadError.value = ''
-      if (bookingCodeStore.loadedSelections.length > 0) {
-        // Apply selections to bet slip
-        const success = bookingCodeStore.applyLoadedSelectionsToSlip()
-        if (success) {
-          toast.success(`✅ ${bookingCodeStore.loadedSelections.length} selections loaded!`, {
-            position: 'bottom-right',
-            timeout: 3000
-          })
-          loadCodeInput.value = ''
-          // Force refresh to show bets
-          // The watcher will handle the UI update
-        } else {
-          loadError.value = 'Failed to apply selections'
-        }
-      } else {
-        loadError.value = 'No selections found in this code'
-      }
-    } else {
-      loadError.value = result.error || 'Failed to load booking code'
-    }
-  } catch (error) {
-    loadError.value = 'An error occurred while loading code'
-    console.error('Load code error:', error)
-  } finally {
-    isLoadingCode.value = false
-  }
-}
-
-// ---- Booking Code Modal Methods ----
+// ---- Booking Code Methods ----
 const toggleBookingCodeModal = () => {
   if (currentTabItems.value.length === 0) {
     toast.warning('No selections to create a booking code', {
@@ -510,8 +387,6 @@ const handleCodeLoaded = (selections) => {
 watch(currentTabItems, (newItems) => {
   if (newItems.length === 0) {
     stakeAmount.value = 0
-    // Reset load code state when slip becomes empty
-    loadError.value = ''
   }
 }, { deep: true })
 
@@ -525,11 +400,6 @@ watch(() => currentTabItems.value.length, (newLength) => {
     stakeAmount.value = betStore.stake || 100
   }
 }, { immediate: true })
-
-// Reset load error when input changes
-watch(loadCodeInput, () => {
-  loadError.value = ''
-})
 </script>
 
 <style scoped>
@@ -545,15 +415,5 @@ watch(loadCodeInput, () => {
 }
 .overflow-y-auto::-webkit-scrollbar-thumb:hover {
   background: #A32D2D;
-}
-
-/* Input placeholder */
-input::placeholder {
-  color: #606060;
-}
-
-/* Focus styles */
-input:focus {
-  outline: none;
 }
 </style>

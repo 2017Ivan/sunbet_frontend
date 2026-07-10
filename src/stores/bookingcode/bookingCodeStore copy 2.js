@@ -1,4 +1,4 @@
-// stores/bookingcode/bookingCodeStore.js
+// stores/bookingcode/bookingcodeStore.js
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import bookingCodeService from '../../services/bookingcode/bookingCodeService.js'
@@ -90,7 +90,6 @@ export const useBookingCodeStore = defineStore('bookingCode', () => {
 
     try {
       const result = await bookingCodeService.loadBookingCode(cleanCode)
-      
       if (result.success) {
         loadedSelections.value = result.data.selections
         currentCode.value = {
@@ -98,26 +97,14 @@ export const useBookingCodeStore = defineStore('bookingCode', () => {
           expiresAt: result.data.expiresAt,
           selections: result.data.selections
         }
-        return { 
-          success: true, 
-          data: result.data,
-          message: result.message || 'Booking code loaded successfully'
-        }
+        return { success: true, data: result.data }
       } else {
-        // Use the exact error message from service
         error.value = result.error
-        return { 
-          success: false, 
-          error: result.error,
-          status: result.status
-        }
+        return { success: false, error: result.error }
       }
     } catch (err) {
       error.value = err.message || 'Failed to load booking code'
-      return { 
-        success: false, 
-        error: error.value 
-      }
+      return { success: false, error: error.value }
     } finally {
       isLoading.value = false
     }
@@ -249,11 +236,5 @@ export const useBookingCodeStore = defineStore('bookingCode', () => {
     generateShareUrl,
     copyBookingCode,
     reset
-  }
-}, {
-  persist: {
-    key: 'booking-code-store',
-    storage: localStorage,
-    paths: ['currentCode', 'loadedSelections', 'codeStatus']
   }
 })

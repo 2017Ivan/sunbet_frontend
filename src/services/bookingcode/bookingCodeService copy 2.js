@@ -1,4 +1,4 @@
-// services/bookingcode/bookingCodeService.js
+// services/bookingcode/bookingcodeService.js
 import api from '../api.js'
 
 const bookingCodeService = {
@@ -17,18 +17,10 @@ const bookingCodeService = {
       }
     } catch (error) {
       console.error('Create booking code error:', error)
-      
-      // Get error message from backend
-      let errorMessage = 'Failed to create booking code'
-      if (error.response?.data?.message) {
-        errorMessage = error.response.data.message
-      }
-      
       return {
         success: false,
-        error: errorMessage,
-        status: error.response?.status,
-        data: error.response?.data
+        error: error.response?.data?.message || 'Failed to create booking code',
+        status: error.response?.status
       }
     }
   },
@@ -48,30 +40,10 @@ const bookingCodeService = {
       }
     } catch (error) {
       console.error('Load booking code error:', error)
-      
-      // Get error message from backend
-      let errorMessage = 'Failed to load booking code'
-      
-      if (error.response) {
-        // Use backend message if available
-        if (error.response.data?.message) {
-          errorMessage = error.response.data.message
-        } else if (error.response.status === 404) {
-          errorMessage = 'Booking code not found'
-        } else if (error.response.status === 400) {
-          errorMessage = error.response.data?.message || 'Invalid booking code'
-        } else if (error.response.status === 410 || error.response.status === 403) {
-          errorMessage = 'Booking code has expired (5 hours limit)'
-        }
-      } else if (error.request) {
-        errorMessage = 'Network error - please check your connection'
-      }
-      
       return {
         success: false,
-        error: errorMessage,
-        status: error.response?.status,
-        data: error.response?.data
+        error: error.response?.data?.message || 'Failed to load booking code',
+        status: error.response?.status
       }
     }
   },
@@ -91,17 +63,10 @@ const bookingCodeService = {
       }
     } catch (error) {
       console.error('Check booking code error:', error)
-      
-      let errorMessage = 'Failed to check booking code'
-      if (error.response?.data?.message) {
-        errorMessage = error.response.data.message
-      }
-      
       return {
         success: false,
-        error: errorMessage,
-        status: error.response?.status,
-        data: error.response?.data
+        error: error.response?.data?.message || 'Failed to check booking code',
+        status: error.response?.status
       }
     }
   },

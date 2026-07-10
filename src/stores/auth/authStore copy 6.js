@@ -432,12 +432,5 @@ export const useAuthStore = defineStore('auth', {
         this.isLoading = false
       }
     }
-  },
-  
-  // ── PERSIST ──────────────────────────────────────────────────────────────
-  persist: {
-    key: 'auth-store',
-    storage: localStorage,
-    paths: ['user', 'isLoggedIn', 'accessToken', 'refreshToken', 'initialized']
   }
 })
