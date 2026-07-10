@@ -2,7 +2,7 @@
 <template>
   <div class="h-full flex flex-col bg-[#0D0D0D]">
     <!-- Header -->
-    <div class="flex items-center justify-between px-5 h-16 border-b border-[#2A2A2A] flex-shrink-0">
+    <div class="flex items-center justify-between px-3 h-16 border-b border-[#2A2A2A] flex-shrink-0">
       <div class="flex items-center gap-2">
         <svg class="w-5 h-5 text-[#A32D2D]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
@@ -16,8 +16,9 @@
           {{ currentTabItems.length }}
         </span> -->
       </div>
-       <!-- Balance display -->
-      <div v-if="isLoggedIn" class="bg-[#1E1E1E] rounded-[10px] px-3 py-2 flex justify-between items-center">
+      <div class="flex items-center gap-2">
+         <!-- Balance display -->
+      <div v-if="isLoggedIn" class="pr-2 py-2 flex justify-between items-center">
         <!-- <span class="text-[#606060] text-xs">Your Balance</span> -->
         <span class="text-[#A32D2D] font-bold text-xs">TZS {{ formatMoney(userBalance) }}</span>
       </div>
@@ -31,6 +32,8 @@
             <path d="M18 6L6 18M6 6l12 12"/>
           </svg>
         </button>
+      
+      </div>
       
       
     </div>
@@ -276,7 +279,7 @@ const hasEnoughBalance = computed(() => {
 
 // ---- Methods ----
 const formatMoney = (n) => {
-  return new Intl.NumberFormat('en-TZ', { minimumFractionDigits: 0 }).format(n || 0)
+  return new Intl.NumberFormat('en-TZ', { minimumFractionDigits: 2 }).format(n || 0)
 }
 
 const handleBrowseSports = () => {
