@@ -17,15 +17,7 @@
         <span class="text-[#A32D2D] font-bold text-xs">TZS {{ formatMoney(userBalance) }}</span>
       </div>
 
-       <!-- <button
-          v-if="showCloseButton"
-          class="w-5 h-5  flex items-center justify-center text-white hover:text-white transition-colors"
-          @click="$emit('close')"
-        >
-          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <path d="M18 6L6 18M6 6l12 12"/>
-          </svg>
-        </button> -->
+     
         <button
     v-if="showCloseButton"
     class="absolute top-2 -right-0 rounded-full bg-[#1E1E1E] w-5 h-5 flex items-center justify-center text-white hover:text-white transition-colors"
@@ -131,10 +123,7 @@
 
        <!-- Footer: Summary + Place bet -->
     <div v-if="currentTabItems.length" class="border-t border-[#2A2A2A] px-0 py-2 space-y-3 flex-shrink-0">
-      <!-- Login required warning -->
-      <!-- <div v-if="!isLoggedIn" class="bg-[#A32D2D]/10 border border-[#A32D2D]/20 rounded-[10px] p-3">
-        <p class="text-xs text-[#A32D2D] text-center">Please login to place bets</p>
-      </div> -->
+    
 
       <!-- Insufficient balance warning -->
       <div v-if="isLoggedIn && stakeAmount > 0 && !hasEnoughBalance" class="bg-[#EF4444]/10 border border-[#EF4444]/20 rounded-[10px] p-3">
@@ -143,20 +132,7 @@
         </p>
       </div>
 
-      <!-- Bet type tabs -->
-      <!-- <div class="flex gap-1 p-1 bg-[#1E1E1E] rounded-[10px]">
-        <button
-          v-for="type in ['Single', 'Accumulator']"
-          :key="type"
-          class="flex-1 py-1.5 text-xs font-semibold rounded-[8px] transition-all"
-          :class="betType === type
-            ? 'bg-[#A32D2D] text-white'
-            : 'text-[#606060] hover:text-white'"
-          @click="betType = type"
-        >
-          {{ type }}
-        </button>
-      </div> -->
+   
 
       <!-- Stake input -->
       <div>
@@ -186,6 +162,14 @@
         <div class="flex justify-between text-xs">
           <span class="text-[#606060]">Potential Win</span>
           <span class="text-[#22C55E] font-semibold">TZS {{ potentialWin.toLocaleString() }}</span>
+        </div>
+          <div class="flex justify-between text-xs">
+          <span class="text-[#606060]"> Tax 12% </span>
+          <span class="text-[#22C55E] font-semibold">TZS {{ tax.toLocaleString() }}</span>
+        </div>
+          <div class="flex justify-between text-xs">
+          <span class="text-[#606060]">Payout</span>
+          <span class="text-[#22C55E] font-semibold">TZS {{ payout.toLocaleString() }}</span>
         </div>
       </div>
 
@@ -270,8 +254,16 @@ const totalOdds = computed(() => {
 })
 
 const potentialWin = computed(() => {
-  return Math.round((stakeAmount.value || 0) * totalOdds.value)
+  return Math.round((stakeAmount.value || 0) * (totalOdds.value - 1))
 })
+const tax = computed(() => {
+  return Math.round((potentialWin.value || 0) * 0.12)
+})
+
+const payout = computed(() => {
+  return Math.round((potentialWin.value - tax.value) + stakeAmount.value)
+})
+
 
 const isStakeValid = computed(() => stakeAmount.value >= 100)
 
