@@ -25,7 +25,7 @@
           <!-- Balance Header -->
           <div class="flex items-center justify-center mb-3">
             <div class="flex items-center gap-2">
-              <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Account Balance</p>
+              <p class="text-xs font-bold text-gray-300 uppercase tracking-widest">Account Balance</p>
             </div>
            
           </div>
@@ -38,9 +38,9 @@
           </div>
             <!-- Phone Number -->
           <div class="my-4 pt-4 border-t border-gray-700/50 flex items-center justify-center gap-2">
-            <svg class="w-3.5 h-3.5 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <!-- <svg class="w-3.5 h-3.5 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/>
-            </svg>
+            </svg> -->
             <p class="text-sm font-mono text-gray-400 font-medium tracking-wide">
               +{{ user.phone_number }}
             </p>
@@ -50,12 +50,12 @@
           <!-- Action Buttons -->
           <div class="flex items-center gap-3">
             <RouterLink to="/deposite"
-              class="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs font-bold bg-rose-400/10 border border-rose-400/30 text-rose-400 hover:bg-rose-400/20 hover:border-rose-400/50 hover:shadow-[0_0_25px_rgba(244,63,94,0.15)] transition-all duration-300 group">
+              class="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-bold bg-rose-400/10 border border-rose-400/30 text-rose-400 hover:bg-rose-400/20 hover:border-rose-400/50 hover:shadow-[0_0_25px_rgba(244,63,94,0.15)] transition-all duration-300 group">
               <svg class="w-4 h-4 transition-transform group-hover:scale-110" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
               Deposit
             </RouterLink>
             <RouterLink to="/withdraw"
-              class="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs font-bold bg-gray-700/30 border border-gray-600/50 text-gray-300 hover:bg-gray-700/50 hover:border-gray-500 hover:text-white transition-all duration-300 group">
+              class="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-bold bg-gray-700/30 border border-gray-600/50 text-gray-300 hover:bg-gray-700/50 hover:border-gray-500 hover:text-white transition-all duration-300 group">
               <svg class="w-4 h-4 transition-transform group-hover:scale-110" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
               Withdraw
             </RouterLink>
