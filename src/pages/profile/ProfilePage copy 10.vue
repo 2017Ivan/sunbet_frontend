@@ -12,10 +12,33 @@
   <div class="relative max-w-7xl mx-auto px-4 py-6 flex flex-col items-center gap-6">
     
     <!-- Welcome Section -->
-   
+    <div class="flex items-center justify-between w-full max-w-3xl">
+      <div class="flex items-center gap-4">
+        <!-- Avatar -->
+          <div class="relative">
+            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-rose-500/20 to-rose-600/10 border-2 border-rose-400/30 flex items-center justify-center shadow-[0_0_30px_rgba(244,63,94,0.15)] hover:shadow-[0_0_40px_rgba(244,63,94,0.25)] transition-all duration-300 group">
+              <svg class="w-6 h-6 text-rose-400 group-hover:scale-110 transition-transform duration-300" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+            </div>
+            <!-- Online status dot -->
+            <div class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-400 border-2 border-gray-800 rounded-full shadow-[0_0_12px_rgba(52,211,153,0.4)] animate-pulse"></div>
+          </div>
+        
+        <div>
+          <p class="text-gray-400 text-xs font-medium tracking-wide">Welcome back,</p>
+          <p class="text-white font-bold text-lg leading-tight">+{{ user.phone_number }}</p>
+        </div>
+      </div>
+          <div class="text-right">
+          <p class="text-gray-500 text-[10px] font-medium uppercase tracking-wider">Last Login</p>
+          <p class="text-gray-300 text-xs font-semibold">{{ lastLogin }}</p>
+        </div>
+    </div>
 
     <!-- Divider -->
-    <!-- <div class="w-full max-w-3xl h-px bg-gradient-to-r from-transparent via-gray-700/50 to-transparent"></div> -->
+    <div class="w-full max-w-3xl h-px bg-gradient-to-r from-transparent via-gray-700/50 to-transparent"></div>
 
     <!-- Balance Card -->
     <div class="w-full max-w-3xl">
@@ -30,24 +53,17 @@
             <div class="flex items-center gap-2">
               <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Account Balance</p>
             </div>
-           
+            <span class="text-[10px] font-mono text-gray-500 bg-gray-900/60 px-3 py-1 rounded-full border border-gray-700/50">
+              TZS
+            </span>
           </div>
 
           <!-- Balance Amount -->
-          <div class="flex items-end gap-2 mb-2">
-            <p class="font-mono font-black text-sm text-rose-400 [text-shadow:0_0_30px_rgba(244,63,94,0.2)] tracking-tight">
+          <div class="flex items-end gap-2 mb-5">
+            <p class="font-mono font-black text-3xl text-rose-400 [text-shadow:0_0_30px_rgba(244,63,94,0.2)] tracking-tight">
               {{ formattedBalance }}
             </p>
-          </div>
-            <!-- Phone Number -->
-          <div class="my-4 pt-4 border-t border-gray-700/50 flex items-center justify-center gap-2">
-            <svg class="w-3.5 h-3.5 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/>
-            </svg>
-            <p class="text-sm font-mono text-gray-400 font-medium tracking-wide">
-              +{{ user.phone_number }}
-            </p>
-            <span class="px-2 py-0.5 rounded-full text-[8px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 uppercase tracking-wider">verified</span>
+            <p class="text-gray-500 text-xs font-medium pb-1">TZS</p>
           </div>
 
           <!-- Action Buttons -->
@@ -64,7 +80,16 @@
             </RouterLink>
           </div>
 
-        
+          <!-- Phone Number -->
+          <div class="mt-4 pt-4 border-t border-gray-700/50 flex items-center justify-center gap-2">
+            <svg class="w-3.5 h-3.5 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/>
+            </svg>
+            <p class="text-sm font-mono text-gray-400 font-medium tracking-wide">
+              +{{ user.phone_number }}
+            </p>
+            <span class="px-2 py-0.5 rounded-full text-[8px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 uppercase tracking-wider">verified</span>
+          </div>
         </div>
       </div>
     </div>
