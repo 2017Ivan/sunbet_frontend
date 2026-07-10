@@ -26,7 +26,7 @@
         <!-- Content -->
         <div class="relative">
           <!-- Balance Header -->
-          <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center justify-center mb-3">
             <div class="flex items-center gap-2">
               <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Account Balance</p>
             </div>
@@ -34,7 +34,7 @@
           </div>
 
           <!-- Balance Amount -->
-          <div class="flex items-end gap-2 mb-2">
+          <div class="flex items-center justify-center gap-2 mb-2">
             <p class="font-mono font-black text-sm text-rose-400 [text-shadow:0_0_30px_rgba(244,63,94,0.2)] tracking-tight">
               {{ formattedBalance }}
             </p>
