@@ -1,7 +1,7 @@
 <template>
   <header class="bg-rose-700 shadow-lg sticky top-0 z-50 max-w-7xl mx-auto">
     <!-- ROW 1: Logo + User Actions -->
-    <div class="flex items-center justify-between mx-auto px-2 h-14 bg-gradient-to-r from-rose-900 to-rose-950 border-b border-rose-800">
+    <div class="flex items-center justify-between mx-auto px-1 h-14 bg-gradient-to-r from-rose-900 to-rose-950 border-b border-rose-800">
       <div class="flex items-center gap-1">
         <!-- Hamburger (mobile only) -->
         <button
@@ -40,7 +40,7 @@
 
         <button 
           @click="toggleSearch" 
-          class="text-rose-200 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200 p-2"
+          class="text-rose-200 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200 p-1.5"
           :class="{ 'bg-transparent text-white': isSearchOpen }"
         >
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -52,7 +52,7 @@
         <template v-if="!isLoggedIn">
           <RouterLink 
             to="/login" 
-            class="px-3 py-1.5 text-sm font-bold text-gray-200 hover:text-white transition-colors"
+            class="px-2 py-1.5 text-sm font-bold text-gray-200 hover:text-white transition-colors"
           >
             Login
           </RouterLink>
@@ -69,16 +69,16 @@
           <!-- Balance Chip -->
           <RouterLink
             to="/wallet"
-            class="flex items-center gap-1.5  px-2  py-1.5 sm:py-2 rounded-[8px] sm:rounded-[10px] bg-[#1E1E1E] border border-[#A32D2D]/40 hover:border-[#A32D2D] transition-colors"
+            class="flex items-center gap-1  px-2  py-1.5 sm:py-2 rounded-[8px] sm:rounded-[10px] bg-gray-950/40 border border-[#A32D2D]/40 hover:border-[#A32D2D] transition-colors"
           >
             <span class="text-[9px] text-gray-300 font-medium xs:inline">TZS</span>
-            <span class="text-xs font-bold text-[#A32D2D]">{{ formattedBalance }}</span>
+            <span class="text-xs font-bold text-[#D23434]">{{ formattedBalance }}</span>
           </RouterLink>
 
           <!-- Avatar -->
-          <div class="relative ml-2" ref="avatarRef">
+          <div class="relative ml-1" ref="avatarRef">
             <button
-              class="w-9 h-9 rounded-full bg-gradient-to-br from-[#A32D2D] to-[#7A1F1F] flex items-center justify-center text-white font-bold text-sm border-2 border-[#A32D2D]/30 hover:border-[#A32D2D] transition-colors"
+              class="w-7 h-7 rounded-full bg-gradient-to-br from-[#A32D2D] to-[#7A1F1F] flex items-center justify-center text-white font-bold text-sm border-2 border-[#A32D2D]/30 hover:border-[#A32D2D] transition-colors"
               @click="dropdownOpen = !dropdownOpen"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

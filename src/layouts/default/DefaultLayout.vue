@@ -1,6 +1,6 @@
 <!-- DefaultLayout.vue -->
 <template>
-  <div class="min-h-screen bg-white lg:px-45">
+  <div class="min-h-screen bg-white px-0 lg:px-45">
     <!-- Header -->
     <Header 
       :is-logged-in="isLoggedIn"
@@ -92,8 +92,16 @@ const userBalance = computed(() => {
 const isBetSlipOpen = ref(false)
 const isMobileSidebarOpen = ref(false)
 const betSlipCount = computed(() => betStore.slipCount)
-const myBetsCount = ref(0)
 
+
+const myBetsCount = computed(() => {
+  if (!betStore.userBets || betStore.userBets.length === 0) return 0
+  
+  return betStore.userBets.filter(b => {
+    const status = (b.status || '').toUpperCase()
+    return status === 'OPEN' || status === 'PENDING'
+  }).length
+})
 // ---- Sidebar width ----
 const sidebarWidthClass = computed(() => {
   return 'w-full lg:w-[300px] xl:w-[360px] 2xl:w-[420px]'

@@ -8,7 +8,7 @@ import api from '../api'
 
 const BET_ENDPOINTS = {
   PLACE_BET: '/bets/bets',                    // POST /api/bets - Backend inatarajia POST /
-  USER_BETS: '/bets/bets',               // GET /api/bets/user - Backend inatarajia GET /user
+  USER_BETS: '/bets/user',               // GET /api/bets/user - Backend inatarajia GET /user
   BET_STATS: '/bets/stats',
   LOAD_BET: '/bets/load',
   LOAD_ACTIVE_BET: '/bets/active',
@@ -24,23 +24,13 @@ const BET_ENDPOINTS = {
  * Convert frontend pick to backend selection format
  * Backend expects: '1', 'X', or '2'
  */
-
-/**
- * Convert frontend pick to backend selection format
- * Backend expects: '1', 'X', or '2'
- */
-function convertPickToSelection(pick, marketKey) {
-  // First priority: use marketKey if available
-  if (marketKey && ['1', 'X', '2'].includes(marketKey)) {
-    return marketKey
-  }
-  
+function convertPickToSelection(pick) {
   // If it's already '1', 'X', '2' format
   if (pick === '1' || pick === 'X' || pick === '2') {
     return pick
   }
   
-  // Try to extract just the selection from strings
+  // Try to extract just the selection from strings like "1X2 | Full Time - 2"
   const match = String(pick).match(/[1X2]/)
   if (match) {
     return match[0]
@@ -65,6 +55,9 @@ function convertPickToSelection(pick, marketKey) {
 
 /**
  * Place a new bet
+ * @param {Array} selections - Array of selections from betStore
+ * @param {number} stake - Stake amount
+ * @returns {Promise<Object>} Placed bet data
  */
 export const placeBet = async (selections, stake) => {
   try {
@@ -72,13 +65,12 @@ export const placeBet = async (selections, stake) => {
     
     // Format selections for backend
     const formattedSelections = selections.map(sel => {
-      // CRITICAL FIX: Use marketKey to determine selection
-      // marketKey inaonesha ni team gani imechaguliwa: '1' (Home), 'X' (Draw), '2' (Away)
-      let selectionValue = sel.marketKey // '1', 'X', or '2'
+      // Get the correct selection value
+      let selectionValue = sel.pick
       
-      // If marketKey is not valid, try to convert pick
-      if (!['1', 'X', '2'].includes(selectionValue)) {
-        selectionValue = convertPickToSelection(sel.pick, sel.marketKey)
+      // If pick is not in correct format, convert it
+      if (selectionValue && !['1', 'X', '2'].includes(selectionValue)) {
+        selectionValue = convertPickToSelection(selectionValue)
       }
       
       return {
@@ -100,6 +92,7 @@ export const placeBet = async (selections, stake) => {
     
     console.log('📤 FINAL PAYLOAD:', JSON.stringify(payload, null, 2))
 
+    // 👇 Backend inatarajia POST /api/bets (router.post('/'))
     const response = await api.post(BET_ENDPOINTS.PLACE_BET, payload)
 
     return {
@@ -117,16 +110,6 @@ export const placeBet = async (selections, stake) => {
     }
   }
 }
-
-
-
-/**
- * Place a new bet
- * @param {Array} selections - Array of selections from betStore
- * @param {number} stake - Stake amount
- * @returns {Promise<Object>} Placed bet data
- */
-
 
 /**
  * Get user's bet history

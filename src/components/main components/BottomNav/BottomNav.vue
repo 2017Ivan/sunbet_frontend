@@ -1,3 +1,4 @@
+// BottomNav.vue 
 <template>
   <nav class="fixed bottom-0 left-0 right-0 z-40 lg:hidden safe-area-pb">
     <div class="pointer-events-none absolute inset-x-0 -top-6 h-6 bg-gradient-to-t from-black/40 to-transparent" />

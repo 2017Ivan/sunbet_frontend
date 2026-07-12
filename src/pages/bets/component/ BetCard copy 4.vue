@@ -1,9 +1,9 @@
 <template>
   <div 
-    class="bg-gray-900 border border-[#2A2A2A] rounded-xl p-3 hover:border-rose-600/40 transition-all duration-300 cursor-pointer hover:bg-[#1A1A1A] group"
+    class="bg-[#0D0D0D] border border-[#2A2A2A] rounded-xl p-3 hover:border-rose-600/40 transition-all duration-300 cursor-pointer hover:bg-[#1A1A1A] group"
     @click="$emit('click')"
   >
-    <!-- Header: Status + Selection Count + Booking Code -->
+    <!-- Header: Status + Booking Code -->
     <div class="flex items-center justify-between mb-2.5">
       <div class="flex items-center gap-2">
         <span 
@@ -11,20 +11,24 @@
           :class="statusClass"
         >
           <span class="w-1.5 h-1.5 rounded-full" :class="statusDotClass"></span>
-          {{ statusLabel }} ({{ getSelectionCount() }})
+          {{ statusLabel }}(selection.length())
         </span>
       </div>
-      <span class="text-[10px] font-bold text-[#606060]">ID: {{ bet.id }}</span>
+        <span class="text-[10px] text-[#606060]">ID: #{{ bet.id }}</span>
+
     </div>
 
-    
-    <!-- Date -->
-    <span class="text-[10px] text-[#606060] block mb-2.5 font-bold">{{ formatDate(bet.createdAt) }}</span>
+    <!-- Event Name -->
+    <!-- <h3 class="text-white font-semibold text-sm truncate mb-2.5">
+      {{ getEventName() }}
+    </h3> -->
+      <span class="text-[10px] text-[#606060]">{{ formatDate(bet.createdAt) }}</span>
+
 
     <!-- Stats Grid - 3 columns -->
-    <div class="grid grid-cols-3 gap-2 bg-gray-900 rounded-lg p-2.5">
+    <div class="grid grid-cols-3 gap-2 bg-[#1A1A1A] rounded-lg p-2.5">
       <!-- Total Odds -->
-      <div class="text-start">
+      <div class="text-center">
         <p class="text-[9px] text-[#606060] uppercase tracking-wider">Odds</p>
         <p class="text-white font-bold text-sm">{{ parseFloat(bet.totalOdds).toFixed(2) }}</p>
       </div>
@@ -36,11 +40,13 @@
       </div>
       
       <!-- Payout -->
-      <div class="text-end">
+      <div class="text-center">
         <p class="text-[9px] text-[#606060] uppercase tracking-wider">Payout</p>
         <p class="text-green-400 font-bold text-sm">{{ formatNumber(bet.potentialReturn) }}</p>
       </div>
     </div>
+
+    
 
     <!-- Arrow Indicator on Hover -->
     <div class="flex justify-end mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -86,11 +92,6 @@ const getEventName = () => {
     return 'Unknown Event'
   }
   return props.bet.selections[0]?.match?.name || 'Unknown Event'
-}
-
-const getSelectionCount = () => {
-  if (!props.bet.selections) return 0
-  return props.bet.selections.length
 }
 
 // ---- Status ----

@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen bg-[#0D0D0D]">
-    <div class="max-w-2xl mx-auto px-1 py-6">
+    <div class="max-w-2xl mx-auto px-4 py-6">
       
       <!-- Back Button -->
       <button 
@@ -24,40 +24,39 @@
       <!-- Bet Details -->
       <div v-else-if="bet">
         
-        <div class="bg-red-60 flex flex-col">
         <!-- Status Banner -->
         <div 
-          class=" p-2  flex items-center justify-between"
-          :class="isWon ? 'bg-gradient-to-r from-green-900/40 to-green-950/40 ' : 
-                   isLost ? 'bg-gradient-to-r from-red-900/40 to-red-950/40 border border-red-700/30' : 
-                   'bg-gradient-to-r from-amber-900/40 to-amber-950/40 border border-amber-700/30'"
+          class="rounded-xl p-4 mb-5 flex items-center justify-between"
+          :class="bet.status === 'won' ? 'bg-gradient-to-r from-green-900/40 to-green-950/40 border border-green-700/30' : 
+                   bet.status === 'lost' ? 'bg-gradient-to-r from-red-900/40 to-red-950/40 border border-red-700/30' : 
+                   'bg-gradient-to-r from-rose-900/40 to-rose-950/40 border border-rose-700/30'"
         >
           <div class="flex items-center gap-3">
-            <span class="text-2xl">{{ isWon ? '🏆' : isLost ? '😔' : '⏳' }}</span>
+            <span class="text-2xl">{{ bet.status === 'won' ? '🏆' : bet.status === 'lost' ? '😔' : '⏳' }}</span>
             <div>
               <p class="text-white font-semibold text-sm">
-                {{ isWon ? 'Bet Won!' : isLost ? 'Bet Lost' : 'Bet in Progress' }}
+                {{ bet.status === 'won' ? 'Bet Won!' : bet.status === 'lost' ? 'Bet Lost' : 'Bet in Progress' }}
               </p>
               <p class="text-xs text-[#606060]">
-                {{ isWon ? '🎉 Congratulations on your win!' : isLost ? '💪 Better luck next time!' : '' }}
+                {{ bet.status === 'won' ? 'Congratulations on your win!' : bet.status === 'lost' ? 'Better luck next time!' : 'Waiting for settlement' }}
               </p>
             </div>
           </div>
           <span 
             class="px-3 py-1 text-xs font-bold rounded-full"
-            :class="isWon ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 
-                     isLost ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 
-                     'bg-amber-500/20 text-amber-400 border border-amber-500/30'"
+            :class="bet.status === 'won' ? 'bg-green-500/20 text-green-400' : 
+                     bet.status === 'lost' ? 'bg-red-500/20 text-red-400' : 
+                     'bg-rose-500/20 text-rose-400'"
           >
-            {{ isWon ? 'WON' : isLost ? 'LOST' : 'OPEN' }}
+            {{ bet.status === 'won' ? 'WON' : bet.status === 'lost' ? 'LOST' : 'OPEN' }}
           </span>
         </div>
 
         <!-- Main Card -->
-        <div class="bg-[#1A1A1A]  overflow-hidden">
+        <div class="bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl overflow-hidden">
           
           <!-- Bet ID Header -->
-          <div class="px-0 py-3.5 bg-[#0D0D0D]  flex items-center justify-between">
+          <div class="px-5 py-3.5 bg-[#0D0D0D] border-b border-[#2A2A2A] flex items-center justify-between">
             <div class="flex items-center gap-3">
               <svg class="w-4 h-4 text-[#606060]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <rect x="3" y="3" width="18" height="18" rx="2"/>
@@ -67,56 +66,53 @@
               </svg>
               <span class="text-[#606060] text-xs font-medium">BET ID</span>
             </div>
-            <span class="text-white font-mono font-semibold text-sm tracking-wider">#{{ bet.id || bet.id || 'N/A' }}</span>
+            <span class="text-white font-mono font-semibold text-sm tracking-wider">#{{ bet.id || bet.bookingCode || 'N/A' }}</span>
           </div>
 
           <!-- Stats Grid -->
-          <div class="flex flex-col px-2">
+          <div class="grid grid-cols-2 gap-0">
             <!-- Stake -->
-            <div class=" flex flex-row items-center justify-between px-0 py-3.5 ">
-              <p class="text-[10px] uppercase tracking-wider text-[#8E8E8E] font-medium">Stake</p>
-              <p class="text-[#8E8E8E] font-bold text-xs">TZS {{ formatNumber(bet.stake) }}</p>
+            <div class="px-5 py-3.5 border-r border-b border-[#2A2A2A]">
+              <p class="text-[10px] uppercase tracking-wider text-[#606060] font-medium">Stake</p>
+              <p class="text-white font-bold text-base mt-0.5">TZS {{ (bet.stake || 0).toLocaleString() }}</p>
             </div>
             <!-- Total Odds -->
-            <div class="flex flex-row items-center justify-between px-0 py-3.5 ">
-              <p class="text-[10px] uppercase tracking-wider text-[#8E8E8E] font-medium">Total Odds</p>
-              <p class="text-[#8E8E8E] font-bold text-xs">{{ parseFloat(bet.totalOdds).toFixed(2) }}</p>
+            <div class="px-5 py-3.5 border-b border-[#2A2A2A]">
+              <p class="text-[10px] uppercase tracking-wider text-[#606060] font-medium">Total Odds</p>
+              <p class="text-rose-400 font-bold text-base mt-0.5">{{ bet.totalOdds || bet.odds || 'N/A' }}</p>
             </div>
             <!-- Tax -->
-            <div class="flex flex-row items-center justify-between px-0 py-3.5 ">
-              <p class="text-[10px] uppercase tracking-wider text-[#8E8E8E] font-medium">Tax</p>
-              <p class="text-[#8E8E8E] font-semibold text-xs">- TZS {{ formatNumber(bet.tax) }}</p>
+            <div class="px-5 py-3.5 border-r border-[#2A2A2A]">
+              <p class="text-[10px] uppercase tracking-wider text-[#606060] font-medium">Tax</p>
+              <p class="text-white font-semibold text-sm mt-0.5">- TZS {{ ((bet.tax || 0)).toLocaleString() }}</p>
             </div>
             <!-- Potential Win -->
-            <div class="flex flex-row items-center justify-between px-0 py-3.5">
-              <p class="text-[10px] uppercase tracking-wider text-[#8E8E8E] font-medium">Potential Return</p>
-              <p class="text-[#8E8E8E]  font-bold text-xs ">TZS {{ formatNumber(bet.potentialReturn) }}</p>
+            <div class="px-5 py-3.5">
+              <p class="text-[10px] uppercase tracking-wider text-[#606060] font-medium">Potential Win</p>
+              <p class="text-green-400 font-bold text-base mt-0.5">TZS {{ (bet.potentialWin || 0).toLocaleString() }}</p>
             </div>
           </div>
 
           <!-- Net Won (Highlighted) -->
-          <div class="flex-col py-4 bg-gradient-to-r from-rose-950/30 to-transparent border-t border-[#2A2A2A] ">
-            <div class="flex flex-row items-center justify-between">
-              <p class="text-xs text-white font-medium">Net Payout</p>
-              <p class="text-green-400  font-bold text-xl">TZS {{ formatNumber(bet.netPayout || bet.potentialReturn) }}</p>
+          <div class="px-5 py-4 bg-gradient-to-r from-rose-950/30 to-transparent border-t border-[#2A2A2A] flex items-center justify-between">
+            <div>
+              <p class="text-xs text-[#606060] font-medium">Net Won</p>
+              <p class="text-white font-bold text-xl mt-0.5">TZS {{ (bet.netWon || 0).toLocaleString() }}</p>
             </div>
-             <div class="text-right">
-              <!-- <p class="text-[10px] text-[#606060]">Result</p> -->
-              <span class="text-xs font-semibold" :class="isWon ? 'text-green-400' : isLost ? 'text-red-400' : 'text-amber-400'">
-                {{ bet.result || 'PENDING' }}
+            <div class="text-right">
+              <p class="text-[10px] text-[#606060]">Status</p>
+              <span class="text-xs font-semibold" :class="bet.status === 'won' ? 'text-green-400' : bet.status === 'lost' ? 'text-red-400' : 'text-rose-400'">
+                {{ bet.status === 'won' ? '✅ Won' : bet.status === 'lost' ? '❌ Lost' : '⏳ Open' }}
               </span>
             </div>
-           
           </div>
-        </div>
-        
         </div>
 
         <!-- Selections Section -->
-        <div v-if="bet.selections && bet.selections.length > 0" class="mt-3 bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-1">
+        <div v-if="bet.selections && bet.selections.length > 0" class="mt-5 bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-5">
           <div class="flex items-center justify-between mb-4">
             <h3 class="text-sm font-semibold text-white flex items-center gap-2">
-              <svg class="w-4 h-4 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <svg class="w-4 h-4 text-rose-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
                 <rect x="9" y="3" width="6" height="4" rx="2"/>
               </svg>
@@ -129,19 +125,22 @@
             <div 
               v-for="(selection, index) in bet.selections" 
               :key="index"
-              class="bg-transparent rounded-lg p-1 flex items-center justify-between group hover:border-amber-600/20 transition-all border border-transparent"
+              class="bg-[#0D0D0D] rounded-lg p-3.5 flex items-center justify-between group hover:border-rose-600/20 transition-all border border-transparent"
             >
               <div class="flex-1">
-                <div class="flex items-center">
-                 
-                  <p class="text-white font-medium text-sm">{{ selection.match?.name || selection.matchName || 'Match' }}</p>
+                <div class="flex items-center gap-2">
+                  <span class="w-5 h-5 rounded-full bg-rose-600/20 text-rose-400 text-[10px] font-bold flex items-center justify-center flex-shrink-0">
+                    {{ index + 1 }}
+                  </span>
+                  <p class="text-white font-medium text-sm">{{ selection.match || selection.matchName || 'Match' }}</p>
                 </div>
-                <div class="flex items-center gap-1 ml-0 mt-0.5">
-                  <span class="text-xs font-semibold text-[#A0A0A0]">{{ selection.match?.market || selection.market || '1X2' }}</span>
-                  <span class="text-xs text-[#A0A0A0]">| Full Time-  <span class="text-white font-medium">{{ selection.selection || selection.pick || 'N/A' }}</span></span>
+                <div class="flex items-center gap-3 ml-7 mt-0.5">
+                  <span class="text-xs text-[#606060]">{{ selection.market || selection.marketKey || 'Market' }}</span>
+                  <span class="text-[10px] text-[#606060]">•</span>
+                  <span class="text-xs text-[#A0A0A0]">Pick: <span class="text-white font-medium">{{ selection.pick || selection.selection || 'N/A' }}</span></span>
                 </div>
               </div>
-              <span class="text-amber-400 font-bold text-sm bg-amber-600/10 px-3 py-1 rounded-lg">{{ parseFloat(selection.odds).toFixed(2) }}</span>
+              <span class="text-rose-400 font-bold text-sm bg-rose-600/10 px-3 py-1 rounded-lg">{{ selection.odds || 'N/A' }}</span>
             </div>
           </div>
         </div>
@@ -149,13 +148,27 @@
         <!-- Timestamps & Actions -->
         <div class="mt-5 bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-4">
           <div class="flex flex-wrap items-center justify-between gap-3">
-            <div class="flex flex-wrap items-center gap-6 justify-center">
+            <div class="flex flex-wrap items-center gap-6">
+              <div v-if="bet.placedAt">
                 <p class="text-[10px] uppercase tracking-wider text-[#606060] font-medium">Placed</p>
-                <p class="text-white text-sm ">{{ formatDate(bet.createdAt) }}</p>
-              
-             
+                <p class="text-white text-sm mt-0.5">{{ formatDate(bet.placedAt) }}</p>
+              </div>
+              <div v-if="bet.settledAt">
+                <p class="text-[10px] uppercase tracking-wider text-[#606060] font-medium">Settled</p>
+                <p class="text-white text-sm mt-0.5">{{ formatDate(bet.settledAt) }}</p>
+              </div>
             </div>
-         
+            <button 
+              v-if="bet.status === 'open' || bet.status === 'pending'"
+              class="px-5 py-2 bg-rose-600 hover:bg-rose-500 text-white text-sm font-semibold rounded-lg transition-all hover:shadow-lg hover:shadow-rose-600/25 flex items-center gap-2"
+              @click="cancelBet"
+            >
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+              Cancel Bet
+            </button>
           </div>
         </div>
 
@@ -183,7 +196,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useBetStore } from '../../stores/bets/betStore.js'
 
@@ -194,44 +207,7 @@ const betStore = useBetStore()
 const bet = ref(null)
 const isLoading = ref(false)
 
-// ---- Computed ----
-const betStatus = computed(() => {
-  if (!bet.value) return 'unknown'
-  
-  const status = (bet.value.status || '').toUpperCase()
-  const result = (bet.value.result || '').toUpperCase()
-  
-  // Check if settled
-  if (status === 'SETTLED') {
-    if (result === 'WON') return 'won'
-    if (result === 'LOST') return 'lost'
-    return 'settled'
-  }
-  
-  // Check if open
-  if (status === 'OPEN' || status === 'PENDING') {
-    return 'open'
-  }
-  
-  // Check by result
-  if (result === 'WON') return 'won'
-  if (result === 'LOST') return 'lost'
-  
-  return 'unknown'
-})
-
-const isWon = computed(() => betStatus.value === 'won')
-const isLost = computed(() => betStatus.value === 'lost')
-const isOpen = computed(() => betStatus.value === 'open')
-
-// ---- Helper Functions ----
-const formatNumber = (value) => {
-  if (value === undefined || value === null) return '0'
-  const num = parseFloat(value)
-  if (isNaN(num)) return '0'
-  return num.toLocaleString()
-}
-
+// ---- Format Date ----
 const formatDate = (dateString) => {
   if (!dateString) return 'N/A'
   const date = new Date(dateString)
@@ -252,13 +228,15 @@ const loadBet = async () => {
   isLoading.value = true
   try {
     // First try to find in store
-    const existingBet = betStore.userBets.find(b => String(b.id) === String(id))
+    const existingBet = betStore.userBets.find(b => b.id === parseInt(id) || b.id === id)
     if (existingBet) {
       bet.value = existingBet
       return
     }
 
     // If not in store, try to load from API
+    // You can add a fetch single bet API call here
+    // For now, show not found
     bet.value = null
   } catch (error) {
     console.error('Error loading bet:', error)
@@ -281,7 +259,8 @@ const cancelBet = async () => {
       const result = await betStore.cancelUserBet(bet.value.id)
       if (result.success) {
         alert('Bet cancelled successfully')
-        await loadBet()
+        await loadBet() // Reload bet details
+        // Navigate back to bets list after cancellation
         router.push('/bets')
       } else {
         alert(result.message || 'Failed to cancel bet')

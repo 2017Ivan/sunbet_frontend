@@ -35,8 +35,8 @@ export const useBetStore = defineStore('bet', () => {
   const tax = computed(() => potentialWin_1.value * 0.12)
   const potentialWin = computed(() => potentialWin_1.value - (tax.value + stake.value))
 
-  const canPlaceBet = computed(() => slipCount.value > 0 && stake.value >= 125000)
-  const isStakeValid = computed(() => stake.value >= 125000)
+  const canPlaceBet = computed(() => slipCount.value > 0 && stake.value >= 100)
+  const isStakeValid = computed(() => stake.value >= 100)
 
   // ── SLIP ACTIONS ──────────────────────────────────────────────────────────
   

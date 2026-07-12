@@ -1,6 +1,7 @@
+// BetsPage.vue 
 <template>
   <div class="h-full py-8 bg-[#0D0D0D]">
-    <div class="max-w-4xl mx-auto px-4">
+    <div class="max-w-4xl mx-auto px-2">
       
       <!-- Header -->
       <div class="mb-6">
@@ -41,7 +42,7 @@
       </div>
 
       <!-- Content -->
-      <div v-else class="bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-4 min-h-[400px]">
+      <div v-else class="bg-[#1A1A1A]  p-1.4 min-h-[400px]">
         <!-- Open Bets -->
         <div v-if="activeTab === 'open'">
           <div v-if="openBets.length === 0" class="text-center py-12">
@@ -54,7 +55,7 @@
             <p class="text-[#606060] font-medium">No open bets</p>
             <p class="text-xs text-[#606060] mt-1">Place a bet to see it here</p>
           </div>
-          <div v-else class="space-y-3">
+          <div v-else class="space-y-2">
             <BetCard
               v-for="bet in openBets"
               :key="bet.id"
@@ -143,12 +144,18 @@ const activeTab = ref('open')
 const isLoadingBets = ref(false)
 
 // ---- Computed ----
+// const openBets = computed(() => {
+//   return betStore.userBets.filter(b => b.status === 'OPEN' || b.status === 'PENDING')
+// })
 const openBets = computed(() => {
-  return betStore.userBets.filter(b => b.status === 'open' || b.status === 'pending')
+  return betStore.userBets.filter(b => {
+    const status = (b.status || '').toUpperCase()
+    return status === 'OPEN' || status === 'PENDING'
+  })
 })
 
 const settledBets = computed(() => {
-  return betStore.userBets.filter(b => b.status === 'won' || b.status === 'lost' || b.status === 'settled')
+  return betStore.userBets.filter(b => b.status === 'WON' || b.status === 'LOST' || b.status === 'SETTLED')
 })
 
 const getBadgeCount = (tabKey) => {
