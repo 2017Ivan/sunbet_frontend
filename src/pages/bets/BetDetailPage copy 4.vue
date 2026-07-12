@@ -2,24 +2,27 @@
   <div class="min-h-screen bg-[#0D0D0D]">
     <div class="max-w-2xl mx-auto px-1 py-6">
       
-      <!-- Bet ID Header - Fixed null check -->
-      <div class="px-0 py-1 bg-[#0D0D0D] flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <!-- Back Button -->
-          <button 
-            class="flex items-center gap-2 text-[#606060] hover:text-white transition-colors mb-0 group"
-            @click="goBack"
-          >
-            <svg class="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="15 18 9 12 15 6"/>
-            </svg>
-          </button>
-          
-          <span class="text-[#8E8E8E] font-mono font-semibold text-sm tracking-wider">
-            BET ID: #{{ bet?.id || route.params.id || 'N/A' }}
-          </span>
-        </div>
-      </div>
+     
+
+          <!-- Bet ID Header -->
+          <div class="px-0 py-1 bg-[#0D0D0D]  flex items-center justify-between">
+            <div class="flex items-center gap-3">
+
+             <!-- Back Button -->
+              <button 
+                class="flex items-center gap-2 text-[#606060] hover:text-white transition-colors mb-0 group"
+                @click="goBack"
+              >
+                <svg class="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="15 18 9 12 15 6"/>
+                </svg>
+              
+              </button>
+              
+            <span class="text-[#8E8E8E] font-mono font-semibold text-sm tracking-wider"> BET ID: #{{ bet.id || bet.id || 'N/A' }}</span>
+              
+            </div>
+          </div>
 
       <!-- Loading -->
       <div v-if="isLoading" class="bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-8">
@@ -30,28 +33,29 @@
       </div>
 
       <!-- Bet Details -->
-      <div v-else-if="bet" class="space-y-0">
+      <div v-else-if="bet">
         
+        <div class="bg-red-60 flex flex-col">
         <!-- Status Banner -->
         <div 
-          class="p-3 rounded-t-xl  flex items-center justify-between"
-          :class="isWon ? 'bg-gradient-to-r from-green-900/40 to-green-950/40 border border-green-700/30' : 
+          class=" p-2  flex items-center justify-between"
+          :class="isWon ? 'bg-gradient-to-r from-green-900/40 to-green-950/40 ' : 
                    isLost ? 'bg-gradient-to-r from-red-900/40 to-red-950/40 border border-red-700/30' : 
-                   'bg-gradient-to-r from-amber-900/40 to-amber-950/40 border-t border-amber-700/30'"
+                   'bg-gradient-to-r from-amber-900/40 to-amber-950/40 border border-amber-700/30'"
         >
           <div class="flex items-center gap-3">
             <span class="text-2xl">{{ isWon ? '🏆' : isLost ? '😔' : '⏳' }}</span>
             <div>
-              <p class="text-white font-semibold text-sm my-5">
+              <p class="text-white font-semibold text-sm">
                 {{ isWon ? 'Bet Won!' : isLost ? 'Bet Lost' : 'Bet in Progress' }}
               </p>
               <p class="text-xs text-[#606060]">
-                {{ isWon ? '🎉 Congratulations on your win!' : isLost ? '💪 Better luck next time!' : '⏳ Waiting for results...' }}
+                {{ isWon ? '🎉 Congratulations on your win!' : isLost ? '💪 Better luck next time!' : '' }}
               </p>
             </div>
           </div>
           <span 
-            class="px-4 py-3 text-xs font-bold rounded-full"
+            class="px-3 py-1 text-xs font-bold rounded-full"
             :class="isWon ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 
                      isLost ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 
                      'bg-amber-500/20 text-amber-400 border border-amber-500/30'"
@@ -61,52 +65,52 @@
         </div>
 
         <!-- Main Card -->
-        <div class="bg-[#1A1A1A] border-b border-[#2A2A2A] rounded-b-xl overflow-hidden">
+        <div class="bg-[#1A1A1A]  overflow-hidden">
           
-          <!-- Stats -->
-          <div class="">
+
+          <!-- Stats Grid -->
+          <div class="flex flex-col px-2">
             <!-- Stake -->
-            <div class="flex items-center justify-between px-4 py-3">
+            <div class=" flex flex-row items-center justify-between px-0 py-3.5 ">
               <p class="text-[10px] uppercase tracking-wider text-[#8E8E8E] font-medium">Stake</p>
-              <p class="text-[#8E8E8E] font-bold text-sm">TZS {{ formatNumber(bet.stake) }}</p>
+              <p class="text-[#8E8E8E] font-bold text-xs">TZS {{ formatNumber(bet.stake) }}</p>
             </div>
-            
             <!-- Total Odds -->
-            <div class="flex items-center justify-between px-4 py-3">
+            <div class="flex flex-row items-center justify-between px-0 py-3.5 ">
               <p class="text-[10px] uppercase tracking-wider text-[#8E8E8E] font-medium">Total Odds</p>
-              <p class="text-[#8E8E8E] font-bold text-sm">{{ parseFloat(bet.totalOdds || bet.odds).toFixed(2) }}</p>
+              <p class="text-[#8E8E8E] font-bold text-xs">{{ parseFloat(bet.totalOdds).toFixed(2) }}</p>
             </div>
-            
             <!-- Tax -->
-            <div class="flex items-center justify-between px-4 py-3">
+            <div class="flex flex-row items-center justify-between px-0 py-3.5 ">
               <p class="text-[10px] uppercase tracking-wider text-[#8E8E8E] font-medium">Tax</p>
-              <p class="text-[#8E8E8E] font-semibold text-sm">- TZS {{ formatNumber(bet.tax || 0) }}</p>
+              <p class="text-[#8E8E8E] font-semibold text-xs">- TZS {{ formatNumber(bet.tax) }}</p>
             </div>
-            
             <!-- Potential Win -->
-            <div class="flex items-center justify-between px-4 py-3">
+            <div class="flex flex-row items-center justify-between px-0 py-3.5">
               <p class="text-[10px] uppercase tracking-wider text-[#8E8E8E] font-medium">Potential Return</p>
-              <p class="text-[#8E8E8E] font-bold text-sm">TZS {{ formatNumber(bet.potentialReturn || bet.possibleWin) }}</p>
+              <p class="text-[#8E8E8E]  font-bold text-xs ">TZS {{ formatNumber(bet.potentialReturn) }}</p>
             </div>
           </div>
 
-          <!-- Net Payout -->
-          <div class="px-4 py-4 bg-gradient-to-r from-rose-950/20 to-transparent border-t border-[#2A2A2A]">
-            <div class="flex items-center justify-between">
+          <!-- Net Won (Highlighted) -->
+          <div class="flex-col py-4 bg-gradient-to-r from-rose-950/30 to-transparent border-t border-[#2A2A2A] ">
+            <div class="flex flex-row items-center justify-between">
               <p class="text-xs text-white font-medium">Net Payout</p>
-              <div class="text-right">
-                <p class="text-green-400 font-bold text-xl">
-                  TZS {{ formatNumber(bet.netPayout || bet.potentialReturn || bet.possibleWin) }}
-                </p>
-                <span class="text-xs font-semibold" :class="isWon ? 'text-green-400' : isLost ? 'text-red-400' : 'text-amber-400'">
-                  {{ bet.result || bet.status || 'PENDING' }}
-                </span>
-              </div>
+              <p class="text-green-400  font-bold text-xl">TZS {{ formatNumber(bet.netPayout || bet.potentialReturn) }}</p>
             </div>
+             <div class="text-right">
+              <!-- <p class="text-[10px] text-[#606060]">Result</p> -->
+              <span class="text-xs font-semibold" :class="isWon ? 'text-green-400' : isLost ? 'text-red-400' : 'text-amber-400'">
+                {{ bet.result || 'PENDING' }}
+              </span>
+            </div>
+           
           </div>
         </div>
+        
+        </div>
 
-        <!-- Selections -->
+        <!-- Selections Section -->
         <div v-if="bet.selections && bet.selections.length > 0" class="mt-3 bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-1">
           <div class="flex items-center justify-between mb-4">
             <h3 class="text-sm font-semibold text-white flex items-center gap-2">
@@ -128,14 +132,14 @@
               <div class="flex-1">
                 <div class="flex items-center">
                  
-                  <p class="text-[#8E8E8E] font-medium text-sm">{{ selection.match?.name || selection.matchName || 'Match' }}</p>
+                  <p class="text-white font-medium text-sm">{{ selection.match?.name || selection.matchName || 'Match' }}</p>
                 </div>
                 <div class="flex items-center gap-1 ml-0 mt-0.5">
                   <span class="text-xs font-semibold text-[#A0A0A0]">{{ selection.match?.market || selection.market || '1X2' }}</span>
-                  <span class="text-xs text-[#A0A0A0] font-semibold">| Full Time - <span class="text-[#A9A9A9] font-medium">{{ selection.selection || selection.pick || 'N/A' }}</span></span>
+                  <span class="text-xs text-[#A0A0A0]">| Full Time-  <span class="text-white font-medium">{{ selection.selection || selection.pick || 'N/A' }}</span></span>
                 </div>
               </div>
-              <span class="text-[#A32D2D] font-bold text-sm bg-amber-600/10 px-3 py-1 rounded-lg">{{ parseFloat(selection.odds).toFixed(2) }}</span>
+              <span class="text-amber-400 font-bold text-sm bg-amber-600/10 px-3 py-1 rounded-lg">{{ parseFloat(selection.odds).toFixed(2) }}</span>
             </div>
           </div>
         </div>
@@ -146,12 +150,11 @@
             <div class="flex flex-wrap items-center gap-6 justify-center">
                 <p class="text-[10px] uppercase tracking-wider text-[#606060] font-medium">Placed</p>
                 <p class="text-white text-sm ">{{ formatDate(bet.createdAt) }}</p>
-              
-             
             </div>
          
           </div>
         </div>
+
       </div>
 
       <!-- Not Found -->
@@ -170,6 +173,7 @@
           Go back to bets
         </button>
       </div>
+
     </div>
   </div>
 </template>
@@ -193,16 +197,19 @@ const betStatus = computed(() => {
   const status = (bet.value.status || '').toUpperCase()
   const result = (bet.value.result || '').toUpperCase()
   
+  // Check if settled
   if (status === 'SETTLED') {
     if (result === 'WON') return 'won'
     if (result === 'LOST') return 'lost'
     return 'settled'
   }
   
+  // Check if open
   if (status === 'OPEN' || status === 'PENDING') {
     return 'open'
   }
   
+  // Check by result
   if (result === 'WON') return 'won'
   if (result === 'LOST') return 'lost'
   
@@ -213,7 +220,7 @@ const isWon = computed(() => betStatus.value === 'won')
 const isLost = computed(() => betStatus.value === 'lost')
 const isOpen = computed(() => betStatus.value === 'open')
 
-// ---- Helpers ----
+// ---- Helper Functions ----
 const formatNumber = (value) => {
   if (value === undefined || value === null) return '0'
   const num = parseFloat(value)
@@ -223,15 +230,11 @@ const formatNumber = (value) => {
 
 const formatDate = (dateString) => {
   if (!dateString) return 'N/A'
-  try {
-    const date = new Date(dateString)
-    return date.toLocaleString('en-US', { 
-      dateStyle: 'medium', 
-      timeStyle: 'short' 
-    })
-  } catch {
-    return 'N/A'
-  }
+  const date = new Date(dateString)
+  return date.toLocaleString('en-US', { 
+    dateStyle: 'medium', 
+    timeStyle: 'short' 
+  })
 }
 
 // ---- Load Bet ----
@@ -244,20 +247,15 @@ const loadBet = async () => {
 
   isLoading.value = true
   try {
-    // Try to find in store
-    const existingBet = betStore.userBets?.find(b => String(b.id) === String(id))
+    // First try to find in store
+    const existingBet = betStore.userBets.find(b => String(b.id) === String(id))
     if (existingBet) {
       bet.value = existingBet
       return
     }
 
-    // If not found, try API
-    const response = await betStore.fetchBetById(id)
-    if (response && response.data) {
-      bet.value = response.data
-    } else {
-      bet.value = null
-    }
+    // If not in store, try to load from API
+    bet.value = null
   } catch (error) {
     console.error('Error loading bet:', error)
     bet.value = null
