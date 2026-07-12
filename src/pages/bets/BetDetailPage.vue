@@ -17,9 +17,9 @@
           <div class="px-0 py-1 bg-[#0D0D0D]  flex items-center justify-between">
             <div class="flex items-center gap-3">
               
-              <span class="text-black text-xs font-medium"></span>
+            <span class="text-[#8E8E8E] font-mono font-semibold text-sm tracking-wider"> BET ID: #{{ bet.id || bet.id || 'N/A' }}</span>
+              
             </div>
-            <span class="text-[#8E8E8E] font-mono font-semibold text-sm tracking-wider"> ID: #{{ bet.id || bet.id || 'N/A' }}</span>
           </div>
 
       <!-- Loading -->
