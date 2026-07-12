@@ -4,14 +4,23 @@
       
       <!-- Back Button -->
       <button 
-        class="flex items-center gap-2 text-[#606060] hover:text-white transition-colors mb-4 group"
+        class="flex items-center gap-2 text-[#606060] hover:text-white transition-colors mb-0 group"
         @click="goBack"
       >
         <svg class="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polyline points="15 18 9 12 15 6"/>
         </svg>
-        Back to Bets
+      
       </button>
+
+          <!-- Bet ID Header -->
+          <div class="px-0 py-1 bg-[#0D0D0D]  flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              
+              <span class="text-black text-xs font-medium"></span>
+            </div>
+            <span class="text-[#8E8E8E] font-mono font-semibold text-sm tracking-wider"> ID: #{{ bet.id || bet.id || 'N/A' }}</span>
+          </div>
 
       <!-- Loading -->
       <div v-if="isLoading" class="bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-8">
@@ -56,19 +65,6 @@
         <!-- Main Card -->
         <div class="bg-[#1A1A1A]  overflow-hidden">
           
-          <!-- Bet ID Header -->
-          <div class="px-0 py-3.5 bg-[#0D0D0D]  flex items-center justify-between">
-            <div class="flex items-center gap-3">
-              <svg class="w-4 h-4 text-[#606060]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="3" y="3" width="18" height="18" rx="2"/>
-                <line x1="3" y1="9" x2="21" y2="9"/>
-                <line x1="3" y1="15" x2="21" y2="15"/>
-                <line x1="9" y1="21" x2="9" y2="9"/>
-              </svg>
-              <span class="text-[#606060] text-xs font-medium">BET ID</span>
-            </div>
-            <span class="text-white font-mono font-semibold text-sm tracking-wider">#{{ bet.id || bet.id || 'N/A' }}</span>
-          </div>
 
           <!-- Stats Grid -->
           <div class="flex flex-col px-2">
