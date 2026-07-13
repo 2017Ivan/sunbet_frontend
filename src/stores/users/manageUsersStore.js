@@ -1,6 +1,6 @@
 // stores/manageUsersStore.js
 import { defineStore } from 'pinia'
-import manageUsersService from '../services/manageUsersService'
+import manageUsersService from '../../services/users/manageUsersService'
 
 export const useManageUsersStore = defineStore('manageUsers', {
   state: () => ({

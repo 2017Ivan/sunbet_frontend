@@ -1,4 +1,4 @@
-<!-- views/admin/AdminUsers.vue - SunBet Theme with User Details Modal -->
+<!-- views/admin/AdminUsers.vue - SunBet Theme -->
 <template>
   <div class="space-y-6">
     <!-- Stats Summary -->
@@ -62,8 +62,8 @@
     <!-- Users Table -->
     <div class="bg-[#1A1A1A] rounded-2xl border border-[#2A2A2A] overflow-hidden">
       <div class="overflow-x-auto">
-        <table class="w-full min-w-[900px]">
-          <thead class="bg-[#0D0D0D] sticky top-0 z-10">
+        <table class="w-full">
+          <thead class="bg-[#0D0D0D]">
             <tr>
               <th class="text-left px-6 py-4 text-gray-400 text-xs font-medium uppercase tracking-wider">User ID</th>
               <th class="text-left px-6 py-4 text-gray-400 text-xs font-medium uppercase tracking-wider">Phone Number</th>
@@ -91,7 +91,7 @@
                   :class="{
                     'bg-rose-500/10 text-rose-400 border-rose-500/20': user.role === 'ADMIN',
                     'bg-blue-500/10 text-blue-400 border-blue-500/20': user.role === 'AGENT',
-                    'bg-gray-500/10 text-gray-400 border-gray-300': user.role === 'USER'
+                    'bg-gray-500/10 text-gray-400 border-gray-500/20': user.role === 'USER'
                   }"
                 >
                   {{ user.role || 'USER' }}
@@ -133,7 +133,7 @@
     </div>
 
     <!-- Pagination -->
-    <div class="flex flex-wrap justify-between items-center gap-4">
+    <div class="flex justify-between items-center">
       <p class="text-gray-500 text-sm">
         Showing {{ manageUsersStore.allUsers.length }} of {{ manageUsersStore.totalUsers }} users
       </p>
@@ -152,102 +152,6 @@
         >
           Next →
         </button>
-      </div>
-    </div>
-
-    <!-- User Details Modal - SunBet Theme -->
-    <div v-if="showUserDetailsModal" 
-         class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4" 
-         @click.self="closeUserDetailsModal">
-      <div class="bg-[#1A1A1A] rounded-2xl border border-[#2A2A2A] p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl shadow-rose-500/10 animate-fadeIn">
-        <!-- Header -->
-        <div class="flex items-center justify-between mb-6 pb-4 border-b border-[#2A2A2A]">
-          <div class="flex items-center gap-3">
-            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-rose-500 to-rose-600 flex items-center justify-center text-2xl">
-              👤
-            </div>
-            <div>
-              <h3 class="text-xl font-bold text-white">User Details</h3>
-              <p class="text-sm text-gray-500">{{ selectedUser?.phone_number }}</p>
-            </div>
-          </div>
-          <button @click="closeUserDetailsModal" class="text-gray-500 hover:text-rose-400 transition-colors">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-            </svg>
-          </button>
-        </div>
-
-        <!-- User Info Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <!-- Left Column -->
-          <div class="space-y-4">
-            <div class="bg-[#0D0D0D] rounded-xl p-4 border border-[#2A2A2A]">
-              <p class="text-xs text-gray-500 uppercase tracking-wider mb-1">User ID</p>
-              <p class="text-white font-mono text-sm break-all">{{ selectedUser?.id }}</p>
-            </div>
-            
-            <div class="bg-[#0D0D0D] rounded-xl p-4 border border-[#2A2A2A]">
-              <p class="text-xs text-gray-500 uppercase tracking-wider mb-1">Phone Number</p>
-              <p class="text-white text-sm">{{ selectedUser?.phone_number }}</p>
-            </div>
-            
-            <div class="bg-[#0D0D0D] rounded-xl p-4 border border-[#2A2A2A]">
-              <p class="text-xs text-gray-500 uppercase tracking-wider mb-1">Role</p>
-              <span class="px-3 py-1 rounded-full text-xs font-medium border inline-block"
-                :class="{
-                  'bg-rose-500/10 text-rose-400 border-rose-500/20': selectedUser?.role === 'ADMIN',
-                  'bg-blue-500/10 text-blue-400 border-blue-500/20': selectedUser?.role === 'AGENT',
-                  'bg-gray-500/10 text-gray-200 border-gray-300': selectedUser?.role !== 'ADMIN' && selectedUser?.role !== 'AGENT'
-                }"
-              >
-                {{ selectedUser?.role || 'USER' }}
-              </span>
-            </div>
-            
-            <div class="bg-[#0D0D0D] rounded-xl p-4 border border-[#2A2A2A]">
-              <p class="text-xs text-gray-500 uppercase tracking-wider mb-1">Joined</p>
-              <p class="text-white text-sm">{{ formatDate(selectedUser?.createdAt) }}</p>
-            </div>
-          </div>
-
-          <!-- Right Column -->
-          <div class="space-y-4">
-            <div class="bg-[#0D0D0D] rounded-xl p-4 border border-[#2A2A2A]">
-              <p class="text-xs text-gray-500 uppercase tracking-wider mb-1">Balance</p>
-              <p class="text-2xl font-bold text-rose-400">TZS {{ formatMoney(selectedUser?.balance) }}</p>
-            </div>
-            
-            <div class="bg-[#0D0D0D] rounded-xl p-4 border border-[#2A2A2A]">
-              <p class="text-xs text-gray-500 uppercase tracking-wider mb-1">Total Bets</p>
-              <p class="text-2xl font-bold text-white">{{ selectedUser?.totalBets || 0 }}</p>
-            </div>
-            
-            <div class="bg-[#0D0D0D] rounded-xl p-4 border border-[#2A2A2A]">
-              <p class="text-xs text-gray-500 uppercase tracking-wider mb-1">Total Won</p>
-              <p class="text-2xl font-bold text-rose-400">TZS {{ formatMoney(selectedUser?.totalWon || 0) }}</p>
-            </div>
-            
-            <div class="bg-[#0D0D0D] rounded-xl p-4 border border-[#2A2A2A]">
-              <p class="text-xs text-gray-500 uppercase tracking-wider mb-1">Status</p>
-              <span class="px-3 py-1 rounded-full text-xs font-medium border inline-block bg-green-500/10 text-green-400 border-green-500/20">
-                Active
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Actions -->
-        <div class="mt-6 pt-4 border-t border-[#2A2A2A] flex flex-wrap gap-3">
-          <button @click="openAdjustBalanceModal(selectedUser); closeUserDetailsModal()" 
-                  class="flex-1 px-4 py-2 bg-gradient-to-r from-rose-500 to-rose-600 text-white rounded-lg hover:from-rose-600 hover:to-rose-700 transition-all duration-300 shadow-lg shadow-rose-500/20">
-            💰 Adjust Balance
-          </button>
-          <button @click="closeUserDetailsModal" 
-                  class="flex-1 px-4 py-2 bg-[#2A2A2A] text-gray-300 rounded-lg hover:bg-[#3A3A3A] hover:text-white transition-all duration-300">
-            Close
-          </button>
-        </div>
       </div>
     </div>
 
@@ -352,7 +256,6 @@ const totalWithdrawals = ref(0)
 
 const showBalanceModal = ref(false)
 const showDeleteModal = ref(false)
-const showUserDetailsModal = ref(false)
 const selectedUser = ref(null)
 const balanceAction = ref('add')
 const balanceAmount = ref(0)
@@ -363,14 +266,8 @@ function formatMoney(n) {
 }
 
 function formatDate(d) {
-  if (!d) return 'N/A'
-  return new Date(d).toLocaleDateString('en-US', { 
-    year: 'numeric', 
-    month: 'short', 
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  })
+  if (!d) return ''
+  return new Date(d).toLocaleDateString()
 }
 
 // ── Load Users ──────────────────────────────────────────────────────────────
@@ -423,22 +320,6 @@ async function exportUsers() {
   }
 }
 
-// ── User Details Modal ────────────────────────────────────────────────────
-function viewUserDetails(user) {
-  selectedUser.value = user
-  showUserDetailsModal.value = true
-}
-
-function closeUserDetailsModal() {
-  showUserDetailsModal.value = false
-  // Don't clear selected user immediately to avoid flicker
-  setTimeout(() => {
-    if (!showUserDetailsModal.value) {
-      // Keep user for other modals
-    }
-  }, 300)
-}
-
 // ── Balance Modal ───────────────────────────────────────────────────────────
 function openAdjustBalanceModal(user) {
   selectedUser.value = user
@@ -462,8 +343,6 @@ async function confirmAdjustBalance() {
   if (result.success) {
     closeBalanceModal()
     alert('Balance updated successfully!')
-    // Refresh users to show updated balance
-    await loadUsers()
   } else {
     alert(result.message || 'Failed to update balance')
   }
@@ -471,11 +350,8 @@ async function confirmAdjustBalance() {
 
 function closeBalanceModal() {
   showBalanceModal.value = false
-  setTimeout(() => {
-    if (!showBalanceModal.value && !showUserDetailsModal.value) {
-      // Only clear if no other modal is open
-    }
-  }, 300)
+  selectedUser.value = null
+  balanceAmount.value = 0
 }
 
 // ── Delete Modal ───────────────────────────────────────────────────────────
@@ -492,7 +368,6 @@ async function confirmDeleteUser() {
   if (result.success) {
     closeDeleteModal()
     alert('User deleted successfully!')
-    await loadUsers()
   } else {
     alert(result.message || 'Failed to delete user')
   }
@@ -500,11 +375,13 @@ async function confirmDeleteUser() {
 
 function closeDeleteModal() {
   showDeleteModal.value = false
-  setTimeout(() => {
-    if (!showDeleteModal.value) {
-      // Clean up if needed
-    }
-  }, 300)
+  selectedUser.value = null
+}
+
+// ── View User Details ──────────────────────────────────────────────────────
+function viewUserDetails(user) {
+  console.log('View user details:', user)
+  // Navigate to user details page
 }
 
 // ── Lifecycle ──────────────────────────────────────────────────────────────
@@ -567,17 +444,5 @@ button:active {
 /* Input focus effects */
 input:focus, select:focus {
   box-shadow: 0 0 0 2px rgba(244, 63, 94, 0.1);
-}
-
-/* Modal scroll */
-.max-h-\[90vh\] {
-  max-height: 90vh;
-}
-
-/* Mobile responsive */
-@media (max-width: 640px) {
-  .grid-cols-1.md\:grid-cols-2 {
-    grid-template-columns: 1fr;
-  }
 }
 </style>
