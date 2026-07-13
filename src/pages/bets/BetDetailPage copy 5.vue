@@ -34,8 +34,8 @@
         
         <!-- Status Banner -->
         <div 
-          class="p-3 rounded-t-xl flex items-center justify-between"
-          :class="isWon ? 'bg-gradient-to-r from-green-900/40 to-green-950/40 border-t border-green-700/30' : 
+          class="p-3 rounded-t-xl  flex items-center justify-between"
+          :class="isWon ? 'bg-gradient-to-r from-green-900/40 to-green-950/40 border border-green-700/30' : 
                    isLost ? 'bg-gradient-to-r from-red-900/40 to-red-950/40 border border-red-700/30' : 
                    'bg-gradient-to-r from-amber-900/40 to-amber-950/40 border-t border-amber-700/30'"
         >
@@ -66,31 +66,30 @@
           <!-- Stats -->
           <div class="">
             
+            
             <!-- Total Odds -->
             <div class="flex items-center justify-between px-4 py-3">
               <p class="text-[10px] uppercase tracking-wider text-[#8E8E8E] font-medium">Total Odds</p>
-              <p class="text-[#8E8E8E] font-bold text-sm">{{ totalOdds.toFixed(2) }}</p>
+              <p class="text-[#8E8E8E] font-bold text-sm">{{ parseFloat(bet.totalOdds || bet.odds).toFixed(2) }}</p>
             </div>
-            
             <!-- Stake -->
             <div class="flex items-center justify-between px-4 py-3">
               <p class="text-[10px] uppercase tracking-wider text-[#8E8E8E] font-medium">Stake</p>
-              <p class="text-[#8E8E8E] font-bold text-sm">TZS {{ formatNumber(stakeAmount) }}</p>
+              <p class="text-[#8E8E8E] font-bold text-sm">TZS {{ formatNumber(bet.stake) }}</p>
             </div>
-            
-            <!-- Potential Win -->
+             <!-- Potential Win -->
             <div class="flex items-center justify-between px-4 py-3">
-              <p class="text-[10px] uppercase tracking-wider text-[#8E8E8E] font-medium">Potential Win</p>
-              <p class="text-[#8E8E8E] font-bold text-sm">TZS {{ formatNumber(potentialWin) }}</p>
+              <p class="text-[10px] uppercase tracking-wider text-[#8E8E8E] font-medium">Potential Return</p>
+              <p class="text-[#8E8E8E] font-bold text-sm">TZS {{ formatNumber(bet.potentialReturn || bet.possibleWin) }}</p>
             </div>
             
             <!-- Tax -->
             <div class="flex items-center justify-between px-4 py-3">
-              <p class="text-[10px] uppercase tracking-wider text-[#8E8E8E] font-medium">Tax (12%)</p>
-              <p class="text-[#8E8E8E] font-semibold text-sm">- TZS {{ formatNumber(tax) }}</p>
+              <p class="text-[10px] uppercase tracking-wider text-[#8E8E8E] font-medium">Tax 12%</p>
+              <p class="text-[#8E8E8E] font-semibold text-sm">- TZS {{ formatNumber(bet.tax || 0) }}</p>
             </div>
             
-            
+           
           </div>
 
           <!-- Net Payout -->
@@ -99,7 +98,7 @@
               <p class="text-xs text-white font-medium">Payout</p>
               <div class="text-right">
                 <p class="text-green-400 font-bold text-xl">
-                  TZS {{ formatNumber(payout) }}
+                  TZS {{ formatNumber(bet.netPayout || bet.potentialReturn || bet.possibleWin) }}
                 </p>
                 <span class="text-xs font-semibold" :class="isWon ? 'text-green-400' : isLost ? 'text-red-400' : 'text-amber-400'">
                   {{ bet.result || bet.status || 'PENDING' }}
@@ -110,7 +109,7 @@
         </div>
 
         <!-- Selections -->
-        <div v-if="bet.selections && bet.selections.length > 0" class="mt-3 bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-4">
+        <div v-if="bet.selections && bet.selections.length > 0" class="mt-3 bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-1">
           <div class="flex items-center justify-between mb-4">
             <h3 class="text-sm font-semibold text-white flex items-center gap-2">
               <svg class="w-4 h-4 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -126,10 +125,11 @@
             <div 
               v-for="(selection, index) in bet.selections" 
               :key="index"
-              class="bg-[#0D0D0D] rounded-lg p-3 flex items-center justify-between group hover:border-amber-600/20 transition-all border border-transparent"
+              class="bg-transparent rounded-lg p-1 flex items-center justify-between group hover:border-amber-600/20 transition-all border border-transparent"
             >
               <div class="flex-1">
                 <div class="flex items-center">
+                 
                   <p class="text-[#8E8E8E] font-medium text-sm">{{ selection.match?.name || selection.matchName || 'Match' }}</p>
                 </div>
                 <div class="flex items-center gap-1 ml-0 mt-0.5">
@@ -145,25 +145,13 @@
         <!-- Timestamps & Actions -->
         <div class="mt-5 bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-4">
           <div class="flex flex-wrap items-center justify-between gap-3">
-            <div class="flex flex-wrap items-center gap-6">
-              <div>
+            <div class="flex flex-wrap items-center gap-6 justify-center">
                 <p class="text-[10px] uppercase tracking-wider text-[#606060] font-medium">Placed</p>
-                <p class="text-white text-sm">{{ formatDate(bet.createdAt) }}</p>
-              </div>
-              <div v-if="bet.settledAt">
-                <p class="text-[10px] uppercase tracking-wider text-[#606060] font-medium">Settled</p>
-                <p class="text-white text-sm">{{ formatDate(bet.settledAt) }}</p>
-              </div>
+                <p class="text-white text-sm ">{{ formatDate(bet.createdAt) }}</p>
+              
+             
             </div>
-            
-            <!-- Cancel Button (only if open) -->
-            <button 
-              v-if="isOpen"
-              @click="cancelBet"
-              class="text-xs text-red-400 hover:text-red-300 transition-colors px-3 py-1.5 rounded-lg border border-red-400/20 hover:border-red-400/40"
-            >
-              Cancel Bet
-            </button>
+         
           </div>
         </div>
       </div>
@@ -226,63 +214,6 @@ const betStatus = computed(() => {
 const isWon = computed(() => betStatus.value === 'won')
 const isLost = computed(() => betStatus.value === 'lost')
 const isOpen = computed(() => betStatus.value === 'open')
-
-// ---- NEW: Bet Calculations ----
-// Get stake amount from bet
-const stakeAmount = computed(() => {
-  if (!bet.value) return 0
-  return parseFloat(bet.value.stake) || 0
-})
-
-// Get total odds directly from database
-const totalOdds = computed(() => {
-  if (!bet.value) return 0
-  
-  // Get total odds from database field
-  const odds = parseFloat(bet.value.totalOdds) || 
-               parseFloat(bet.value.odds) || 
-               1.00
-  
-  return odds
-})
-
-// Calculate potential win
-const potentialWin = computed(() => {
-  if (!stakeAmount.value || !totalOdds.value) return 0
-  return Math.round(stakeAmount.value * (totalOdds.value - 1))
-})
-
-// Calculate tax (12%)
-const tax = computed(() => {
-  if (!potentialWin.value) return 0
-  return Math.round(potentialWin.value * 0.12)
-})
-
-// Calculate payout (potential win - tax + stake)
-const payout = computed(() => {
-  if (!potentialWin.value) return 0
-  return Math.round(potentialWin.value - tax.value + stakeAmount.value)
-})
-
-// Calculate net payout (actual payout based on result)
-const netPayout = computed(() => {
-  if (!bet.value) return 0
-  
-  // If bet is settled
-  if (bet.value.status === 'SETTLED') {
-    if (bet.value.result === 'WON') {
-      // Use bet's potential return or net payout from database
-      return parseFloat(bet.value.potentialReturn || 
-                       bet.value.netPayout || 
-                       payout.value) || 0
-    } else if (bet.value.result === 'LOST') {
-      return 0
-    }
-  }
-  
-  // For open bets, show potential payout
-  return payout.value
-})
 
 // ---- Helpers ----
 const formatNumber = (value) => {
@@ -362,6 +293,11 @@ const cancelBet = async () => {
   }
 }
 
+// bet calculation 
+
+
+
+
 // ---- Mounted ----
 onMounted(() => {
   loadBet()
@@ -391,10 +327,5 @@ onMounted(() => {
 }
 .animate-spin {
   animation: spin 1s linear infinite;
-}
-
-/* Custom styles for the details */
-.bg-\[\#2A2A2A\]\/20 {
-  background-color: rgba(42, 42, 42, 0.2);
 }
 </style>

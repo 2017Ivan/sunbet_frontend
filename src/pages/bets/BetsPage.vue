@@ -144,9 +144,7 @@ const activeTab = ref('open')
 const isLoadingBets = ref(false)
 
 // ---- Computed ----
-// const openBets = computed(() => {
-//   return betStore.userBets.filter(b => b.status === 'OPEN' || b.status === 'PENDING')
-// })
+
 const openBets = computed(() => {
   return betStore.userBets.filter(b => {
     const status = (b.status || '').toUpperCase()
