@@ -110,7 +110,7 @@
         </div>
 
         <!-- Selections -->
-        <div v-if="bet.selections && bet.selections.length > 0" class="mt-3 bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-4">
+        <div v-if="bet.selections && bet.selections.length > 0" class="mt-3 bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-2">
           <div class="flex items-center justify-between mb-4">
             <h3 class="text-sm font-semibold text-white flex items-center gap-2">
               <svg class="w-4 h-4 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -126,18 +126,24 @@
             <div 
               v-for="(selection, index) in bet.selections" 
               :key="index"
-              class="bg-[#0D0D0D] rounded-lg p-3 flex items-center justify-between group hover:border-amber-600/20 transition-all border border-transparent"
+              class="bg-[#0D0D0D] rounded-lg p-1 flex  flex-col   group hover:border-amber-600/20 transition-all border border-transparent"
             >
-              <div class="flex-1">
-                <div class="flex items-center">
-                  <p class="text-[#8E8E8E] font-medium text-sm">{{ selection.match?.name || selection.matchName || 'Match' }}</p>
-                </div>
+             
                 <div class="flex items-center gap-1 ml-0 mt-0.5">
-                  <span class="text-xs font-semibold text-[#A0A0A0]">{{ selection.match?.market || selection.market || '1X2' }}</span>
-                  <span class="text-xs text-[#A0A0A0] font-semibold">| Full Time - <span class="text-[#A9A9A9] font-medium">{{ selection.selection || selection.pick || 'N/A' }}</span></span>
+                  
                 </div>
-              </div>
-              <span class="text-[#A32D2D] font-bold text-sm bg-amber-600/10 px-3 py-1 rounded-lg">{{ parseFloat(selection.odds).toFixed(2) }}</span>
+                <div class="flex  justify-between items-center">
+                  <p class="text-[#8E8E8E] font-medium text-sm">{{ selection.match?.name || selection.matchName || 'Match' }}</p>
+                  <span class="text-[#A32D2D] font-bold text-sm  px-1 py-1 rounded-lg">{{ parseFloat(selection.odds).toFixed(2) }}</span>
+                </div>
+                 <div class="flex  justify-between items-center py-1">
+                  <span class="text-sm text-[#A0A0A0] font-bold">League name</span>
+                  <span class="text-xs text-[#A0A0A0] font-semibold">(<span class="text-xs text-rose-600/40 font-bold">1-2</span>)</span>
+                </div>
+                 <div class="flex  justify-between items-center">
+                  <span class="text-xs text-[#A0A0A0] font-semibold">{{ selection.match?.market || '1X2' }} | Full Time - <span class="text-[#A9A9A9] font-medium">{{ selection.selection || selection.pick || 'N/A' }}</span></span>
+                  <span class="text-xs text-green-500 font-semibold">WON</span>
+                </div>
             </div>
           </div>
         </div>
@@ -145,25 +151,13 @@
         <!-- Timestamps & Actions -->
         <div class="mt-5 bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-4">
           <div class="flex flex-wrap items-center justify-between gap-3">
-            <div class="flex flex-wrap items-center gap-6">
-              <div>
+            <div class="flex flex-wrap items-center gap-6 justify-center">
                 <p class="text-[10px] uppercase tracking-wider text-[#606060] font-medium">Placed</p>
-                <p class="text-white text-sm">{{ formatDate(bet.createdAt) }}</p>
-              </div>
-              <div v-if="bet.settledAt">
-                <p class="text-[10px] uppercase tracking-wider text-[#606060] font-medium">Settled</p>
-                <p class="text-white text-sm">{{ formatDate(bet.settledAt) }}</p>
-              </div>
+                <p class="text-white text-sm ">{{ formatDate(bet.createdAt) }}</p>
+              
+             
             </div>
-            
-            <!-- Cancel Button (only if open) -->
-            <button 
-              v-if="isOpen"
-              @click="cancelBet"
-              class="text-xs text-red-400 hover:text-red-300 transition-colors px-3 py-1.5 rounded-lg border border-red-400/20 hover:border-red-400/40"
-            >
-              Cancel Bet
-            </button>
+         
           </div>
         </div>
       </div>
@@ -286,10 +280,13 @@ const netPayout = computed(() => {
 
 // ---- Helpers ----
 const formatNumber = (value) => {
-  if (value === undefined || value === null) return '0'
+  if (value === undefined || value === null) return '0.00'
   const num = parseFloat(value)
-  if (isNaN(num)) return '0'
-  return num.toLocaleString()
+  if (isNaN(num)) return '0.00'
+  return num.toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  })
 }
 
 const formatDate = (dateString) => {
