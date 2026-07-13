@@ -27,11 +27,6 @@ export const useBetStore = defineStore('bet', () => {
   const uncheckedWins = ref([])
   const hasUnreadWins = ref(false)
 
-  // ── NEW: Auto-refresh state ──────────────────────────────────────────────
-  const lastUpdateTime = ref(Date.now())
-  const isAutoRefreshEnabled = ref(true)
-  const refreshInterval = ref(30000) // 30 seconds
-
   // ── Computed ──────────────────────────────────────────────────────────────
   const slipCount = computed(() => slip.value.length)
   const totalOdds = computed(() => slip.value.reduce((acc, b) => acc * (b.odds || 1), 1))
@@ -42,22 +37,6 @@ export const useBetStore = defineStore('bet', () => {
 
   const canPlaceBet = computed(() => slipCount.value > 0 && stake.value >= 100)
   const isStakeValid = computed(() => stake.value >= 100)
-
-  // ── NEW: Computed for live data ──────────────────────────────────────────
-  const activeBets = computed(() => {
-    return userBets.value.filter(bet => 
-      bet.status === 'OPEN' || bet.status === 'PENDING'
-    )
-  })
-
-  const settledBets = computed(() => {
-    return userBets.value.filter(bet => 
-      bet.status === 'SETTLED'
-    )
-  })
-
-  const totalActiveBets = computed(() => activeBets.value.length)
-  const totalSettledBets = computed(() => settledBets.value.length)
 
   // ── SLIP ACTIONS ──────────────────────────────────────────────────────────
   
@@ -117,10 +96,6 @@ export const useBetStore = defineStore('bet', () => {
       
       if (result.success) {
         lastPlacedBet.value = result.data
-        
-        // ── NEW: Auto-refresh after placing bet ──────────────────────────
-        await refreshUserData()
-        
         clearSlip()
         return { success: true, data: result.data }
       } else {
@@ -135,55 +110,6 @@ export const useBetStore = defineStore('bet', () => {
     }
   }
 
-  // ── NEW: Refresh all user data ──────────────────────────────────────────
-  async function refreshUserData() {
-    try {
-      await Promise.all([
-        loadUserBets(),
-        loadBetStats(),
-        loadUncheckedWins()
-      ])
-      lastUpdateTime.value = Date.now()
-      return { success: true }
-    } catch (error) {
-      console.error('Error refreshing user data:', error)
-      return { success: false, error: error.message }
-    }
-  }
-
-  // ── NEW: Start auto-refresh ─────────────────────────────────────────────
-  let autoRefreshTimer = null
-
-  function startAutoRefresh() {
-    if (autoRefreshTimer) {
-      clearInterval(autoRefreshTimer)
-    }
-    
-    if (isAutoRefreshEnabled.value) {
-      autoRefreshTimer = setInterval(async () => {
-        if (!isPlacingBet.value) {
-          await refreshUserData()
-        }
-      }, refreshInterval.value)
-    }
-  }
-
-  function stopAutoRefresh() {
-    if (autoRefreshTimer) {
-      clearInterval(autoRefreshTimer)
-      autoRefreshTimer = null
-    }
-  }
-
-  function toggleAutoRefresh(enabled) {
-    isAutoRefreshEnabled.value = enabled
-    if (enabled) {
-      startAutoRefresh()
-    } else {
-      stopAutoRefresh()
-    }
-  }
-
   // ── USER BETS ─────────────────────────────────────────────────────────────
   
   async function loadUserBets(options = {}) {
@@ -193,10 +119,8 @@ export const useBetStore = defineStore('bet', () => {
       const result = await betService.getUserBets(options)
       
       if (result.success) {
-        // ── FIX: Preserve reactivity ─────────────────────────────────────
-        userBets.value = [...result.data.bets]
+        userBets.value = result.data.bets
         userBetsTotal.value = result.data.total
-        lastUpdateTime.value = Date.now()
         return { success: true, data: result.data }
       } else {
         return { success: false, error: result.message }
@@ -209,30 +133,6 @@ export const useBetStore = defineStore('bet', () => {
     }
   }
 
-  // ── NEW: Load single bet by ID with cache check ────────────────────────
-  async function loadBetById(betId) {
-    // Check if we already have it in store
-    const existingBet = userBets.value.find(b => String(b.id) === String(betId))
-    if (existingBet) {
-      return { success: true, data: existingBet, fromCache: true }
-    }
-
-    try {
-      const result = await betService.getBetById(betId)
-      if (result.success) {
-        // Add to userBets if not exists
-        const exists = userBets.value.some(b => String(b.id) === String(result.data.id))
-        if (!exists) {
-          userBets.value = [result.data, ...userBets.value]
-        }
-        return { success: true, data: result.data }
-      }
-      return { success: false, message: result.message }
-    } catch (error) {
-      return { success: false, message: error.message }
-    }
-  }
-
   async function loadBetStats() {
     isLoadingStats.value = true
     
@@ -240,7 +140,7 @@ export const useBetStore = defineStore('bet', () => {
       const result = await betService.getUserBetStats()
       
       if (result.success) {
-        betStats.value = { ...result.data }
+        betStats.value = result.data
         return { success: true, data: result.data }
       } else {
         return { success: false, error: result.message }
@@ -316,16 +216,12 @@ export const useBetStore = defineStore('bet', () => {
     }
   }
 
-  // ── NEW: Cancel bet with auto-refresh ──────────────────────────────────
   async function cancelUserBet(betId) {
     try {
       const result = await betService.cancelBet(betId)
       
       if (result.success) {
-        // Remove bet from local state immediately
-        userBets.value = userBets.value.filter(b => String(b.id) !== String(betId))
-        // Then refresh to get latest data
-        await refreshUserData()
+        await loadUserBets()
         return { success: true, data: result.data }
       } else {
         return { success: false, message: result.message }
@@ -351,7 +247,7 @@ export const useBetStore = defineStore('bet', () => {
       const result = await betService.getUncheckedWins()
       
       if (result.success) {
-        uncheckedWins.value = [...(result.data.wins || [])]
+        uncheckedWins.value = result.data.wins || []
         hasUnreadWins.value = result.data.hasUnreadWins || false
         return { success: true, data: result.data }
       }
@@ -410,27 +306,11 @@ export const useBetStore = defineStore('bet', () => {
     }
   }
 
-  // ── NEW: Settle bet with auto-refresh ──────────────────────────────────
   async function settleBet(betId, result) {
     try {
       const response = await api.patch(`/bets/admin/bets/${betId}/approve`, { result })
 
       if (response.data && response.data.success) {
-        // Update local state immediately
-        const betIndex = userBets.value.findIndex(b => String(b.id) === String(betId))
-        if (betIndex !== -1) {
-          userBets.value[betIndex] = {
-            ...userBets.value[betIndex],
-            status: 'SETTLED',
-            result: result
-          }
-          // Trigger reactivity
-          userBets.value = [...userBets.value]
-        }
-        
-        // Refresh to get latest data
-        await refreshUserData()
-        
         return {
           success: true,
           data: response.data.data,
@@ -470,9 +350,6 @@ export const useBetStore = defineStore('bet', () => {
     loadedBet,
     uncheckedWins,
     hasUnreadWins,
-    lastUpdateTime,
-    isAutoRefreshEnabled,
-    refreshInterval,
     
     // Computed
     slipCount,
@@ -480,10 +357,6 @@ export const useBetStore = defineStore('bet', () => {
     potentialWin,
     canPlaceBet,
     isStakeValid,
-    activeBets,
-    settledBets,
-    totalActiveBets,
-    totalSettledBets,
     
     // Slip actions
     isSelected,
@@ -495,7 +368,6 @@ export const useBetStore = defineStore('bet', () => {
     // Bet actions
     placeBetWithBackend,
     loadUserBets,
-    loadBetById,
     loadBetStats,
     loadBetByCode,
     applyLoadedBetToSlip,
@@ -507,13 +379,7 @@ export const useBetStore = defineStore('bet', () => {
     
     // Admin actions
     loadAdminBets,
-    settleBet,
-    
-    // Auto-refresh actions
-    refreshUserData,
-    startAutoRefresh,
-    stopAutoRefresh,
-    toggleAutoRefresh
+    settleBet
   }
 }, {
   persist: {

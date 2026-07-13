@@ -21,19 +21,6 @@ const decodeToken = (token) => {
   }
 }
 
-// ── Helper: Check if token is expired ─────────────────────────────────────
-const isTokenExpired = (token) => {
-  if (!token) return true
-  try {
-    const decoded = decodeToken(token)
-    if (!decoded || !decoded.exp) return true
-    // exp is in seconds, Date.now() is in milliseconds
-    return Date.now() >= decoded.exp * 1000
-  } catch (error) {
-    return true
-  }
-}
-
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     user: {
@@ -49,11 +36,7 @@ export const useAuthStore = defineStore('auth', {
     error: null,
     accessToken: null,
     refreshToken: null,
-    initialized: false,
-    // ── NEW: Auto-refresh state ──────────────────────────────────────────
-    lastAuthUpdate: null,
-    isAutoRefreshEnabled: true,
-    refreshInterval: 30000 // 30 seconds
+    initialized: false
   }),
   
   getters: {
@@ -67,12 +50,6 @@ export const useAuthStore = defineStore('auth', {
         return role.includes(state.user.role)
       }
       return state.user.role === role
-    },
-    
-    // ── NEW: Check if token is valid ────────────────────────────────────
-    isTokenValid: (state) => {
-      if (!state.accessToken) return false
-      return !isTokenExpired(state.accessToken)
     },
     
     // Ensure balance is always a number
@@ -93,8 +70,10 @@ export const useAuthStore = defineStore('auth', {
       const balance = state.user.balance
       if (balance === null || balance === undefined) return 'TZS 0.00'
       
+      // Ensure it's a number
       const numBalance = typeof balance === 'string' ? parseFloat(balance) : balance
       
+      // Format with commas and 2 decimal places
       return `TZS ${numBalance.toLocaleString('en-US', {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
@@ -132,19 +111,6 @@ export const useAuthStore = defineStore('auth', {
       console.log('🔑 Token from localStorage:', token ? 'exists' : 'not found')
       
       if (token) {
-        // ── NEW: Check if token is expired ──────────────────────────────
-        if (isTokenExpired(token)) {
-          console.warn('⚠️ Token expired, trying to refresh...')
-          const refreshed = await this.refreshAccessToken()
-          if (!refreshed) {
-            console.warn('⚠️ Token refresh failed, clearing auth')
-            this.clearAuth()
-            return false
-          }
-          // Token refreshed, continue with new token
-          return this.initialize()
-        }
-
         try {
           const decoded = decodeToken(token)
           console.log('🔓 Decoded token:', decoded)
@@ -156,7 +122,6 @@ export const useAuthStore = defineStore('auth', {
             this.isLoggedIn = true
             this.accessToken = token
             this.initialized = true
-            this.lastAuthUpdate = Date.now()
             
             console.log('✅ Store initialized. User:', {
               id: this.user.id,
@@ -164,12 +129,8 @@ export const useAuthStore = defineStore('auth', {
               isLoggedIn: this.isLoggedIn
             })
             
-            // Load user data
             await this.fetchUserProfile()
             await this.fetchUserBalance()
-            
-            // ── NEW: Start auto-refresh ──────────────────────────────────
-            this.startAutoRefresh()
             
             console.log('✅ Final state after init:', this.$state)
             return true
@@ -190,31 +151,6 @@ export const useAuthStore = defineStore('auth', {
       }
     },
     
-    // ── NEW: Refresh access token ──────────────────────────────────────────
-    async refreshAccessToken() {
-      try {
-        const refreshToken = localStorage.getItem('refresh_token')
-        if (!refreshToken) {
-          return false
-        }
-
-        const response = await api.post('/auth/refresh', { refreshToken })
-        
-        if (response.data && response.data.accessToken) {
-          const newToken = response.data.accessToken
-          localStorage.setItem('access_token', newToken)
-          this.accessToken = newToken
-          this.isLoggedIn = true
-          this.lastAuthUpdate = Date.now()
-          return true
-        }
-        return false
-      } catch (error) {
-        console.error('Token refresh failed:', error)
-        return false
-      }
-    },
-
     // ── REGISTER ────────────────────────────────────────────────────────────
     async register(phone_number, password) {
       this.isLoading = true
@@ -271,7 +207,6 @@ export const useAuthStore = defineStore('auth', {
           this.user.balance = 0
           this.isLoggedIn = true
           this.initialized = true
-          this.lastAuthUpdate = Date.now()
           
           console.log('✅ Login successful. User state:', {
             id: this.user.id,
@@ -280,9 +215,6 @@ export const useAuthStore = defineStore('auth', {
             isLoggedIn: this.isLoggedIn,
             initialized: this.initialized
           })
-          
-          // ── NEW: Start auto-refresh after login ──────────────────────
-          this.startAutoRefresh()
           
           await this.fetchUserProfile()
           await this.fetchUserBalance()
@@ -309,9 +241,6 @@ export const useAuthStore = defineStore('auth', {
     
     // ── LOGOUT ──────────────────────────────────────────────────────────────
     logout() {
-      // ── NEW: Stop auto-refresh ────────────────────────────────────────
-      this.stopAutoRefresh()
-      
       authService.logout()
       this.clearAuth()
       return { success: true, message: 'Logged out successfully' }
@@ -332,8 +261,6 @@ export const useAuthStore = defineStore('auth', {
       this.refreshToken = null
       this.error = null
       this.initialized = false
-      this.lastAuthUpdate = null
-      this.stopAutoRefresh()
     },
     
     // ── FETCH USER PROFILE ──────────────────────────────────────────────────
@@ -359,21 +286,11 @@ export const useAuthStore = defineStore('auth', {
           this.user.role = currentRole
           this.user.id = currentId
           
-          this.lastAuthUpdate = Date.now()
-          
           console.log('✅ Profile fetched. Keeping role from token:', this.user.role)
           
           return { success: true, user: this.user }
         } else {
-          // ── NEW: If profile fetch fails, check token ────────────────
-          if (result.message?.includes('token') || result.message?.includes('auth')) {
-            const refreshed = await this.refreshAccessToken()
-            if (refreshed) {
-              return this.fetchUserProfile()
-            } else {
-              this.clearAuth()
-            }
-          }
+          this.clearAuth()
           return { success: false, message: result.message }
         }
       } catch (error) {
@@ -397,7 +314,6 @@ export const useAuthStore = defineStore('auth', {
         if (result.success) {
           const balance = result.balance || result.data?.balance || 0
           this.user.balance = typeof balance === 'string' ? parseFloat(balance) : balance
-          this.lastAuthUpdate = Date.now()
           console.log('💰 Balance saved as number:', this.user.balance)
           return { success: true, balance: this.user.balance }
         } else {
@@ -408,28 +324,10 @@ export const useAuthStore = defineStore('auth', {
         return { success: false, message: error.message }
       }
     },
-
-    // ── NEW: Refresh all user data ──────────────────────────────────────────
-    async refreshUserData() {
-      if (!this.isLoggedIn) return { success: false, message: 'Not logged in' }
-      
-      try {
-        await Promise.all([
-          this.fetchUserProfile(),
-          this.fetchUserBalance()
-        ])
-        this.lastAuthUpdate = Date.now()
-        return { success: true }
-      } catch (error) {
-        console.error('Error refreshing user data:', error)
-        return { success: false, message: error.message }
-      }
-    },
     
     // ── UPDATE BALANCE LOCALLY ─────────────────────────────────────────────
     updateBalanceLocally(newBalance) {
       this.user.balance = typeof newBalance === 'string' ? parseFloat(newBalance) : newBalance
-      this.lastAuthUpdate = Date.now()
     },
     
     // ── DEPOSIT ─────────────────────────────────────────────────────────────
@@ -486,8 +384,6 @@ export const useAuthStore = defineStore('auth', {
             await this.fetchUserBalance()
           }
           
-          this.lastAuthUpdate = Date.now()
-          
           return { 
             success: true, 
             message: response.data.message,
@@ -535,38 +431,6 @@ export const useAuthStore = defineStore('auth', {
       } finally {
         this.isLoading = false
       }
-    },
-
-    // ── NEW: Auto-refresh methods ──────────────────────────────────────────
-    startAutoRefresh() {
-      if (this._autoRefreshTimer) {
-        clearInterval(this._autoRefreshTimer)
-      }
-      
-      if (this.isAutoRefreshEnabled && this.isLoggedIn) {
-        this._autoRefreshTimer = setInterval(async () => {
-          if (this.isLoggedIn && !this.isLoading) {
-            console.log('🔄 Auto-refreshing user data...')
-            await this.refreshUserData()
-          }
-        }, this.refreshInterval)
-      }
-    },
-
-    stopAutoRefresh() {
-      if (this._autoRefreshTimer) {
-        clearInterval(this._autoRefreshTimer)
-        this._autoRefreshTimer = null
-      }
-    },
-
-    toggleAutoRefresh(enabled) {
-      this.isAutoRefreshEnabled = enabled
-      if (enabled) {
-        this.startAutoRefresh()
-      } else {
-        this.stopAutoRefresh()
-      }
     }
   },
   
@@ -574,6 +438,6 @@ export const useAuthStore = defineStore('auth', {
   persist: {
     key: 'auth-store',
     storage: localStorage,
-    paths: ['user', 'isLoggedIn', 'accessToken', 'refreshToken', 'initialized', 'lastAuthUpdate']
+    paths: ['user', 'isLoggedIn', 'accessToken', 'refreshToken', 'initialized']
   }
 })

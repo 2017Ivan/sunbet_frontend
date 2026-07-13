@@ -66,19 +66,13 @@
 
         <!-- Logged in: Balance + Avatar -->
         <template v-else>
-          <!-- Balance Chip with animation -->
+          <!-- Balance Chip -->
           <RouterLink
             to="/wallet"
-            class="flex items-center gap-1 px-2 py-1.5 sm:py-2 rounded-[8px] sm:rounded-[10px] bg-gray-950/40 border border-[#A32D2D]/40 hover:border-[#A32D2D] transition-colors relative"
+            class="flex items-center gap-1  px-2  py-1.5 sm:py-2 rounded-[8px] sm:rounded-[10px] bg-gray-950/40 border border-[#A32D2D]/40 hover:border-[#A32D2D] transition-colors"
           >
-            <!-- Balance update indicator -->
-            <span v-if="balanceUpdated" class="absolute -top-1 -right-1 w-2 h-2 bg-green-400 rounded-full animate-ping"></span>
-            
             <span class="text-[9px] text-gray-300 font-medium xs:inline">TZS</span>
-            <span class="text-xs font-bold text-[#D23434] transition-all duration-300" 
-                  :class="{ 'scale-110 text-green-400': balanceUpdated }">
-              {{ formattedBalance }}
-            </span>
+            <span class="text-xs font-bold text-[#D23434]">{{ formattedBalance }}</span>
           </RouterLink>
 
           <!-- Avatar -->
@@ -137,7 +131,7 @@
     <!-- ROW 2: Search Bar -->
     <div 
       v-show="isSearchOpen"
-      class="py-2 sm:py-3 transition-all duration-300 max-w-7xl mx-auto px-2 bg-rose-950"
+      class="py-2 sm:py-3 transition-all duration-300 max-w-7xl mx-auto px-2  bg-rose-950"
       :class="{ 'animate-slide-down': isSearchOpen }"
     >
       <div class="flex items-center gap-1 sm:gap-2">
@@ -182,13 +176,14 @@
         </div>
       </div>
     </div>
+
+   
   </header>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, watch, h } from 'vue'
+import { ref, computed, onMounted, onUnmounted, h } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
-import { useAuthStore } from '../../../stores/auth/authStore'
 
 const props = defineProps({
   isLoggedIn: { type: Boolean, default: false },
@@ -196,45 +191,11 @@ const props = defineProps({
   balance: { type: Number, default: 0 },
 })
 
-const emit = defineEmits(['toggle-sidebar', 'logout', 'update-balance'])
+const emit = defineEmits(['toggle-sidebar', 'logout'])
 
 const route = useRoute()
-const authStore = useAuthStore()
 
-// ── Balance State ──────────────────────────────────────────────────────────
-const balanceUpdated = ref(false)
-let balanceUpdateTimeout = null
-
-// ── NEW: Watch for balance changes ──────────────────────────────────────
-watch(() => props.balance, (newVal, oldVal) => {
-  if (newVal !== oldVal) {
-    // Show balance update animation
-    balanceUpdated.value = true
-    clearTimeout(balanceUpdateTimeout)
-    balanceUpdateTimeout = setTimeout(() => {
-      balanceUpdated.value = false
-    }, 1000)
-    
-    // Emit update event
-    emit('update-balance', newVal)
-  }
-}, { immediate: false })
-
-// ── NEW: Auto-refresh balance every 30 seconds ──────────────────────────
-let balanceRefreshInterval = null
-
-const refreshBalance = async () => {
-  if (props.isLoggedIn && authStore.isLoggedIn) {
-    try {
-      await authStore.fetchUserBalance()
-      // The balance will update via watch
-    } catch (error) {
-      console.error('Error refreshing balance:', error)
-    }
-  }
-}
-
-// ── Search State ──────────────────────────────────────────────────────────
+// ---- Search State ----
 const isSearchOpen = ref(false)
 const searchQuery = ref('')
 const suggestions = ref([
@@ -263,7 +224,7 @@ const performSearch = () => {
   }
 }
 
-// ── Icons ──────────────────────────────────────────────────────────────────
+// ---- Icons ----
 const HomeIcon = {
   render: () => h('svg', { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': '2' }, [
     h('path', { d: 'M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z' }),
@@ -322,7 +283,7 @@ const BetsIcon = {
   ])
 }
 
-// ── Nav Links ──────────────────────────────────────────────────────────────
+// ---- Nav Links ----
 const navLinks = [
   { to: '/', name: 'home', label: 'Home', icon: HomeIcon },
   { to: '/sports', name: 'sports', label: 'Sports', icon: SportsIcon },
@@ -337,18 +298,16 @@ const dropdownItems = [
   { to: '/bets', label: 'My Bets', icon: BetsIcon },
 ]
 
-// ── Dropdown ──────────────────────────────────────────────────────────────
+// ---- Dropdown ----
 const dropdownOpen = ref(false)
 const avatarRef = ref(null)
 
-// ── NEW: Use auth store balance directly ────────────────────────────────
 const formattedBalance = computed(() => {
-  // Use auth store balance if available, otherwise props
-  const balance = authStore.isLoggedIn ? authStore.userBalance : props.balance
+  const bal = props.balance || 0.00
   return new Intl.NumberFormat('en-TZ', { 
     minimumFractionDigits: 2,
     maximumFractionDigits: 2 
-  }).format(balance || 0)
+  }).format(bal)
 })
 
 const handleLogout = () => {
@@ -362,22 +321,8 @@ const handleClickOutside = (e) => {
   }
 }
 
-// ── Lifecycle ──────────────────────────────────────────────────────────────
-onMounted(() => {
-  document.addEventListener('click', handleClickOutside)
-  
-  // Start auto-refresh for balance
-  if (props.isLoggedIn) {
-    refreshBalance()
-    balanceRefreshInterval = setInterval(refreshBalance, 30000) // 30 seconds
-  }
-})
-
-onUnmounted(() => {
-  document.removeEventListener('click', handleClickOutside)
-  clearInterval(balanceRefreshInterval)
-  clearTimeout(balanceUpdateTimeout)
-})
+onMounted(() => document.addEventListener('click', handleClickOutside))
+onUnmounted(() => document.removeEventListener('click', handleClickOutside))
 </script>
 
 <style scoped>
@@ -416,25 +361,5 @@ onUnmounted(() => {
 .dropdown-leave-to {
   opacity: 0;
   transform: scale(0.95) translateY(-8px);
-}
-
-/* Balance update animation */
-.scale-110 {
-  transform: scale(1.1);
-}
-
-.animate-ping {
-  animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;
-}
-
-@keyframes ping {
-  0% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  75%, 100% {
-    transform: scale(2);
-    opacity: 0;
-  }
 }
 </style>
