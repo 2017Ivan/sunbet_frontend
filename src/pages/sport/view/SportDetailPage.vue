@@ -262,7 +262,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useBetStore } from '../../../stores/bets/betStore.js'
 import gamesData from '../../../assets/DataManager/MatchePaser.js'
-import SportDetailSkeleton from './SportDetailSkeleton.vue'
+import SportDetailSkeleton from '../../../components/skeletons/sport/sportDetail/SportDetailSkeleton.vue'
 
 const router = useRouter()
 const route = useRoute()

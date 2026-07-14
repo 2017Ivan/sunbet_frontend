@@ -179,6 +179,6 @@
 </template>
 
 <script setup>
-import SkeletonLoader from '../../../components/skeletons/ui/SkeletonLoader.vue/index.js'
+import SkeletonLoader from '../../ui/SkeletonLoader.vue'
 
 </script>
