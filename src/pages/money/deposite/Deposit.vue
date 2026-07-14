@@ -48,7 +48,7 @@
                   required
                 />
               </div>
-              <p class="text-gray-400 text-xs mt-1">Minimum deposit: TSh 1,000</p>
+              <p class="text-gray-400 text-xs mt-1">Minimum deposit: TSh 168,000.00</p>
             </div>
 
          
