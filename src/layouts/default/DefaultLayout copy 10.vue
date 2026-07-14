@@ -154,28 +154,5 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* Hide scrollbar for all elements */
-:global(*::-webkit-scrollbar) {
-  width: 0px;
-  height: 0px;
-  background: transparent;
-}
-
-:global(*::-webkit-scrollbar-track) {
-  background: transparent;
-}
-
-:global(*::-webkit-scrollbar-thumb) {
-  background: transparent;
-}
-
-/* For Firefox */
-:global(*) {
-  scrollbar-width: none;
-}
-
-/* For IE and Edge */
-:global(*) {
-  -ms-overflow-style: none;
-}
+/* Custom styles */
 </style>

@@ -1,253 +1,259 @@
-<!-- SportDetailPage.vue - Iliyorekebishwa na themes -->
+<!-- SportDetailPage.vue - Na Skeleton Loading -->
 <template>
   <div class="min-h-screen bg-gray-900 pb-10">
-    <!-- Back Button & Header -->
-    <div class="sticky top-0 z-20 bg-gray-800 border-b border-gray-700 shadow-sm">
-      <div class="max-w-7xl mx-auto px-2 sm:px-4 py-2 sm:py-3">
-        <div class="flex items-center justify-between sm:justify-center relative">
-          <!-- Back Button - Left (absolute on large screens) -->
-          <button 
-            @click="goBack"
-            class="p-1.5 sm:p-2 hover:bg-gray-700 rounded-full transition-colors duration-200 flex-shrink-0 sm:absolute sm:left-0"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-          </button>
-          
-          <!-- Center Content -->
-          <div class="text-center flex-1 sm:flex-none px-1 sm:px-0">
-            <h1 class="text-[11px] sm:text-lg font-bold text-white truncate">{{ match?.homeTeam || matchData.homeTeam }} vs {{ match?.awayTeam || matchData.awayTeam }}</h1>
-            <p class="text-[9px] sm:text-xs text-gray-400 truncate">{{ match?.league || matchData.league }}</p>
-          </div>
-
-          <!-- Empty div to balance space-between on mobile -->
-          <div class="w-8 sm:hidden"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Match Details Content -->
-    <div class="max-w-7xl mx-auto px-2 mt-4">
-      <!-- Match Status Card -->
-      <div class="bg-gray-800 rounded-xl shadow-lg border border-gray-700 p-3 mb-4">
-        <div class="flex flex-col items-center">
-          <!-- Status Badge -->
-          <div class="mb-2 sm:mb-4">
-            <span class="px-2 sm:px-4 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-semibold bg-rose-600/20 text-rose-400 border border-rose-600/30">
-              ⏳ {{ match?.status || 'Upcoming' }}
-            </span>
-          </div>
-
-          <!-- Teams -->
-          <div class="flex items-center justify-between w-full max-w-2xl gap-1 sm:gap-4">
-            <!-- Home Team -->
-            <div class="flex flex-col items-center flex-1">
-              <div class="w-10 h-10 sm:w-16 sm:h-16  flex items-center justify-center text-sm sm:text-2xl font-bold text-blue-300 mb-1 sm:mb-2 ">
-                {{ getTeamInitials(match?.homeTeam || matchData.homeTeam) }}
-              </div>
-              <span class="text-[10px] sm:text-sm font-semibold text-gray-300 text-center line-clamp-1">{{ match?.homeTeam || matchData.homeTeam }}</span>
-              <span class="text-lg sm:text-2xl font-bold text-white mt-0.5 sm:mt-1">-</span>
+    <!-- Loading State -->
+    <SportDetailSkeleton v-if="isLoading" />
+    
+    <!-- Actual Content -->
+    <template v-else>
+      <!-- Back Button & Header -->
+      <div class="sticky top-0 z-20 bg-gray-800 border-b border-gray-700 shadow-sm">
+        <div class="max-w-7xl mx-auto px-2 sm:px-4 py-2 sm:py-3">
+          <div class="flex items-center justify-between sm:justify-center relative">
+            <!-- Back Button - Left (absolute on large screens) -->
+            <button 
+              @click="goBack"
+              class="p-1.5 sm:p-2 hover:bg-gray-700 rounded-full transition-colors duration-200 flex-shrink-0 sm:absolute sm:left-0"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+            </button>
+            
+            <!-- Center Content -->
+            <div class="text-center flex-1 sm:flex-none px-1 sm:px-0">
+              <h1 class="text-[11px] sm:text-lg font-bold text-white truncate">{{ match?.homeTeam || matchData.homeTeam }} vs {{ match?.awayTeam || matchData.awayTeam }}</h1>
+              <p class="text-[9px] sm:text-xs text-gray-400 truncate">{{ match?.league || matchData.league }}</p>
             </div>
 
-            <!-- VS / Time -->
-            <div class="flex flex-col items-center px-1 sm:px-4">
-              <span class="text-[10px] sm:text-xs font-bold text-gray-500 uppercase">vs</span>
-              <div class="w-8 h-8 sm:w-12 sm:h-12  flex items-center justify-center mt-1 sm:mt-2">
-                <span class="text-[10px] sm:text-sm font-bold text-gray-400">{{ match?.time || matchData.time || '00:00' }}</span>
-              </div>
-            </div>
-
-            <!-- Away Team -->
-            <div class="flex flex-col items-center flex-1">
-              <div class="w-10 h-10 sm:w-16 sm:h-16  flex items-center justify-center text-sm sm:text-2xl font-bold text-red-300 mb-1 sm:mb-2 ">
-                {{ getTeamInitials(match?.awayTeam || matchData.awayTeam) }}
-              </div>
-              <span class="text-[10px] sm:text-sm font-semibold text-gray-300 text-center line-clamp-1">{{ match?.awayTeam || matchData.awayTeam }}</span>
-              <span class="text-lg sm:text-2xl font-bold text-white mt-0.5 sm:mt-1">-</span>
-            </div>
-          </div>
-
-          <!-- Match Info -->
-          <div class="mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-gray-700 w-full">
-            <div class="flex justify-center gap-4 sm:gap-8 text-[10px] sm:text-xs text-gray-400">
-              <div class="flex items-center gap-1">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                <span>{{ match?.date || matchData.date }}</span>
-              </div>
-              <div class="flex items-center gap-1">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span>{{ match?.time || matchData.time }}</span>
-              </div>
-              <div class="flex items-center gap-1">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-                <span>{{ match?.totalBets || 0 }} bets</span>
-              </div>
-            </div>
+            <!-- Empty div to balance space-between on mobile -->
+            <div class="w-8 sm:hidden"></div>
           </div>
         </div>
       </div>
 
-      <!-- Markets Section -->
-      <div class="bg-gray-800 rounded-xl shadow-lg border border-gray-700 p-3 sm:p-4 mb-4">
-        <div class="space-y-4 sm:space-y-6">
-          
-          <!-- 1. 1X2 -->
-          <div>
-            <h4 class="text-xs sm:text-sm font-semibold text-gray-300 mb-2 sm:mb-3">1X2 | Full Time</h4>
-            <div class="grid grid-cols-3 gap-2 sm:gap-3">
-              <div 
-                @click="handleOddsClick('1', matchData.homeOdds, '1', '1X2 | Full Time')"
-                class="flex flex-row justify-between items-center cursor-pointer bg-gray-700 border border-gray-600 rounded-lg p-2 sm:p-3 text-center hover:bg-gray-600 transition-all"
-                :class="{ 'bg-rose-600 border-rose-500 hover:bg-rose-700': isSelectedInBetSlip('1') }"
-              >
-                <span class="text-xs text-gray-400 block" :class="{ 'text-white': isSelectedInBetSlip('1') }">1</span>
-                <span class="text-base sm:text-lg font-bold text-white">{{ matchData.homeOdds || '0' }}</span>
+      <!-- Match Details Content -->
+      <div class="max-w-7xl mx-auto px-2 mt-4">
+        <!-- Match Status Card -->
+        <div class="bg-gray-800 rounded-xl shadow-lg border border-gray-700 p-3 mb-4">
+          <div class="flex flex-col items-center">
+            <!-- Status Badge -->
+            <div class="mb-2 sm:mb-4">
+              <span class="px-2 sm:px-4 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-semibold bg-rose-600/20 text-rose-400 border border-rose-600/30">
+                ⏳ {{ match?.status || 'Upcoming' }}
+              </span>
+            </div>
+
+            <!-- Teams -->
+            <div class="flex items-center justify-between w-full max-w-2xl gap-1 sm:gap-4">
+              <!-- Home Team -->
+              <div class="flex flex-col items-center flex-1">
+                <div class="w-10 h-10 sm:w-16 sm:h-16 flex items-center justify-center text-sm sm:text-2xl font-bold text-blue-300 mb-1 sm:mb-2">
+                  {{ getTeamInitials(match?.homeTeam || matchData.homeTeam) }}
+                </div>
+                <span class="text-[10px] sm:text-sm font-semibold text-gray-300 text-center line-clamp-1">{{ match?.homeTeam || matchData.homeTeam }}</span>
+                <span class="text-lg sm:text-2xl font-bold text-white mt-0.5 sm:mt-1">-</span>
               </div>
-              <div 
-                @click="handleOddsClick('X', matchData.drawOdds, 'X', '1X2 | Full Time')"
-                class="flex flex-row justify-between items-center cursor-pointer bg-gray-700 border border-gray-600 rounded-lg p-2 sm:p-3 text-center hover:bg-gray-600 transition-all"
-                :class="{ 'bg-rose-600 border-rose-500 hover:bg-rose-700': isSelectedInBetSlip('X') }"
-              >
-                <span class="text-xs text-gray-400 block" :class="{ 'text-white': isSelectedInBetSlip('X') }">X</span>
-                <span class="text-base sm:text-lg font-bold text-white">{{ matchData.drawOdds || '0' }}</span>
+
+              <!-- VS / Time -->
+              <div class="flex flex-col items-center px-1 sm:px-4">
+                <span class="text-[10px] sm:text-xs font-bold text-gray-500 uppercase">vs</span>
+                <div class="w-8 h-8 sm:w-12 sm:h-12 flex items-center justify-center mt-1 sm:mt-2">
+                  <span class="text-[10px] sm:text-sm font-bold text-gray-400">{{ match?.time || matchData.time || '00:00' }}</span>
+                </div>
               </div>
-              <div 
-                @click="handleOddsClick('2', matchData.awayOdds, '2', '1X2 | Full Time')"
-                class="flex flex-row justify-between items-center cursor-pointer bg-gray-700 border border-gray-600 rounded-lg p-2 sm:p-3 text-center hover:bg-gray-600 transition-all"
-                :class="{ 'bg-rose-600 border-rose-500 hover:bg-rose-700': isSelectedInBetSlip('2') }"
-              >
-                <span class="text-xs text-gray-400 block" :class="{ 'text-white': isSelectedInBetSlip('2') }">2</span>
-                <span class="text-base sm:text-lg font-bold text-white">{{ matchData.awayOdds || '0' }}</span>
+
+              <!-- Away Team -->
+              <div class="flex flex-col items-center flex-1">
+                <div class="w-10 h-10 sm:w-16 sm:h-16 flex items-center justify-center text-sm sm:text-2xl font-bold text-red-300 mb-1 sm:mb-2">
+                  {{ getTeamInitials(match?.awayTeam || matchData.awayTeam) }}
+                </div>
+                <span class="text-[10px] sm:text-sm font-semibold text-gray-300 text-center line-clamp-1">{{ match?.awayTeam || matchData.awayTeam }}</span>
+                <span class="text-lg sm:text-2xl font-bold text-white mt-0.5 sm:mt-1">-</span>
+              </div>
+            </div>
+
+            <!-- Match Info -->
+            <div class="mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-gray-700 w-full">
+              <div class="flex justify-center gap-4 sm:gap-8 text-[10px] sm:text-xs text-gray-400">
+                <div class="flex items-center gap-1">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  <span>{{ match?.date || matchData.date }}</span>
+                </div>
+                <div class="flex items-center gap-1">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span>{{ match?.time || matchData.time }}</span>
+                </div>
+                <div class="flex items-center gap-1">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
+                  <span>{{ match?.totalBets || 0 }} bets</span>
+                </div>
               </div>
             </div>
           </div>
+        </div>
 
-          <!-- 2. Double Chance -->
-          <div>
-            <h4 class="text-xs sm:text-sm font-semibold text-gray-300 mb-2 sm:mb-3">Double Chance | Full Time</h4>
-            <div class="grid grid-cols-3 gap-2 sm:gap-3">
-              <div 
-                @click="handleOddsClick('1X', doubleChanceOdds.oneX, '1X', 'Double Chance | Full Time')"
-                class="flex flex-row justify-between items-center cursor-pointer bg-gray-700 border border-gray-600 rounded-lg p-2 sm:p-3 text-center hover:bg-gray-600 transition-all"
-                :class="{ 'bg-rose-600 border-rose-500 hover:bg-rose-700': isSelectedInBetSlip('1X') }"
-              >
-                <span class="text-xs text-gray-400 block" :class="{ 'text-white': isSelectedInBetSlip('1X') }">1X</span>
-                <span class="text-base sm:text-lg font-bold text-white">{{ doubleChanceOdds.oneX }}</span>
-              </div>
-              <div 
-                @click="handleOddsClick('X2', doubleChanceOdds.xTwo, 'X2', 'Double Chance | Full Time')"
-                class="flex flex-row justify-between items-center cursor-pointer bg-gray-700 border border-gray-600 rounded-lg p-2 sm:p-3 text-center hover:bg-gray-600 transition-all"
-                :class="{ 'bg-rose-600 border-rose-500 hover:bg-rose-700': isSelectedInBetSlip('X2') }"
-              >
-                <span class="text-xs text-gray-400 block" :class="{ 'text-white': isSelectedInBetSlip('X2') }">X2</span>
-                <span class="text-base sm:text-lg font-bold text-white">{{ doubleChanceOdds.xTwo }}</span>
-              </div>
-              <div 
-                @click="handleOddsClick('12', doubleChanceOdds.oneTwo, '12', 'Double Chance | Full Time')"
-                class="flex flex-row justify-between items-center cursor-pointer bg-gray-700 border border-gray-600 rounded-lg p-2 sm:p-3 text-center hover:bg-gray-600 transition-all"
-                :class="{ 'bg-rose-600 border-rose-500 hover:bg-rose-700': isSelectedInBetSlip('12') }"
-              >
-                <span class="text-xs text-gray-400 block" :class="{ 'text-white': isSelectedInBetSlip('12') }">12</span>
-                <span class="text-base sm:text-lg font-bold text-white">{{ doubleChanceOdds.oneTwo }}</span>
+        <!-- Markets Section -->
+        <div class="bg-gray-800 rounded-xl shadow-lg border border-gray-700 p-3 sm:p-4 mb-4">
+          <div class="space-y-4 sm:space-y-6">
+            
+            <!-- 1. 1X2 -->
+            <div>
+              <h4 class="text-xs sm:text-sm font-semibold text-gray-300 mb-2 sm:mb-3">1X2 | Full Time</h4>
+              <div class="grid grid-cols-3 gap-2 sm:gap-3">
+                <div 
+                  @click="handleOddsClick('1', matchData.homeOdds, '1', '1X2 | Full Time')"
+                  class="flex flex-row justify-between items-center cursor-pointer bg-gray-700 border border-gray-600 rounded-lg p-2 sm:p-3 text-center hover:bg-gray-600 transition-all"
+                  :class="{ 'bg-rose-600 border-rose-500 hover:bg-rose-700': isSelectedInBetSlip('1') }"
+                >
+                  <span class="text-xs text-gray-400 block" :class="{ 'text-white': isSelectedInBetSlip('1') }">1</span>
+                  <span class="text-base sm:text-lg font-bold text-white">{{ matchData.homeOdds || '0' }}</span>
+                </div>
+                <div 
+                  @click="handleOddsClick('X', matchData.drawOdds, 'X', '1X2 | Full Time')"
+                  class="flex flex-row justify-between items-center cursor-pointer bg-gray-700 border border-gray-600 rounded-lg p-2 sm:p-3 text-center hover:bg-gray-600 transition-all"
+                  :class="{ 'bg-rose-600 border-rose-500 hover:bg-rose-700': isSelectedInBetSlip('X') }"
+                >
+                  <span class="text-xs text-gray-400 block" :class="{ 'text-white': isSelectedInBetSlip('X') }">X</span>
+                  <span class="text-base sm:text-lg font-bold text-white">{{ matchData.drawOdds || '0' }}</span>
+                </div>
+                <div 
+                  @click="handleOddsClick('2', matchData.awayOdds, '2', '1X2 | Full Time')"
+                  class="flex flex-row justify-between items-center cursor-pointer bg-gray-700 border border-gray-600 rounded-lg p-2 sm:p-3 text-center hover:bg-gray-600 transition-all"
+                  :class="{ 'bg-rose-600 border-rose-500 hover:bg-rose-700': isSelectedInBetSlip('2') }"
+                >
+                  <span class="text-xs text-gray-400 block" :class="{ 'text-white': isSelectedInBetSlip('2') }">2</span>
+                  <span class="text-base sm:text-lg font-bold text-white">{{ matchData.awayOdds || '0' }}</span>
+                </div>
               </div>
             </div>
-          </div>
 
-          <!-- 3. BTTS -->
-          <div>
-            <h4 class="text-xs sm:text-sm font-semibold text-gray-300 mb-2 sm:mb-3">Both Teams To Score | Full Time</h4>
-            <div class="grid grid-cols-2 gap-2 sm:gap-3">
-              <div 
-                v-for="(odd, key) in bttsOdds"
-                :key="key"
-                @click="handleOddsClick(key, odd, key === 'yes' ? 'Yes' : 'No', 'Both Teams to Score | Full Time')"
-                class="flex flex-row justify-between items-center cursor-pointer bg-gray-700 border border-gray-600 rounded-lg p-2 sm:p-3 text-center hover:bg-gray-600 transition-all"
-                :class="{ 'bg-rose-600 border-rose-500 hover:bg-rose-700': isSelectedInBetSlip(key) }"
-              >
-                <span class="text-xs text-gray-400 block" :class="{ 'text-white': isSelectedInBetSlip(key) }">{{ key === 'yes' ? 'Yes' : 'No' }}</span>
-                <span class="text-base sm:text-lg font-bold text-white">{{ odd }}</span>
+            <!-- 2. Double Chance -->
+            <div>
+              <h4 class="text-xs sm:text-sm font-semibold text-gray-300 mb-2 sm:mb-3">Double Chance | Full Time</h4>
+              <div class="grid grid-cols-3 gap-2 sm:gap-3">
+                <div 
+                  @click="handleOddsClick('1X', doubleChanceOdds.oneX, '1X', 'Double Chance | Full Time')"
+                  class="flex flex-row justify-between items-center cursor-pointer bg-gray-700 border border-gray-600 rounded-lg p-2 sm:p-3 text-center hover:bg-gray-600 transition-all"
+                  :class="{ 'bg-rose-600 border-rose-500 hover:bg-rose-700': isSelectedInBetSlip('1X') }"
+                >
+                  <span class="text-xs text-gray-400 block" :class="{ 'text-white': isSelectedInBetSlip('1X') }">1X</span>
+                  <span class="text-base sm:text-lg font-bold text-white">{{ doubleChanceOdds.oneX }}</span>
+                </div>
+                <div 
+                  @click="handleOddsClick('X2', doubleChanceOdds.xTwo, 'X2', 'Double Chance | Full Time')"
+                  class="flex flex-row justify-between items-center cursor-pointer bg-gray-700 border border-gray-600 rounded-lg p-2 sm:p-3 text-center hover:bg-gray-600 transition-all"
+                  :class="{ 'bg-rose-600 border-rose-500 hover:bg-rose-700': isSelectedInBetSlip('X2') }"
+                >
+                  <span class="text-xs text-gray-400 block" :class="{ 'text-white': isSelectedInBetSlip('X2') }">X2</span>
+                  <span class="text-base sm:text-lg font-bold text-white">{{ doubleChanceOdds.xTwo }}</span>
+                </div>
+                <div 
+                  @click="handleOddsClick('12', doubleChanceOdds.oneTwo, '12', 'Double Chance | Full Time')"
+                  class="flex flex-row justify-between items-center cursor-pointer bg-gray-700 border border-gray-600 rounded-lg p-2 sm:p-3 text-center hover:bg-gray-600 transition-all"
+                  :class="{ 'bg-rose-600 border-rose-500 hover:bg-rose-700': isSelectedInBetSlip('12') }"
+                >
+                  <span class="text-xs text-gray-400 block" :class="{ 'text-white': isSelectedInBetSlip('12') }">12</span>
+                  <span class="text-base sm:text-lg font-bold text-white">{{ doubleChanceOdds.oneTwo }}</span>
+                </div>
               </div>
             </div>
-          </div>
 
-          <!-- 4. Over/Under -->
-          <div>
-            <h4 class="text-xs sm:text-sm font-semibold text-gray-300 mb-2 sm:mb-3">Over/Under | Full Time</h4>
-            <div class="grid grid-cols-2 gap-2 sm:gap-3">
-              <div 
-                v-for="(odd, key) in overUnderOdds" 
-                :key="key"
-                @click="handleOddsClick(key, odd, key.replace('_', ' ').toUpperCase(), 'Over/Under | Full Time')"
-                class="flex flex-row justify-between items-center cursor-pointer bg-gray-700 border border-gray-600 rounded-lg p-2 sm:p-3 text-center hover:bg-gray-600 transition-all"
-                :class="{ 'bg-rose-600 border-rose-500 hover:bg-rose-700': isSelectedInBetSlip(key) }"
-              >
-                <span class="text-[10px] sm:text-xs text-gray-400 block" :class="{ 'text-white': isSelectedInBetSlip(key) }">{{ key.replace('_', ' ').toUpperCase() }}</span>
-                <span class="text-base sm:text-lg font-bold text-white">{{ odd }}</span>
+            <!-- 3. BTTS -->
+            <div>
+              <h4 class="text-xs sm:text-sm font-semibold text-gray-300 mb-2 sm:mb-3">Both Teams To Score | Full Time</h4>
+              <div class="grid grid-cols-2 gap-2 sm:gap-3">
+                <div 
+                  v-for="(odd, key) in bttsOdds"
+                  :key="key"
+                  @click="handleOddsClick(key, odd, key === 'yes' ? 'Yes' : 'No', 'Both Teams to Score | Full Time')"
+                  class="flex flex-row justify-between items-center cursor-pointer bg-gray-700 border border-gray-600 rounded-lg p-2 sm:p-3 text-center hover:bg-gray-600 transition-all"
+                  :class="{ 'bg-rose-600 border-rose-500 hover:bg-rose-700': isSelectedInBetSlip(key) }"
+                >
+                  <span class="text-xs text-gray-400 block" :class="{ 'text-white': isSelectedInBetSlip(key) }">{{ key === 'yes' ? 'Yes' : 'No' }}</span>
+                  <span class="text-base sm:text-lg font-bold text-white">{{ odd }}</span>
+                </div>
               </div>
             </div>
-          </div>
 
-          <!-- 5. Correct Score Full Time -->
-          <div>
-            <h4 class="text-xs sm:text-sm font-semibold text-gray-300 mb-2 sm:mb-3">Correct Score | Full Time</h4>
-            <div class="grid grid-cols-3 sm:grid-cols-4 gap-1 sm:gap-2">
-              <div 
-                v-for="score in correctScoreOdds" 
-                :key="score.label"
-                @click="handleOddsClick(`CS_FT_${score.label}`, score.odds, score.label, 'Correct Score | Full Time')"
-                class="flex flex-row justify-between items-center cursor-pointer bg-gray-700 border border-gray-600 rounded-lg p-1.5 sm:p-2 text-center hover:bg-gray-600 transition-all"
-                :class="{ 'bg-rose-600 border-rose-500 hover:bg-rose-700': isSelectedInBetSlip(`CS_FT_${score.label}`) }"
-              >
-                <span class="text-[10px] sm:text-xs text-gray-400 block" :class="{ 'text-white': isSelectedInBetSlip(`CS_FT_${score.label}`) }">{{ score.label }}</span>
-                <span class="text-xs sm:text-sm font-bold text-white">{{ score.odds }}</span>
+            <!-- 4. Over/Under -->
+            <div>
+              <h4 class="text-xs sm:text-sm font-semibold text-gray-300 mb-2 sm:mb-3">Over/Under | Full Time</h4>
+              <div class="grid grid-cols-2 gap-2 sm:gap-3">
+                <div 
+                  v-for="(odd, key) in overUnderOdds" 
+                  :key="key"
+                  @click="handleOddsClick(key, odd, key.replace('_', ' ').toUpperCase(), 'Over/Under | Full Time')"
+                  class="flex flex-row justify-between items-center cursor-pointer bg-gray-700 border border-gray-600 rounded-lg p-2 sm:p-3 text-center hover:bg-gray-600 transition-all"
+                  :class="{ 'bg-rose-600 border-rose-500 hover:bg-rose-700': isSelectedInBetSlip(key) }"
+                >
+                  <span class="text-[10px] sm:text-xs text-gray-400 block" :class="{ 'text-white': isSelectedInBetSlip(key) }">{{ key.replace('_', ' ').toUpperCase() }}</span>
+                  <span class="text-base sm:text-lg font-bold text-white">{{ odd }}</span>
+                </div>
               </div>
             </div>
-          </div>
 
-          <!-- 6. Correct Score First Half -->
-          <div>
-            <h4 class="text-xs sm:text-sm font-semibold text-gray-300 mb-2 sm:mb-3">Correct Score | First Half</h4>
-            <div class="grid grid-cols-3 sm:grid-cols-4 gap-1 sm:gap-2">
-              <div 
-                v-for="score in correctScoreFirstHalfOdds" 
-                :key="score.label"
-                @click="handleOddsClick(`CS_FH_${score.label}`, score.odds, score.label, 'Correct Score | First Half')"
-                class="flex flex-row justify-between items-center cursor-pointer bg-gray-700 border border-gray-600 rounded-lg p-1.5 sm:p-2 text-center hover:bg-gray-600 transition-all"
-                :class="{ 'bg-rose-600 border-rose-500 hover:bg-rose-700': isSelectedInBetSlip(`CS_FH_${score.label}`) }"
-              >
-                <span class="text-[10px] sm:text-xs text-gray-400 block" :class="{ 'text-white': isSelectedInBetSlip(`CS_FH_${score.label}`) }">{{ score.label }}</span>
-                <span class="text-xs sm:text-sm font-bold text-white">{{ score.odds }}</span>
+            <!-- 5. Correct Score Full Time -->
+            <div>
+              <h4 class="text-xs sm:text-sm font-semibold text-gray-300 mb-2 sm:mb-3">Correct Score | Full Time</h4>
+              <div class="grid grid-cols-3 sm:grid-cols-4 gap-1 sm:gap-2">
+                <div 
+                  v-for="score in correctScoreOdds" 
+                  :key="score.label"
+                  @click="handleOddsClick(`CS_FT_${score.label}`, score.odds, score.label, 'Correct Score | Full Time')"
+                  class="flex flex-row justify-between items-center cursor-pointer bg-gray-700 border border-gray-600 rounded-lg p-1.5 sm:p-2 text-center hover:bg-gray-600 transition-all"
+                  :class="{ 'bg-rose-600 border-rose-500 hover:bg-rose-700': isSelectedInBetSlip(`CS_FT_${score.label}`) }"
+                >
+                  <span class="text-[10px] sm:text-xs text-gray-400 block" :class="{ 'text-white': isSelectedInBetSlip(`CS_FT_${score.label}`) }">{{ score.label }}</span>
+                  <span class="text-xs sm:text-sm font-bold text-white">{{ score.odds }}</span>
+                </div>
               </div>
             </div>
-          </div>
 
-          <!-- 7. Correct Score Second Half -->
-          <div>
-            <h4 class="text-xs sm:text-sm font-semibold text-gray-300 mb-2 sm:mb-3">Correct Score | Second Half</h4>
-            <div class="grid grid-cols-3 sm:grid-cols-4 gap-1 sm:gap-2">
-              <div 
-                v-for="score in correctScoreSecondHalfOdds" 
-                :key="score.label"
-                @click="handleOddsClick(`CS_SH_${score.label}`, score.odds, score.label, 'Correct Score | Second Half')"
-                class="flex flex-row justify-between items-center cursor-pointer bg-gray-700 border border-gray-600 rounded-lg p-1.5 sm:p-2 text-center hover:bg-gray-600 transition-all"
-                :class="{ 'bg-rose-600 border-rose-500 hover:bg-rose-700': isSelectedInBetSlip(`CS_SH_${score.label}`) }"
-              >
-                <span class="text-[10px] sm:text-xs text-gray-400 block" :class="{ 'text-white': isSelectedInBetSlip(`CS_SH_${score.label}`) }">{{ score.label }}</span>
-                <span class="text-xs sm:text-sm font-bold text-white">{{ score.odds }}</span>
+            <!-- 6. Correct Score First Half -->
+            <div>
+              <h4 class="text-xs sm:text-sm font-semibold text-gray-300 mb-2 sm:mb-3">Correct Score | First Half</h4>
+              <div class="grid grid-cols-3 sm:grid-cols-4 gap-1 sm:gap-2">
+                <div 
+                  v-for="score in correctScoreFirstHalfOdds" 
+                  :key="score.label"
+                  @click="handleOddsClick(`CS_FH_${score.label}`, score.odds, score.label, 'Correct Score | First Half')"
+                  class="flex flex-row justify-between items-center cursor-pointer bg-gray-700 border border-gray-600 rounded-lg p-1.5 sm:p-2 text-center hover:bg-gray-600 transition-all"
+                  :class="{ 'bg-rose-600 border-rose-500 hover:bg-rose-700': isSelectedInBetSlip(`CS_FH_${score.label}`) }"
+                >
+                  <span class="text-[10px] sm:text-xs text-gray-400 block" :class="{ 'text-white': isSelectedInBetSlip(`CS_FH_${score.label}`) }">{{ score.label }}</span>
+                  <span class="text-xs sm:text-sm font-bold text-white">{{ score.odds }}</span>
+                </div>
               </div>
             </div>
-          </div>
 
+            <!-- 7. Correct Score Second Half -->
+            <div>
+              <h4 class="text-xs sm:text-sm font-semibold text-gray-300 mb-2 sm:mb-3">Correct Score | Second Half</h4>
+              <div class="grid grid-cols-3 sm:grid-cols-4 gap-1 sm:gap-2">
+                <div 
+                  v-for="score in correctScoreSecondHalfOdds" 
+                  :key="score.label"
+                  @click="handleOddsClick(`CS_SH_${score.label}`, score.odds, score.label, 'Correct Score | Second Half')"
+                  class="flex flex-row justify-between items-center cursor-pointer bg-gray-700 border border-gray-600 rounded-lg p-1.5 sm:p-2 text-center hover:bg-gray-600 transition-all"
+                  :class="{ 'bg-rose-600 border-rose-500 hover:bg-rose-700': isSelectedInBetSlip(`CS_SH_${score.label}`) }"
+                >
+                  <span class="text-[10px] sm:text-xs text-gray-400 block" :class="{ 'text-white': isSelectedInBetSlip(`CS_SH_${score.label}`) }">{{ score.label }}</span>
+                  <span class="text-xs sm:text-sm font-bold text-white">{{ score.odds }}</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
         </div>
       </div>
-    </div>
+    </template>
   </div>
 </template>
 
@@ -256,12 +262,14 @@ import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useBetStore } from '../../../stores/bets/betStore.js'
 import gamesData from '../../../assets/DataManager/MatchePaser.js'
+import SportDetailSkeleton from './SportDetailSkeleton.vue'
 
 const router = useRouter()
 const route = useRoute()
 const betStore = useBetStore()
 
 // ---- State ----
+const isLoading = ref(true)
 const matchData = ref({
   eventId: '',
   homeTeam: '',
@@ -501,48 +509,58 @@ const goBack = () => {
 
 // ---- Load match data ----
 const loadMatchData = () => {
-  const matchId = parseInt(route.params.id)
+  isLoading.value = true
   
-  if (matchId) {
-    try {
-      const foundMatch = gamesData.find(item => item.id === matchId)
-      
-      if (foundMatch) {
-        matchData.value = {
-          eventId: foundMatch.id || foundMatch.eventId || matchId,
-          homeTeam: foundMatch.homeTeam || '',
-          awayTeam: foundMatch.awayTeam || '',
-          league: foundMatch.league || '',
-          time: foundMatch.time || '',
-          date: foundMatch.date || '',
-          homeOdds: foundMatch.homeOdds || '0',
-          drawOdds: foundMatch.drawOdds || '0',
-          awayOdds: foundMatch.awayOdds || '0'
-        }
-        
-        match.value = foundMatch
-        generateAllOdds()
-        return
-      }
-    } catch (error) {
-      console.error('Error finding match:', error)
-    }
-  }
-  
-  // Fallback: route query
-  if (route.query.eventId) {
-    matchData.value.eventId = route.query.eventId
-    if (route.query.homeTeam) matchData.value.homeTeam = route.query.homeTeam
-    if (route.query.awayTeam) matchData.value.awayTeam = route.query.awayTeam
-    if (route.query.league) matchData.value.league = route.query.league
-    if (route.query.time) matchData.value.time = route.query.time
-    if (route.query.date) matchData.value.date = route.query.date
-    if (route.query.homeOdds) matchData.value.homeOdds = route.query.homeOdds
-    if (route.query.drawOdds) matchData.value.drawOdds = route.query.drawOdds
-    if (route.query.awayOdds) matchData.value.awayOdds = route.query.awayOdds
+  // Simulate API delay
+  setTimeout(() => {
+    const matchId = parseInt(route.params.id)
     
-    generateAllOdds()
-  }
+    if (matchId) {
+      try {
+        const foundMatch = gamesData.find(item => item.id === matchId)
+        
+        if (foundMatch) {
+          matchData.value = {
+            eventId: foundMatch.id || foundMatch.eventId || matchId,
+            homeTeam: foundMatch.homeTeam || '',
+            awayTeam: foundMatch.awayTeam || '',
+            league: foundMatch.league || '',
+            time: foundMatch.time || '',
+            date: foundMatch.date || '',
+            homeOdds: foundMatch.homeOdds || '0',
+            drawOdds: foundMatch.drawOdds || '0',
+            awayOdds: foundMatch.awayOdds || '0'
+          }
+          
+          match.value = foundMatch
+          generateAllOdds()
+          isLoading.value = false
+          return
+        }
+      } catch (error) {
+        console.error('Error finding match:', error)
+      }
+    }
+    
+    // Fallback: route query
+    if (route.query.eventId) {
+      matchData.value.eventId = route.query.eventId
+      if (route.query.homeTeam) matchData.value.homeTeam = route.query.homeTeam
+      if (route.query.awayTeam) matchData.value.awayTeam = route.query.awayTeam
+      if (route.query.league) matchData.value.league = route.query.league
+      if (route.query.time) matchData.value.time = route.query.time
+      if (route.query.date) matchData.value.date = route.query.date
+      if (route.query.homeOdds) matchData.value.homeOdds = route.query.homeOdds
+      if (route.query.drawOdds) matchData.value.drawOdds = route.query.drawOdds
+      if (route.query.awayOdds) matchData.value.awayOdds = route.query.awayOdds
+      
+      generateAllOdds()
+      isLoading.value = false
+    } else {
+      // No match found, redirect
+      router.push('/sports')
+    }
+  }, 800) // Simulate loading delay
 }
 
 // ---- Lifecycle ----

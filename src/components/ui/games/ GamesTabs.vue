@@ -2,15 +2,7 @@
   <section class="w-full bg-white">
     <div class="max-w-screen-xl mx-auto relative">
       
-      <!-- Header -->
-      <!-- <div class="flex items-center justify-between px-2 bg-gradient-to-b from-gray-200 via-gray-900/30 to-gray-300 py-2 "> -->
-        <!-- <h2 class="text-base sm:text-lg font-bold text-purple-800 flex items-center gap-2">
-          <span class="text-rose-500">🔥</span>
-          Games
-        </h2> -->
-        <!-- <span class="text-xs font-bold text-rose-400">Games</span> -->
-      <!-- </div> -->
-
+   
       <!-- Horizontal Scroll with Arrows -->
       <div class="relative">
         

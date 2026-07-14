@@ -1,64 +1,70 @@
 <!-- HomePage.vue -->
 <template>
-  <div class="mx-auto bg-white">
+  <div class="mx-auto">
+    <!-- Loading State -->
+    <HomePageSkeleton v-if="isLoading" />
     
-    <HeroSection />
-    <GamesTabs :games="displayGames" />
+    <!-- Actual Content -->
+    <template v-else>
+      <div class="bg-white">
+        <HeroSection />
+        <GamesTabs :games="displayGames" />
 
-    <!-- League Groups -->
-    <div 
-      v-for="(matches, leagueName) in groupedGames" 
-      :key="leagueName"
-      class=""
-    >
-      <!-- League Header -->
-      <div class="sticky top-0 z-10 py-2 pl-1 bg-gradient-to-b from-gray-400 via-gray-700/0 to-gray-400 backdrop-blur-sm">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-bold text-gray-800 truncate">{{ leagueName }}</span>
+        <!-- League Groups -->
+        <div 
+          v-for="(matches, leagueName) in groupedGames" 
+          :key="leagueName"
+          class=""
+        >
+          <!-- League Header -->
+          <div class="sticky top-0 z-10 py-2 pl-1 bg-gradient-to-b from-gray-400 via-gray-700/0 to-gray-400 backdrop-blur-sm">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-gray-800 truncate">{{ leagueName }}</span>
 
-          <div class="flex gap-1 flex-shrink-0">
-            <span 
-              class="w-12 sm:w-14 text-center text-xs sm:text-sm font-bold text-gray-600 hover:text-white rounded transition-colors duration-200"
-            >
-              1
-            </span>
-            <span 
-              class="w-12 sm:w-14 text-center text-xs sm:text-sm font-bold text-gray-600 hover:text-white rounded transition-colors duration-200"
-            >
-              x
-            </span>
-            <span 
-              class="w-12 sm:w-14 text-center text-xs sm:text-sm font-bold text-gray-600 hover:text-white rounded transition-colors duration-200"
-            >
-              2
-            </span>
+              <div class="flex gap-1 flex-shrink-0">
+                <span 
+                  class="w-12 sm:w-14 text-center text-xs sm:text-sm font-bold text-gray-600 hover:text-white rounded transition-colors duration-200"
+                >
+                  1
+                </span>
+                <span 
+                  class="w-12 sm:w-14 text-center text-xs sm:text-sm font-bold text-gray-600 hover:text-white rounded transition-colors duration-200"
+                >
+                  x
+                </span>
+                <span 
+                  class="w-12 sm:w-14 text-center text-xs sm:text-sm font-bold text-gray-600 hover:text-white rounded transition-colors duration-200"
+                >
+                  2
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Matches for this league -->
+          <div class="bg-white overflow-hidden">
+            <MatchCard 
+              v-for="game in matches" 
+              :key="game.id"
+              :game="game"
+              @click="navigateToMatch(game.id)"
+            />
           </div>
         </div>
+
+        <!-- View All Button -->
+        <div class="text-center py-1.5 bg-gradient-to-b from-gray-300 via-gray-100 to-gray-300 backdrop-blur-sm">
+          <button 
+            @click="navigateToSports" 
+            class="text-gray-500 hover:text-rose-600 font-semibold text-sm transition-colors"
+          >
+            View All ({{ totalGamesCount }}) Sports 
+          </button>
+        </div>
+        
+        <RecentWinners :winners="recentWinners" :scroll-speed="1.5" />
       </div>
-
-      <!-- Matches for this league -->
-      <div class="bg-white overflow-hidden">
-        <MatchCard 
-          v-for="game in matches" 
-          :key="game.id"
-          :game="game"
-          @click="navigateToMatch(game.id)"
-        />
-      </div>
-    </div>
-
-    <!-- View All Button -->
-    <div class="text-center py-1.5 bg-gradient-to-b from-gray-300 via-gray-100 to-gray-300 backdrop-blur-sm">
-      <button 
-        @click="navigateToSports" 
-        class="text-gray-500 hover:text-rose-600 font-semibold text-sm transition-colors"
-      >
-        View All ({{ totalGamesCount }}) Sports 
-      </button>
-    </div>
-    
-    <RecentWinners :winners="recentWinners" :scroll-speed="1.5" />
-
+    </template>
   </div>
 </template>
 
@@ -71,9 +77,13 @@ import RecentWinners from '../../components/main components/RecentWinners/Recent
 import GamesTabs from '../../components/ui/games/ GamesTabs.vue'
 import { useBetStore } from '../../stores/bets/betStore.js'
 import gamesData from '../../assets/DataManager/MatchePaser.js'
+import HomePageSkeleton from '../../components/skeletons/home/HomePageSkeleton.vue'
 
 // ---- Initialize Router ----
 const router = useRouter()
+
+// ---- State ----
+const isLoading = ref(true)
 
 // ---- Navigation Functions ----
 const navigateToSports = () => {
@@ -108,35 +118,42 @@ const detectSport = (league) => {
 
 // ---- Load games from parser ----
 const loadGames = () => {
-  try {
-    // Map the parsed data to match the expected format
-    const mappedGames = gamesData.map((item, index) => ({
-      id: item.id || index + 1,
-      league: item.league || 'Unknown League',
-      time: item.time || '00:00',
-      date: item.date || new Date().toLocaleDateString(),
-      status: 'Upcoming',
-      sport: detectSport(item.league),
-      homeTeam: item.homeTeam || 'Unknown',
-      awayTeam: item.awayTeam || 'Unknown',
-      odds: {
-        home: parseFloat(item.homeOdds) || 1.00,
-        draw: parseFloat(item.drawOdds) || 1.00,
-        away: parseFloat(item.awayOdds) || 1.00
-      },
-      totalBets: item.market || Math.floor(Math.random() * 50) + 10
-    }))
+  isLoading.value = true
+  
+  // Simulate API delay
+  setTimeout(() => {
+    try {
+      // Map the parsed data to match the expected format
+      const mappedGames = gamesData.map((item, index) => ({
+        id: item.id || index + 1,
+        league: item.league || 'Unknown League',
+        time: item.time || '00:00',
+        date: item.date || new Date().toLocaleDateString(),
+        status: 'Upcoming',
+        sport: detectSport(item.league),
+        homeTeam: item.homeTeam || 'Unknown',
+        awayTeam: item.awayTeam || 'Unknown',
+        odds: {
+          home: parseFloat(item.homeOdds) || 1.00,
+          draw: parseFloat(item.drawOdds) || 1.00,
+          away: parseFloat(item.awayOdds) || 1.00
+        },
+        totalBets: item.market || Math.floor(Math.random() * 50) + 10
+      }))
 
-    allGames.value = mappedGames
-    
-    // Take only first 7 games for display
-    displayGames.value = mappedGames.slice(0, 7)
-    
-  } catch (error) {
-    console.error('Error loading games data:', error)
-    allGames.value = []
-    displayGames.value = []
-  }
+      allGames.value = mappedGames
+      
+      // Take only first 7 games for display
+      displayGames.value = mappedGames.slice(0, 7)
+      
+    } catch (error) {
+      console.error('Error loading games data:', error)
+      allGames.value = []
+      displayGames.value = []
+    } finally {
+      isLoading.value = false
+    }
+  }, 800) // Simulate loading delay
 }
 
 // ---- Group games by league (for display) ----
