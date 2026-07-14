@@ -4,19 +4,19 @@
       
       <!-- Bet ID Header - Fixed null check -->
       <div class="px-0 py-1 bg-[#0D0D0D] flex items-center justify-between">
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-3 my-3">
           <!-- Back Button -->
           <button 
             class="flex items-center gap-2 text-[#606060] hover:text-white transition-colors mb-0 group"
             @click="goBack"
           >
-            <svg class="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg class="w-6 h-6 group-hover:-translate-x-0.5 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <polyline points="15 18 9 12 15 6"/>
             </svg>
           </button>
           
-          <span class="text-[#8E8E8E] font-mono font-semibold text-sm tracking-wider">
-            BET ID: #{{ bet?.id || route.params.id || 'N/A' }}
+          <span class="text-[#8E8E8E] font-mono font-bold text-sm tracking-wider">
+            Bet ID:#{{ bet?.id || route.params.id || 'N/A' }}
           </span>
         </div>
       </div>
