@@ -63,6 +63,7 @@
             v-for="game in matches" 
             :key="game.id"
             :game="game"
+            @click="navigateToMatch(game.id)"
           />
         </div>
       </div>
@@ -80,17 +81,24 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import MatchCard from '../../components/betting/match Card/MatchCard.vue'
+import gamesData from '../../assets/DataManager/MatchePaser.js'
 
-
-// ---- Initialize Bet Store ----
-// const betStore = useBetStore()
 const router = useRouter()
+
+// ---- Navigation ----
+const navigateToMatch = (matchId) => {
+  router.push({
+    name: 'sport-detail',
+    params: { id: matchId }
+  })
+}
 
 // ---- State ----
 const selectedSport = ref('all')
+const games = ref([])
 
 // ---- Sports Filter ----
 const sportsFilter = [
@@ -102,332 +110,44 @@ const sportsFilter = [
   { id: 'rugby', name: 'Rugby', icon: '🏉', count: 0 },
 ]
 
-// ---- Games Data ----
-const games = ref([
-  // ============================================
-  // ENGLAND - PREMIER LEAGUE
-  // ============================================
-  {
-    id: 1,
-    league: 'England - Premier League',
-    time: '23:22',
-    date: 'Tue 06/15',
-    status: 'H1',
-    sport: 'football',
-    homeTeam: 'Manchester United',
-    awayTeam: 'Liverpool',
-    odds: { home: 2.85, draw: 3.40, away: 2.20 },
-    totalBets: 40
-  },
-  {
-    id: 2,
-    league: 'England - Premier League',
-    time: '22:15',
-    date: 'Tue 06/15',
-    status: 'H1',
-    sport: 'football',
-    homeTeam: 'Arsenal',
-    awayTeam: 'Chelsea',
-    odds: { home: 3.10, draw: 3.20, away: 2.40 },
-    totalBets: 35
-  },
-  {
-    id: 3,
-    league: 'England - Premier League',
-    time: '88:12',
-    date: 'Tue 06/15',
-    status: 'H2',
-    sport: 'football',
-    homeTeam: 'Manchester City',
-    awayTeam: 'Tottenham',
-    odds: { home: 1.60, draw: 4.00, away: 6.00 },
-    totalBets: 89
-  },
-  {
-    id: 4,
-    league: 'England - Premier League',
-    time: '55:00',
-    date: 'Tue 06/15',
-    status: 'H2',
-    sport: 'football',
-    homeTeam: 'Newcastle United',
-    awayTeam: 'Aston Villa',
-    odds: { home: 2.40, draw: 3.30, away: 3.10 },
-    totalBets: 67
-  },
+// ---- Detect sport from league name ----
+const detectSport = (league) => {
+  const leagueLower = league.toLowerCase()
+  if (leagueLower.includes('basketball') || leagueLower.includes('nba')) return 'basketball'
+  if (leagueLower.includes('tennis') || leagueLower.includes('wimbledon')) return 'tennis'
+  if (leagueLower.includes('cricket') || leagueLower.includes('icc')) return 'cricket'
+  if (leagueLower.includes('rugby')) return 'rugby'
+  return 'football'
+}
 
-  // ============================================
-  // SPAIN - LA LIGA
-  // ============================================
-  {
-    id: 5,
-    league: 'Spain - La Liga',
-    time: '45:00',
-    date: 'Tue 06/15',
-    status: 'HT',
-    sport: 'football',
-    homeTeam: 'Real Madrid',
-    awayTeam: 'Barcelona',
-    odds: { home: 2.30, draw: 3.20, away: 3.10 },
-    totalBets: 98
-  },
-  {
-    id: 6,
-    league: 'Spain - La Liga',
-    time: '68:30',
-    date: 'Tue 06/15',
-    status: 'H2',
-    sport: 'football',
-    homeTeam: 'Atletico Madrid',
-    awayTeam: 'Sevilla',
-    odds: { home: 2.10, draw: 3.30, away: 3.60 },
-    totalBets: 75
-  },
-  {
-    id: 7,
-    league: 'Spain - La Liga',
-    time: '35:00',
-    date: 'Tue 06/15',
-    status: 'H1',
-    sport: 'football',
-    homeTeam: 'Villarreal',
-    awayTeam: 'Real Sociedad',
-    odds: { home: 2.70, draw: 3.20, away: 2.80 },
-    totalBets: 52
-  },
+// ---- Load Games from CSV Parser ----
+const loadGames = () => {
+  try {
+    // Map the parsed data to match the expected format
+    const mappedGames = gamesData.map((item, index) => ({
+      id: item.id || index + 1,
+      league: item.league || 'Unknown League',
+      time: item.time || '00:00',
+      date: item.date || new Date().toLocaleDateString(),
+      status: 'Upcoming', // All games from CSV are upcoming
+      sport: detectSport(item.league),
+      homeTeam: item.homeTeam || 'Unknown',
+      awayTeam: item.awayTeam || 'Unknown',
+      odds: {
+        home: parseFloat(item.homeOdds) || 1.00,
+        draw: parseFloat(item.drawOdds) || 1.00,
+        away: parseFloat(item.awayOdds) || 1.00
+      },
+      totalBets: item.market || Math.floor(Math.random() * 50) + 10
+    }))
 
-  // ============================================
-  // ITALY - SERIE A
-  // ============================================
-  {
-    id: 8,
-    league: 'Italy - Serie A',
-    time: '82:15',
-    date: 'Tue 06/15',
-    status: 'H2',
-    sport: 'football',
-    homeTeam: 'AC Milan',
-    awayTeam: 'Inter Milan',
-    odds: { home: 2.60, draw: 3.30, away: 2.80 },
-    totalBets: 45
-  },
-  {
-    id: 9,
-    league: 'Italy - Serie A',
-    time: '50:00',
-    date: 'Tue 06/15',
-    status: 'H2',
-    sport: 'football',
-    homeTeam: 'Juventus',
-    awayTeam: 'Napoli',
-    odds: { home: 2.20, draw: 3.20, away: 3.50 },
-    totalBets: 62
-  },
-  {
-    id: 10,
-    league: 'Italy - Serie A',
-    time: '28:00',
-    date: 'Tue 06/15',
-    status: 'H1',
-    sport: 'football',
-    homeTeam: 'AS Roma',
-    awayTeam: 'Lazio',
-    odds: { home: 2.40, draw: 3.10, away: 3.20 },
-    totalBets: 55
-  },
-
-  // ============================================
-  // BRAZIL - U20 PIAUIENSE
-  // ============================================
-  {
-    id: 11,
-    league: 'Brazil - U20 Piauiense',
-    time: '23:22',
-    date: 'Tue 06/15',
-    status: 'H1',
-    sport: 'football',
-    homeTeam: 'River-PI U20',
-    awayTeam: 'AE Altos U20',
-    odds: { home: 2.85, draw: 3.40, away: 2.20 },
-    totalBets: 40
-  },
-  {
-    id: 12,
-    league: 'Brazil - U20 Piauiense',
-    time: '22:15',
-    date: 'Tue 06/15',
-    status: 'H1',
-    sport: 'football',
-    homeTeam: 'Piauí U20',
-    awayTeam: 'River-PI U20',
-    odds: { home: 3.10, draw: 3.20, away: 2.40 },
-    totalBets: 35
-  },
-
-  // ============================================
-  // ICELAND - U19 LEAGUE
-  // ============================================
-  {
-    id: 13,
-    league: 'Iceland - U19 League',
-    time: '75:24',
-    date: 'Tue 06/15',
-    status: 'H2',
-    sport: 'football',
-    homeTeam: 'Fylkir/Ellidi U19',
-    awayTeam: 'HK/Ymir U19',
-    odds: { home: 40.00, draw: 10.00, away: 1.03 },
-    totalBets: 25
-  },
-  {
-    id: 14,
-    league: 'Iceland - U19 League',
-    time: '63:33',
-    date: 'Tue 06/15',
-    status: 'H2',
-    sport: 'football',
-    homeTeam: 'Stjarnan/KFG U19',
-    awayTeam: 'Leiknir U19',
-    odds: { home: 1.41, draw: 4.10, away: 6.70 },
-    totalBets: 22
-  },
-
-  // ============================================
-  // BASKETBALL - NBA
-  // ============================================
-  {
-    id: 15,
-    league: 'NBA - Regular Season',
-    time: '88:12',
-    date: 'Tue 06/15',
-    status: 'H2',
-    sport: 'basketball',
-    homeTeam: 'Los Angeles Lakers',
-    awayTeam: 'Golden State Warriors',
-    odds: { home: 1.85, draw: 1.95, away: 2.10 },
-    totalBets: 56
-  },
-  {
-    id: 16,
-    league: 'NBA - Regular Season',
-    time: '78:45',
-    date: 'Tue 06/15',
-    status: 'H2',
-    sport: 'basketball',
-    homeTeam: 'Miami Heat',
-    awayTeam: 'Boston Celtics',
-    odds: { home: 2.20, draw: 1.90, away: 2.50 },
-    totalBets: 34
-  },
-  {
-    id: 17,
-    league: 'NBA - Regular Season',
-    time: '55:00',
-    date: 'Tue 06/15',
-    status: 'H2',
-    sport: 'basketball',
-    homeTeam: 'Denver Nuggets',
-    awayTeam: 'Phoenix Suns',
-    odds: { home: 1.95, draw: 2.10, away: 2.60 },
-    totalBets: 28
-  },
-
-  // ============================================
-  // TENNIS - WIMBLEDON
-  // ============================================
-  {
-    id: 18,
-    league: 'Wimbledon - Men\'s Singles',
-    time: '15:30',
-    date: 'Tue 06/15',
-    status: 'H1',
-    sport: 'tennis',
-    homeTeam: 'Carlos Alcaraz',
-    awayTeam: 'Novak Djokovic',
-    odds: { home: 2.40, draw: 1.80, away: 2.90 },
-    totalBets: 28
-  },
-  {
-    id: 19,
-    league: 'Wimbledon - Women\'s Singles',
-    time: '14:00',
-    date: 'Tue 06/15',
-    status: 'H1',
-    sport: 'tennis',
-    homeTeam: 'Iga Swiatek',
-    awayTeam: 'Aryna Sabalenka',
-    odds: { home: 1.95, draw: 2.10, away: 2.70 },
-    totalBets: 22
-  },
-  {
-    id: 20,
-    league: 'Wimbledon - Men\'s Singles',
-    time: '12:00',
-    date: 'Tue 06/15',
-    status: 'H1',
-    sport: 'tennis',
-    homeTeam: 'Jannik Sinner',
-    awayTeam: 'Daniil Medvedev',
-    odds: { home: 2.10, draw: 2.00, away: 2.80 },
-    totalBets: 18
-  },
-
-  // ============================================
-  // CRICKET - ICC WORLD CUP
-  // ============================================
-  {
-    id: 21,
-    league: 'ICC World Cup - Group Stage',
-    time: '35:00',
-    date: 'Tue 06/15',
-    status: 'H1',
-    sport: 'cricket',
-    homeTeam: 'India',
-    awayTeam: 'Australia',
-    odds: { home: 1.75, draw: 2.20, away: 2.85 },
-    totalBets: 67
-  },
-  {
-    id: 22,
-    league: 'ICC World Cup - Group Stage',
-    time: '28:00',
-    date: 'Tue 06/15',
-    status: 'H1',
-    sport: 'cricket',
-    homeTeam: 'England',
-    awayTeam: 'New Zealand',
-    odds: { home: 2.10, draw: 2.00, away: 2.90 },
-    totalBets: 45
-  },
-
-  // ============================================
-  // RUGBY - SIX NATIONS
-  // ============================================
-  {
-    id: 23,
-    league: 'Six Nations Championship',
-    time: '55:00',
-    date: 'Tue 06/15',
-    status: 'H2',
-    sport: 'rugby',
-    homeTeam: 'England',
-    awayTeam: 'France',
-    odds: { home: 2.30, draw: 2.50, away: 2.80 },
-    totalBets: 31
-  },
-  {
-    id: 24,
-    league: 'Six Nations Championship',
-    time: '42:00',
-    date: 'Tue 06/15',
-    status: 'HT',
-    sport: 'rugby',
-    homeTeam: 'Ireland',
-    awayTeam: 'Scotland',
-    odds: { home: 1.90, draw: 2.60, away: 3.20 },
-    totalBets: 24
+    games.value = mappedGames
+    updateSportCounts()
+  } catch (error) {
+    console.error('Error loading games data:', error)
+    games.value = []
   }
-])
+}
 
 // ---- Computed ----
 const filteredGames = computed(() => {
@@ -445,12 +165,6 @@ const filteredGames = computed(() => {
   return groups
 })
 
-const totalMatches = computed(() => games.value.length)
-
-const liveMatches = computed(() => {
-  return games.value.filter(g => g.status.includes('H') || g.status === 'HT').length
-})
-
 // Update sport counts
 const updateSportCounts = () => {
   const counts = {}
@@ -465,7 +179,11 @@ const updateSportCounts = () => {
     }
   })
 }
-updateSportCounts()
+
+// ---- Load data on mount ----
+onMounted(() => {
+  loadGames()
+})
 </script>
 
 <style scoped>

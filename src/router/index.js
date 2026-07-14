@@ -11,6 +11,7 @@ import AdminLayout from "../layouts/admin/AdminLayout.vue";
 const HomePage = () => import("../pages/home/HomePage.vue");
 const DashboardPage = () => import("../pages/Dashboard/DashboardPage.vue");
 const SportsPage = () => import("../pages/sport/SportsPage.vue");
+const SportDetailPage = () => import("../pages/sport/view/SportDetailPage.vue"); 
 const LivePage = () => import("../pages/live/LivePage.vue");
 const CasinoPage = () => import("../pages/casino/CasinoPage.vue");
 const AviatorPage = () => import("../pages/aviator/AviatorPage.vue");
@@ -76,6 +77,13 @@ const routes = [
         name: "sports",
         component: SportsPage,
         meta: { title: "Sports" },
+      },
+      {
+        path: "sport-detail/:id",
+        name: "sport-detail",
+        component: SportDetailPage,
+        meta: { title: "Match Details" },
+        props: true // This passes route params as props to the component
       },
       {
         path: "sports/live",

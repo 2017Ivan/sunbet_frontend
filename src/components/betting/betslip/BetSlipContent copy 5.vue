@@ -1,10 +1,10 @@
 <!-- BetSlipContent.vue -->
 <template>
-  <div class="h-full flex flex-col bg-gray-900">
+  <div class="h-full flex flex-col bg-[#0D0D0D]">
     <!-- Header -->
-    <div class="flex items-center justify-between px-3 h-16 border-b border-gray-700 flex-shrink-0">
+    <div class="flex items-center justify-between px-3 h-16 border-b border-[#2A2A2A] flex-shrink-0">
       <div class="flex items-center gap-2">
-        <svg class="w-5 h-5 text-rose-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <svg class="w-5 h-5 text-[#A32D2D]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
           <rect x="9" y="3" width="6" height="4" rx="2"/>
         </svg>
@@ -13,12 +13,12 @@
       <div class="flex items-center gap-2">
         <!-- Balance display -->
         <div v-if="isLoggedIn" class="pr-2 py-2 flex justify-between items-center">
-          <span class="text-rose-500 font-bold text-xs">TZS {{ formatMoney(userBalance) }}</span>
+          <span class="text-[#A32D2D] font-bold text-xs">TZS {{ formatMoney(userBalance) }}</span>
         </div>
 
         <button
           v-if="showCloseButton"
-          class="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center text-gray-400 hover:text-white transition-colors"
+          class="w-8 h-8 rounded-full bg-[#1E1E1E] flex items-center justify-center text-white hover:text-white transition-colors"
           @click="$emit('close')"
         >
           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -29,38 +29,38 @@
     </div>
 
     <!-- Sports / Virtuals Tabs -->
-    <div class="flex border-b border-gray-700 bg-gray-800 flex-shrink-0">
+    <div class="flex border-b border-[#2A2A2A] bg-[#111] flex-shrink-0">
       <button
         v-for="tab in ['Sports', 'Virtuals']"
         :key="tab"
         @click="activeTab = tab"
         class="flex-1 py-3 text-xs font-semibold uppercase tracking-wider transition-all relative flex items-center justify-center gap-1.5"
-        :class="activeTab === tab ? 'text-white' : 'text-gray-500 hover:text-gray-300'"
+        :class="activeTab === tab ? 'text-white' : 'text-[#606060] hover:text-[#A0A0A0]'"
       >
         <span>{{ tab }}</span>
         <span
           class="px-1.5 py-0.5 text-[10px] rounded-full font-bold transition-colors"
-          :class="activeTab === tab ? 'bg-rose-500 text-white' : 'bg-gray-700 text-gray-400'"
+          :class="activeTab === tab ? 'bg-[#A32D2D] text-white' : 'bg-[#1E1E1E] text-[#606060]'"
         >
           {{ tab === 'Sports' ? sportsItems.length : virtualsItems.length }}
         </span>
-        <div v-if="activeTab === tab" class="absolute bottom-0 left-0 right-0 h-0.5 bg-rose-500"></div>
+        <div v-if="activeTab === tab" class="absolute bottom-0 left-0 right-0 h-0.5 bg-[#A32D2D]"></div>
       </button>
     </div>
 
     <!-- ============ EMPTY STATE WITH LOAD CODE ============ -->
     <div v-if="!currentTabItems.length" class="flex-1 flex flex-col items-center justify-center gap-4 px-6 py-8">
       <!-- Empty Icon -->
-      <div class="w-20 h-20 rounded-full bg-gray-800 flex items-center justify-center">
-        <svg class="w-10 h-10 text-gray-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+      <div class="w-20 h-20 rounded-full bg-[#1E1E1E] flex items-center justify-center">
+        <svg class="w-10 h-10 text-[#333]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
           <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
           <rect x="9" y="3" width="6" height="4" rx="2"/>
         </svg>
       </div>
 
       <div class="text-center">
-        <p class="text-sm font-medium text-gray-400">{{ activeTab }} bet slip is empty</p>
-        <p class="text-xs text-gray-500 mt-1">Load a booking code or click on odds to add selections</p>
+        <p class="text-sm font-medium text-[#A0A0A0]">{{ activeTab }} bet slip is empty</p>
+        <p class="text-xs text-[#606060] mt-1">Load a booking code or click on odds to add selections</p>
       </div>
 
       <!-- Load Booking Code Input - Always visible when empty -->
@@ -71,12 +71,12 @@
             type="text"
             placeholder="Enter code e.g. ABC123"
             maxlength="6"
-            class="flex-1 min-w-0 h-10 px-3 rounded-xl bg-gray-800 border border-gray-700 focus:border-rose-500 text-white text-sm uppercase tracking-wider focus:outline-none focus:ring-1 focus:ring-rose-500/30 transition-all placeholder:text-gray-500"
+            class="flex-1 min-w-0 h-10 px-3 rounded-xl bg-[#1E1E1E] border border-[#2A2A2A] focus:border-[#A32D2D] text-white text-sm uppercase tracking-wider focus:outline-none focus:ring-1 focus:ring-[#A32D2D]/30 transition-all placeholder:text-[#606060]"
             @input="handleLoadCodeInput"
             @keyup.enter="handleLoadCodeFromEmpty"
           />
           <button
-            class="px-4 py-2 rounded-xl text-sm font-bold bg-rose-500 text-white hover:bg-rose-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+            class="px-4 py-2 rounded-xl text-sm font-bold bg-[#A32D2D] text-white hover:bg-[#8B2424] transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
             :disabled="!isLoadCodeValid || isLoadingCode"
             @click="handleLoadCodeFromEmpty"
           >
@@ -91,14 +91,14 @@
         </div>
 
         <!-- Load error -->
-        <div v-if="loadError" class="bg-red-500/10 border border-red-500/20 rounded-xl p-2">
-          <p class="text-xs text-red-400 text-center">{{ loadError }}</p>
+        <div v-if="loadError" class="bg-[#EF4444]/10 border border-[#EF4444]/20 rounded-xl p-2">
+          <p class="text-xs text-[#EF4444] text-center">{{ loadError }}</p>
         </div>
 
-        <div class="flex items-center gap-2 text-[10px] text-gray-500 justify-center">
-          <span class="w-8 h-px bg-gray-700"></span>
+        <div class="flex items-center gap-2 text-[10px] text-[#606060] justify-center">
+          <span class="w-8 h-px bg-[#2A2A2A]"></span>
           <span>or</span>
-          <span class="w-8 h-px bg-gray-700"></span>
+          <span class="w-8 h-px bg-[#2A2A2A]"></span>
         </div>
 
         <AppButton variant="outline" size="sm" fullWidth @click="handleBrowseSports">
@@ -112,7 +112,7 @@
       <!-- Actions row -->
       <div class="flex justify-between items-center gap-2 mb-3">
         <button
-          class="text-xs text-rose-400 hover:text-rose-300 transition-colors flex items-center gap-1.5 font-medium"
+          class="text-xs text-[#A32D2D] hover:text-[#EF4444] transition-colors flex items-center gap-1.5 font-medium"
           @click="toggleBookingCodeModal"
         >
           <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -122,7 +122,7 @@
           Create Booking Code
         </button>
         <button
-          class="text-xs text-gray-500 hover:text-red-400 transition-colors"
+          class="text-xs text-[#606060] hover:text-[#EF4444] transition-colors"
           @click="handleClearCurrentTab"
         >
           Clear BetSlip
@@ -133,51 +133,48 @@
       <div
         v-for="(bet, index) in currentTabItems"
         :key="bet.matchId || index"
-        class="bg-gray-800 border border-gray-700 rounded-[12px] p-3 hover:border-gray-600 transition-colors"
+        class="bg-[#1E1E1E] border border-[#2A2A2A] rounded-[12px] p-3"
       >
         <div class="flex items-start justify-between gap-2">
           <div class="flex-1 min-w-0">
-            <p class="text-sm text-gray-400 truncate">{{ bet.matchName || bet.match || 'Match' }}</p>
-            <div class="mt-0.5 flex flex-row gap-1 items-center">
-              <p class="text-xs text-gray-400">{{ getMarketDisplay(bet) }}</p>
-              <p class="text-xs font-semibold text-gray-300 truncate">
-                - {{ getSelectionDisplay(bet) }}
+            <p class="text-xs text-[#606060] truncate">{{ bet.matchName || bet.match || 'Match' }}</p>
+            <div class="mt-0.5">
+              <p class="text-sm font-semibold text-white truncate">
+                {{ getSelectionDisplay(bet) }}
               </p>
             </div>
             <div class="flex items-center gap-2 mt-0.5">
-              <span v-if="bet.type === 'virtuals'" class="text-[9px] bg-rose-500/10 text-rose-400 px-1 rounded font-medium">Virtual</span>
+              <p class="text-xs text-[#A0A0A0]">{{ getMarketDisplay(bet) }}</p>
+              <span v-if="bet.type === 'virtuals'" class="text-[9px] bg-[#A32D2D]/10 text-[#A32D2D] px-1 rounded font-medium">Virtual</span>
             </div>
-            <div class="flex flex-row gap-2">
-                <p v-if="bet.time" class="text-[10px] text-gray-500 font-bold mt-0.5">{{ bet.time }}</p>
-                <p v-if="bet.date" class="text-[10px] text-gray-500 font-bold mt-0.5">{{ bet.date }}</p>
-            </div>
+            <p v-if="bet.time" class="text-[10px] text-[#606060] mt-0.5">{{ bet.time }}</p>
           </div>
           <div class="flex flex-col items-end gap-2">
             <button
-              class="text-gray-500 hover:text-red-400 transition-colors"
+              class="text-[#606060] hover:text-[#EF4444] transition-colors"
               @click="handleRemoveBet(bet)"
             >
               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                 <path d="M18 6L6 18M6 6l12 12"/>
               </svg>
             </button>
-            <span class="text-sm font-bold text-rose-400">{{ parseFloat(bet.odds).toFixed(2) }}</span>
+            <span class="text-sm font-bold text-[#A32D2D]">{{ parseFloat(bet.odds).toFixed(2) }}</span>
           </div>
         </div>
       </div>
 
       <!-- Footer: Summary + Place bet -->
-      <div class="border-t border-gray-700 px-0 py-2 space-y-3 flex-shrink-0">
+      <div class="border-t border-[#2A2A2A] px-0 py-2 space-y-3 flex-shrink-0">
         <!-- Insufficient balance warning -->
-        <div v-if="isLoggedIn && stakeAmount > 0 && !hasEnoughBalance" class="bg-red-500/10 border border-red-500/20 rounded-[10px] p-3">
-          <p class="text-xs text-red-400 text-center">
+        <div v-if="isLoggedIn && stakeAmount > 0 && !hasEnoughBalance" class="bg-[#EF4444]/10 border border-[#EF4444]/20 rounded-[10px] p-3">
+          <p class="text-xs text-[#EF4444] text-center">
             Insufficient balance! Need TZS {{ formatMoney(stakeAmount) }} but have TZS {{ formatMoney(userBalance) }}
           </p>
         </div>
 
         <!-- Stake input -->
         <div>
-          <label class="text-xs text-gray-500 mb-1.5 block">Stake (TZS)</label>
+          <label class="text-xs text-[#606060] mb-1.5 block">Stake (TZS)</label>
           <div class="flex gap-2">
             <input
               v-model.number="stakeAmount"
@@ -185,29 +182,29 @@
               min="100"
               placeholder="Enter stake"
               :disabled="!isLoggedIn"
-              class="flex-1 h-10 px-3 rounded-[10px] bg-gray-800 border border-gray-700 focus:border-rose-500 text-white text-sm focus:outline-none focus:ring-1 focus:ring-rose-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
+              class="flex-1 h-10 px-3 rounded-[10px] bg-[#1E1E1E] border border-[#2A2A2A] focus:border-[#A32D2D] text-white text-sm focus:outline-none focus:ring-1 focus:ring-[#A32D2D]/30 disabled:opacity-50 disabled:cursor-not-allowed"
             />
           </div>
-          <p v-if="stakeAmount > 0 && stakeAmount < 100" class="text-red-400 text-[10px] mt-1">Minimum stake is TZS 100</p>
+          <p v-if="stakeAmount > 0 && stakeAmount < 100" class="text-[#EF4444] text-[10px] mt-1">Minimum stake is TZS 100</p>
         </div>
 
         <!-- Summary -->
-        <div class="space-y-1.5 bg-gray-800 rounded-[10px] px-3 py-2.5 border border-gray-700">
+        <div class="space-y-1.5 bg-[#1E1E1E] rounded-[10px] px-3 py-2.5">
           <div class="flex justify-between text-xs">
-            <span class="text-gray-500">Total Odds</span>
+            <span class="text-[#606060]">Total Odds</span>
             <span class="text-white font-semibold">{{ totalOdds.toFixed(2) }}</span>
           </div>
           <div class="flex justify-between text-xs">
-            <span class="text-gray-500">Potential Win</span>
-            <span class="text-emerald-400 font-semibold">TZS {{ potentialWin.toLocaleString() }}</span>
+            <span class="text-[#606060]">Potential Win</span>
+            <span class="text-[#22C55E] font-semibold">TZS {{ potentialWin.toLocaleString() }}</span>
           </div>
           <div class="flex justify-between text-xs">
-            <span class="text-gray-500">Tax 12%</span>
-            <span class="text-emerald-400 font-semibold">TZS {{ tax.toLocaleString() }}</span>
+            <span class="text-[#606060]">Tax 12%</span>
+            <span class="text-[#22C55E] font-semibold">TZS {{ tax.toLocaleString() }}</span>
           </div>
           <div class="flex justify-between text-xs">
-            <span class="text-gray-500">Payout</span>
-            <span class="text-emerald-400 font-semibold">TZS {{ payout.toLocaleString() }}</span>
+            <span class="text-[#606060]">Payout</span>
+            <span class="text-[#22C55E] font-semibold">TZS {{ payout.toLocaleString() }}</span>
           </div>
         </div>
 
@@ -235,7 +232,7 @@
           Login to Bet
         </AppButton>
 
-        <p class="text-[10px] text-gray-500 text-center">20% Excise Duty · Must be 18+</p>
+        <p class="text-[10px] text-[#606060] text-center">20% Excise Duty · Must be 18+</p>
       </div>
     </div>
 
@@ -358,23 +355,11 @@ const getMarketDisplay = (bet) => {
 
 const getSelectionDisplay = (bet) => {
   let pick = bet.pick || bet.selection || ''
-  const market = bet.market || bet.marketKey || '1X2'
   
-  // For 1X2 market - show as is (1, X, 2)
-  if (market === '1X2' || market === '1X2 | Full Time') {
-    if (pick === '1' || pick === 'home') return '1'
-    if (pick === 'X' || pick === 'draw') return 'X'
-    if (pick === '2' || pick === 'away') return '2'
-    return pick
-  }
-  
-  // For Double Chance market - show as is (1X, X2, 12)
-  if (market === 'Double Chance' || market === 'Double Chance | Full Time') {
-    if (pick === '1X' || pick === '1X') return '1X'
-    if (pick === 'X2' || pick === 'X2') return 'X2'
-    if (pick === '12' || pick === '12') return '12'
-    return pick
-  }
+  // If pick is a market key (like '1', 'X', '2'), map to readable format
+  if (pick === '1' || pick === 'home') return 'Home Win'
+  if (pick === 'X' || pick === 'draw') return 'Draw'
+  if (pick === '2' || pick === 'away') return 'Away Win'
   
   // For Over/Under, format nicely
   if (pick.toLowerCase().includes('over')) {
@@ -387,6 +372,11 @@ const getSelectionDisplay = (bet) => {
   // For BTTS
   if (pick.toLowerCase() === 'yes') return 'Yes'
   if (pick.toLowerCase() === 'no') return 'No'
+  
+  // For Double Chance
+  if (pick === '1X') return '1X'
+  if (pick === 'X2') return 'X2'
+  if (pick === '12') return '12'
   
   // For Correct Score, already has format like "2-1"
   return pick
@@ -583,15 +573,15 @@ watch(loadCodeInput, () => {
   background: transparent;
 }
 .overflow-y-auto::-webkit-scrollbar-thumb {
-  background: #4a4a4a;
+  background: #2A2A2A;
   border-radius: 10px;
 }
 .overflow-y-auto::-webkit-scrollbar-thumb:hover {
-  background: #f43f5e;
+  background: #A32D2D;
 }
 
 input::placeholder {
-  color: #6b7280;
+  color: #606060;
 }
 
 input:focus {

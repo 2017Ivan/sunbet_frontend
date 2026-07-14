@@ -11,7 +11,7 @@
           </svg>
           Back to Profile
         </RouterLink>
-        <h1 class="text-3xl font-bold text-gray-100">Deposit Funds</h1>
+        <h1 class="text-lg font-bold text-gray-300">Deposit Funds</h1>
         <p class="text-gray-400 text-sm mt-1">Add funds to your account securely</p>
       </div>
 

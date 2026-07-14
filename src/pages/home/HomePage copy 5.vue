@@ -42,7 +42,6 @@
           v-for="game in matches" 
           :key="game.id"
           :game="game"
-          @click="navigateToMatch(game.id)"
         />
       </div>
     </div>
@@ -75,16 +74,9 @@ import gamesData from '../../assets/DataManager/MatchePaser.js'
 // ---- Initialize Router ----
 const router = useRouter()
 
-// ---- Navigation Functions ----
+// ---- Navigation Function ----
 const navigateToSports = () => {
   router.push({ name: 'sports' })
-}
-
-const navigateToMatch = (matchId) => {
-  router.push({
-    name: 'sport-detail',
-    params: { id: matchId }
-  })
 }
 
 // ---- Initialize Bet Store ----
