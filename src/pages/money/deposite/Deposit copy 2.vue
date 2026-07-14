@@ -1,4 +1,5 @@
-<!-- deposit.vue -->
+
+// deposite.vue 
 <template>
   <div class="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800">
     <div class="w-full max-w-4xl mx-auto px-4 sm:px-6 py-6">
@@ -15,12 +16,12 @@
         <p class="text-gray-400 text-sm mt-1">Add funds to your account securely</p>
       </div>
 
-      <!-- Balance Card - Now using authStore -->
+      <!-- Balance Card -->
       <div class="bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700 rounded-2xl p-6 mb-8">
         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <p class="text-gray-400 text-sm">Available Balance</p>
-            <p class="text-3xl font-bold text-gray-100 mt-1">{{ formattedBalance }}</p>
+            <p class="text-3xl font-bold text-gray-100 mt-1">TSh {{ balance.toLocaleString() }}</p>
           </div>
           <div class="flex items-center gap-4 w-full sm:w-auto">
             <div class="flex-1 sm:flex-none text-right">
@@ -37,7 +38,7 @@
         </div>
       </div>
 
-      <!-- Rest of your template remains the same -->
+      <!-- Deposit Grid -->
       <div class="flex flex-col lg:flex-row gap-6">
         <!-- Deposit Form -->
         <div class="flex-1 bg-gray-800 border border-gray-700 rounded-2xl p-6">
@@ -79,10 +80,11 @@
               </div>
             </div>
 
-            <!-- Payment Method Dropdown -->
+            <!-- Professional Dropdown for Payment Method -->
             <div>
               <label class="block text-sm text-gray-400 mb-2">Payment Method</label>
               <div class="relative">
+                <!-- Dropdown Trigger -->
                 <button
                   type="button"
                   @click="toggleDropdown"
@@ -110,6 +112,7 @@
                   </svg>
                 </button>
 
+                <!-- Dropdown Menu -->
                 <div 
                   v-if="isDropdownOpen"
                   class="absolute z-50 w-full mt-2 bg-gray-800 border border-gray-700 rounded-xl shadow-2xl shadow-rose-500/10 overflow-hidden animate-dropdown"
@@ -147,6 +150,8 @@
               <p class="text-gray-400 text-xs mt-1">Select your mobile network provider</p>
             </div>
 
+            <!-- Deposit Summary -->
+         
             <!-- Deposit Button -->
             <button
               type="submit"
@@ -180,7 +185,11 @@
             </div>
           </form>
         </div>
+
+    
       </div>
+
+  
 
       <!-- Success Modal -->
       <div v-if="showSuccessModal" class="fixed inset-0 z-50 flex items-center justify-center px-4">
@@ -216,12 +225,10 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAuthStore } from '../../../stores/auth/authStore' // Adjust path as needed
 
 const router = useRouter()
-const authStore = useAuthStore()
 
 // State
 const depositAmount = ref(0)
@@ -231,23 +238,69 @@ const showSuccessModal = ref(false)
 const lastDepositAmount = ref(0)
 const transactionId = ref('')
 const isDropdownOpen = ref(false)
-const totalDeposits = ref(32500) // This could also come from API
+
+// Data
+const balance = ref(2450000)
+const totalDeposits = ref(32500)
+const monthlyDeposits = ref(4200)
+const depositCount = ref(28)
 
 const quickDepositAmounts = [1000, 5000, 10000, 50000]
 
-// Payment Methods
+// Payment Methods (Tanzanian Mobile Money)
 const paymentMethods = [
-  { id: 'airtel', name: 'Airtel Money', description: 'Airtel Tanzania' },
-  { id: 'vodacom', name: 'M-Pesa', description: 'Vodacom Tanzania' },
-  { id: 'mixbyyas', name: 'Mix by Yas', description: 'Mobile Money' },
-  { id: 'halotel', name: 'Halotel', description: 'Halotel Mobile Money' },
-  { id: 'ttcl', name: 'TTCL', description: 'TTCL Mobile Money' }
+  {
+    id: 'airtel',
+    name: 'Airtel Money',
+    description: 'Airtel Tanzania',
+  },
+  {
+    id: 'vodacom',
+    name: 'M-Pesa',
+    description: 'Vodacom Tanzania',
+  },
+  {
+    id: 'mixbyyas',
+    name: 'Mix by Yas',
+    description: 'Mobile Money',
+  },
+  {
+    id: 'halotel',
+    name: 'Halotel',
+    description: 'Halotel Mobile Money',
+  },
+  {
+    id: 'ttcl',
+    name: 'TTCL',
+    description: 'TTCL Mobile Money',
+  }
 ]
 
-// Computed - Using authStore
-const balance = computed(() => authStore.userBalance)
-const formattedBalance = computed(() => authStore.formattedBalance)
+const recentDeposits = ref([
+  {
+    id: 1,
+    method: 'M-Pesa',
+    amount: 50000,
+    date: '2024-01-15 14:30',
+    status: 'Completed'
+  },
+  {
+    id: 2,
+    method: 'Airtel Money',
+    amount: 25000,
+    date: '2024-01-14 10:20',
+    status: 'Completed'
+  },
+  {
+    id: 3,
+    method: 'Mix by Yas',
+    amount: 10000,
+    date: '2024-01-12 09:15',
+    status: 'Pending'
+  }
+])
 
+// Computed
 const selectedMethodName = computed(() => {
   const method = paymentMethods.find(m => m.id === selectedMethod.value)
   return method ? method.name : 'Unknown'
@@ -276,6 +329,18 @@ const selectMethod = (methodId) => {
   isDropdownOpen.value = false
 }
 
+// Close dropdown when clicking outside
+const handleClickOutside = (event) => {
+  if (isDropdownOpen.value && !event.target.closest('.relative')) {
+    isDropdownOpen.value = false
+  }
+}
+
+// Add click outside listener
+if (typeof window !== 'undefined') {
+  document.addEventListener('click', handleClickOutside)
+}
+
 const generateTransactionId = () => {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
   let result = 'TXN-'
@@ -286,43 +351,31 @@ const generateTransactionId = () => {
 }
 
 const handleDeposit = async () => {
-  if (!depositAmount.value || depositAmount.value < 1000) {
-    return
-  }
-  
-  // Check if user is authenticated
-  if (!authStore.isLoggedIn) {
-    router.push('/login')
-    return
-  }
+  if (!depositAmount.value || depositAmount.value < 1000) return
   
   isProcessing.value = true
   
   try {
-    // Call the deposit action from authStore
-    const result = await authStore.initiateDeposit(depositAmount.value)
+    await new Promise(resolve => setTimeout(resolve, 2000))
     
-    if (result.success && result.paymentUrl) {
-      // If payment URL is returned, redirect
-      window.location.href = result.paymentUrl
-      return
-    }
-    
-    // If deposit is handled directly (not redirect)
-    // Update balance locally
     lastDepositAmount.value = depositAmount.value
     transactionId.value = generateTransactionId()
     
-    // Refresh balance from server
-    await authStore.fetchUserBalance()
+    balance.value += depositAmount.value
     
-    showSuccessModal.value = true
+    recentDeposits.value.unshift({
+      id: Date.now(),
+      method: selectedMethodName.value,
+      amount: depositAmount.value,
+      date: new Date().toLocaleString(),
+      status: 'Pending'
+    })
+    
     depositAmount.value = 0
+    showSuccessModal.value = true
     
   } catch (error) {
     console.error('Deposit failed:', error)
-    // Show error message
-    alert(error.message || 'Deposit failed. Please try again.')
   } finally {
     isProcessing.value = false
   }
@@ -331,32 +384,98 @@ const handleDeposit = async () => {
 const closeSuccessModal = () => {
   showSuccessModal.value = false
 }
-
-// Handle click outside dropdown
-const handleClickOutside = (event) => {
-  if (isDropdownOpen.value && !event.target.closest('.relative')) {
-    isDropdownOpen.value = false
-  }
-}
-
-// Lifecycle
-onMounted(() => {
-  // Refresh balance when component mounts
-  if (authStore.isLoggedIn) {
-    authStore.fetchUserBalance()
-  }
-  
-  // Add click outside listener
-  document.addEventListener('click', handleClickOutside)
-})
-
-// Cleanup
-import { onBeforeUnmount } from 'vue'
-onBeforeUnmount(() => {
-  document.removeEventListener('click', handleClickOutside)
-})
 </script>
 
 <style scoped>
-/* Your existing styles remain the same */
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+::-webkit-scrollbar-thumb {
+  background: #374151;
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #e11d48;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+/* Animations */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes dropdownSlide {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.animate-dropdown {
+  animation: dropdownSlide 0.2s ease-out;
+}
+
+/* Prevent overflow */
+.min-w-0 {
+  min-width: 0;
+}
+
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.break-all {
+  word-break: break-all;
+}
+
+/* Dropdown scrollbar */
+.overflow-y-auto::-webkit-scrollbar {
+  width: 2px;
+}
+.overflow-y-auto::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+.overflow-y-auto::-webkit-scrollbar-thumb {
+  background: #374151;
+  border-radius: 10px;
+}
 </style>

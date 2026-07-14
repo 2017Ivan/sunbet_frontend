@@ -116,26 +116,28 @@
         <!-- Main Share Button -->
         <button 
           @click="shareWin"
-          class="group relative w-full cursor-pointer overflow-hidden bg-gradient-to-r from-rose-600 via-rose-500 to-rose-400 hover:from-rose-500 hover:via-rose-400 hover:to-rose-300 border border-rose-400/30 rounded-xl p-3.5 transition-all duration-300 shadow-lg shadow-rose-500/20 hover:shadow-rose-500/40"
+          class="group relative w-full overflow-hidden bg-gradient-to-r from-rose-600 via-rose-500 to-rose-400 hover:from-rose-500 hover:via-rose-400 hover:to-rose-300 border border-rose-400/30 rounded-xl p-3.5 transition-all duration-300 shadow-lg shadow-rose-500/20 hover:shadow-rose-500/40"
         >
           <!-- Animated Background Glow -->
           <div class="absolute inset-0 bg-gradient-to-r from-rose-400/20 to-rose-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
           
           <!-- Content -->
           <div class="relative flex items-center justify-center gap-3">
+            <!-- Icon with pulse animation -->
+            <div class="relative">
+              <div class="absolute inset-0 bg-rose-300/20 rounded-full blur-sm animate-pulse"></div>
+             
+            </div>
+            
             <!-- Text -->
             <span class="text-white font-semibold text-base tracking-wide">
               Share Your Win
             </span>
             
             <!-- Arrow indicator -->
-            <svg class="w-4 h-4 text-white/70 group-hover:rotate-6 transition-transform duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <circle cx="18" cy="5" r="3" stroke-linecap="round" stroke-linejoin="round"/>
-                <circle cx="6" cy="12" r="3" stroke-linecap="round" stroke-linejoin="round"/>
-                <circle cx="18" cy="19" r="3" stroke-linecap="round" stroke-linejoin="round"/>
-                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" stroke-linecap="round"/>
-                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" stroke-linecap="round"/>
-              </svg>
+            <svg class="w-4 h-4 text-white/70 group-hover:translate-x-1 transition-transform duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="9 6 15 12 9 18" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
           </div>
         </button>
 
