@@ -116,7 +116,7 @@
         <!-- Main Share Button -->
         <button 
           @click="shareWin"
-          class="group relative w-full cursor-pointer overflow-hidden bg-gradient-to-r from-rose-600 via-rose-500 to-rose-400 hover:from-rose-500 hover:via-rose-400 hover:to-rose-300 border border-rose-400/30 rounded-xl p-3.5 transition-all duration-300 shadow-lg shadow-rose-500/20 hover:shadow-rose-500/40"
+          class="group relative w-full cursor-pointer overflow-hidden bg-gradient-to-r from-green-600/50 via-green-500 to-green-400/40 border border-rose-400/30 rounded-xl p-3.5 transition-all duration-300 shadow-lg shadow-rose-500/20 hover:shadow-teal-500/40"
         >
           <!-- Animated Background Glow -->
           <div class="absolute inset-0 bg-gradient-to-r from-rose-400/20 to-rose-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
