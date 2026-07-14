@@ -67,25 +67,25 @@
           <div class="">
             
             <!-- Total Odds -->
-            <div class="flex items-center justify-between px-4 py-3">
+            <div class="flex items-center justify-between px-4 py-1">
               <p class="text-[10px] uppercase tracking-wider text-[#8E8E8E] font-medium">Total Odds</p>
               <p class="text-[#8E8E8E] font-bold text-sm">{{ totalOdds.toFixed(2) }}</p>
             </div>
             
             <!-- Stake -->
-            <div class="flex items-center justify-between px-4 py-3">
+            <div class="flex items-center justify-between px-4 py-1">
               <p class="text-[10px] uppercase tracking-wider text-[#8E8E8E] font-medium">Stake</p>
               <p class="text-[#8E8E8E] font-bold text-sm">TZS {{ formatNumber(stakeAmount) }}</p>
             </div>
             
             <!-- Potential Win -->
-            <div class="flex items-center justify-between px-4 py-3">
+            <div class="flex items-center justify-between px-4 py-1">
               <p class="text-[10px] uppercase tracking-wider text-[#8E8E8E] font-medium">Potential Win</p>
               <p class="text-[#8E8E8E] font-bold text-sm">TZS {{ formatNumber(potentialWin) }}</p>
             </div>
             
             <!-- Tax -->
-            <div class="flex items-center justify-between px-4 py-3">
+            <div class="flex items-center justify-between px-4 py-1">
               <p class="text-[10px] uppercase tracking-wider text-[#8E8E8E] font-medium">Tax (12%)</p>
               <p class="text-[#8E8E8E] font-semibold text-sm">- TZS {{ formatNumber(tax) }}</p>
             </div>
