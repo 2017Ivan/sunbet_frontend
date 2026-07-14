@@ -57,7 +57,7 @@
             <!-- Deposit Button -->
             <button
               type="submit"
-              class="w-full py-3 bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400 text-white font-semibold rounded-xl transition-all duration-200 shadow-lg shadow-rose-500/20 hover:shadow-rose-500/40 disabled:opacity-50 disabled:cursor-not-allowed"
+              class="w-full py-3 bg-gradient-to-r from-teal-600 to-rose-500 hover:from-rose-500 hover:to-rose-400 text-white font-semibold rounded-xl transition-all duration-200 shadow-lg shadow-rose-500/20 hover:shadow-rose-500/40 disabled:opacity-50 disabled:cursor-not-allowed"
               :disabled="isProcessing || !depositAmount || depositAmount < 1000"
             >
               <template v-if="!isProcessing">
