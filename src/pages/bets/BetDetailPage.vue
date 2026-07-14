@@ -40,7 +40,7 @@
                    'bg-gradient-to-r from-amber-900/40 to-amber-950/40 border-t border-amber-700/30'"
         >
           <div class="flex items-center gap-3">
-            <span class="text-2xl">{{ isWon ? '🏆' : isLost ? '😔' : '⏳' }}</span>
+            <span class="text-4xl">{{ isWon ? '🏆' : isLost ? '😔' : '⏳' }}</span>
             <div>
               <p class="text-white font-semibold text-sm my-5">
                 {{ isWon ? 'Bet Won!' : isLost ? 'Bet Lost' : 'Bet in Progress' }}
