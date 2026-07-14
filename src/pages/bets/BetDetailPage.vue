@@ -124,7 +124,7 @@
           <!-- Content -->
           <div class="relative flex items-center justify-center gap-3">
             <!-- Text -->
-            <span class="text-white font-semibold text-base tracking-wide">
+            <span class="text-white font-semibold text-base tracking-wide uppercase">
               Share Your Win
             </span>
             
