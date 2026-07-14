@@ -41,7 +41,7 @@
                 <input
                   v-model.number="depositAmount"
                   type="number"
-                  min="1000"
+                  min="168000"
                   step="100"
                   placeholder="0"
                   class="w-full pl-12 pr-4 py-3 bg-gray-900 border border-gray-700 rounded-xl text-gray-100 text-lg focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20 transition-all"

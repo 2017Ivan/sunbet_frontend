@@ -40,22 +40,16 @@
                 <input
                   v-model.number="withdrawAmount"
                   type="number"
-                  min="1000"
+                  max="5000000"
                   step="100"
                   placeholder="0"
-                  class="w-full pl-12 pr-4 py-3 bg-gray-900 border border-gray-700 rounded-xl text-gray-100 text-lg focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20 transition-all"
+                  class="w-full pl-12 pr-4 py-2 bg-gray-900 border border-gray-700 rounded-xl text-gray-100 text-lg focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20 transition-all"
                   required
                 />
               </div>
               <div class="flex justify-between items-center mt-1">
-                <p class="text-gray-400 text-xs">Minimum withdrawal: TSh 1,000</p>
-                <button 
-                  type="button"
-                  @click="setMaxAmount"
-                  class="text-xs text-rose-400 hover:text-rose-300 transition-colors font-medium"
-                >
-                  Withdraw All
-                </button>
+                <p class="text-gray-400 text-xs">Maximum withdrawal: TSh 5,000,000</p>
+             
               </div>
             </div>
 
@@ -212,14 +206,7 @@ const totalWithdrawn = ref(125000)
 const quickWithdrawAmounts = [100000, 500000, 1000000, 2500000]
 const withdrawalFeePercent = 0.005 // 0.5%
 
-// Payment Methods
-const paymentMethods = [
-  { id: 'airtel', name: 'Airtel Money', description: 'Airtel Tanzania' },
-  { id: 'vodacom', name: 'M-Pesa', description: 'Vodacom Tanzania' },
-  { id: 'mixbyyas', name: 'Mix by Yas', description: 'Mobile Money' },
-  { id: 'halotel', name: 'Halotel', description: 'Halotel Mobile Money' },
-  { id: 'ttcl', name: 'TTCL', description: 'TTCL Mobile Money' }
-]
+
 
 // Computed
 const balance = computed(() => authStore.userBalance)
