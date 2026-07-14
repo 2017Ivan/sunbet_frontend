@@ -107,13 +107,13 @@
               </div>
             </div>
 
-            <div class="p-3 bg-rose-500/5 border border-rose-500/20 rounded-xl">
+            <div class="p-3 ">
               <div class="flex items-start gap-2">
                 <svg class="w-4 h-4 text-rose-400 mt-0.5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
                   <polyline points="22 4 12 14.01 9 11.01"/>
                 </svg>
-                <p class="text-rose-200 text-xs">
+                <p class="text-rose-100 text-xs">
                   Funds will be sent to your mobile money within 1-24 hours. Fee: 0% of withdrawal amount.
                 </p>
               </div>
