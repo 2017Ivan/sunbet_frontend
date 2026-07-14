@@ -80,8 +80,8 @@
                   <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
                   <polyline points="22 4 12 14.01 9 11.01"/>
                 </svg>
-                <p class="text-rose-400 text-xs">
-                  Funds will be added to your account instantly. Minimum deposit: TSh 1,000
+                <p class="text-rose-200 text-xs">
+                  Funds will be added to your account instantly. Minimum deposit: TSh 168,000.00
                 </p>
               </div>
             </div>
