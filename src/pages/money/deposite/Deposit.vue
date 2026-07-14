@@ -142,14 +142,6 @@ const totalDeposits = ref(32500) // This could also come from API
 
 const quickDepositAmounts = [1000, 5000, 10000, 50000]
 
-// Payment Methods
-const paymentMethods = [
-  { id: 'airtel', name: 'Airtel Money', description: 'Airtel Tanzania' },
-  { id: 'vodacom', name: 'M-Pesa', description: 'Vodacom Tanzania' },
-  { id: 'mixbyyas', name: 'Mix by Yas', description: 'Mobile Money' },
-  { id: 'halotel', name: 'Halotel', description: 'Halotel Mobile Money' },
-  { id: 'ttcl', name: 'TTCL', description: 'TTCL Mobile Money' }
-]
 
 // Computed - Using authStore
 const balance = computed(() => authStore.userBalance)

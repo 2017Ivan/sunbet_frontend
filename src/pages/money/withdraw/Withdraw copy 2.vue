@@ -17,12 +17,23 @@
 
       <!-- Balance Card -->
       <div class="bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700 rounded-2xl p-6 mb-8">
-        <div class="flex flex-col sm:flex-row items-center sm:items-center justify-center gap-4">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <p class="text-gray-400 text-sm">Available Balance</p>
-            <p class="text-sm font-bold text-gray-100 mt-1">{{ formattedBalance }}</p>
+            <p class="text-3xl font-bold text-gray-100 mt-1">{{ formattedBalance }}</p>
           </div>
-     
+          <div class="flex items-center gap-4 w-full sm:w-auto">
+            <div class="flex-1 sm:flex-none text-right">
+              <p class="text-gray-400 text-xs">Total Withdrawn</p>
+              <p class="text-rose-400 font-semibold">TSh {{ totalWithdrawn.toLocaleString() }}</p>
+            </div>
+            <div class="w-12 h-12 bg-gradient-to-br from-rose-500/20 to-rose-600/20 rounded-xl flex items-center justify-center flex-shrink-0">
+              <svg class="w-6 h-6 text-rose-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2v4M12 22v-4M4 12H2M6 12H4M20 12h-2M22 12h-2M19.07 4.93l-2.83 2.83M4.93 19.07l2.83-2.83M19.07 19.07l-2.83-2.83M4.93 4.93l2.83 2.83"/>
+                <circle cx="12" cy="12" r="4"/>
+              </svg>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -76,8 +87,89 @@
               </div>
             </div>
 
-    
+            <!-- Payment Method Dropdown -->
+            <div>
+              <label class="block text-sm text-gray-400 mb-2">Withdraw To</label>
+              <div class="relative">
+                <button
+                  type="button"
+                  @click="toggleDropdown"
+                  class="w-full flex items-center justify-between p-3 bg-gray-900 border border-gray-700 rounded-xl text-gray-100 focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20 transition-all"
+                  :class="{ 'border-rose-500': isDropdownOpen }"
+                >
+                  <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-gray-800 flex items-center justify-center flex-shrink-0">
+                      <span class="text-rose-400 font-bold text-xs">{{ getMethodInitial(selectedMethodName) }}</span>
+                    </div>
+                    <div class="text-left">
+                      <p class="text-gray-100 text-sm font-medium">{{ selectedMethodName }}</p>
+                      <p class="text-gray-400 text-xs">{{ getMethodDescription(selectedMethodName) }}</p>
+                    </div>
+                  </div>
+                  <svg 
+                    class="w-5 h-5 text-gray-400 transition-transform duration-200"
+                    :class="{ 'rotate-180': isDropdownOpen }"
+                    viewBox="0 0 24 24" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    stroke-width="2"
+                  >
+                    <polyline points="6 9 12 15 18 9"/>
+                  </svg>
+                </button>
 
+                <div 
+                  v-if="isDropdownOpen"
+                  class="absolute z-50 w-full mt-2 bg-gray-800 border border-gray-700 rounded-xl shadow-2xl shadow-rose-500/10 overflow-hidden animate-dropdown"
+                >
+                  <div class="max-h-60 overflow-y-auto">
+                    <button
+                      v-for="method in paymentMethods"
+                      :key="method.id"
+                      type="button"
+                      @click="selectMethod(method.id)"
+                      class="w-full flex items-center gap-3 p-3 hover:bg-gray-700 transition-colors border-b border-gray-700 last:border-b-0"
+                      :class="{ 'bg-rose-500/5 border-rose-500/30': selectedMethod === method.id }"
+                    >
+                      <div class="w-8 h-8 rounded-lg bg-gray-900 flex items-center justify-center flex-shrink-0">
+                        <span class="text-rose-400 font-bold text-xs">{{ getMethodInitial(method.name) }}</span>
+                      </div>
+                      <div class="text-left flex-1">
+                        <p class="text-gray-100 text-sm font-medium">{{ method.name }}</p>
+                        <p class="text-gray-400 text-xs">{{ method.description }}</p>
+                      </div>
+                      <svg 
+                        v-if="selectedMethod === method.id"
+                        class="w-4 h-4 text-rose-400 flex-shrink-0"
+                        viewBox="0 0 24 24" 
+                        fill="none" 
+                        stroke="currentColor" 
+                        stroke-width="2.5"
+                      >
+                        <polyline points="20 6 9 17 4 12"/>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <p class="text-gray-400 text-xs mt-1">Funds will be sent to your mobile money account</p>
+            </div>
+
+            <!-- Withdrawal Summary -->
+            <div v-if="withdrawAmount >= 1000" class="p-4 bg-gray-900/50 border border-gray-700 rounded-xl space-y-2">
+              <div class="flex justify-between text-sm">
+                <span class="text-gray-400">Withdrawal Amount</span>
+                <span class="text-gray-100 font-semibold">TSh {{ withdrawAmount.toLocaleString() }}</span>
+              </div>
+              <div class="flex justify-between text-sm">
+                <span class="text-gray-400">Withdrawal Fee</span>
+                <span class="text-gray-100 font-semibold">TSh {{ withdrawalFee.toLocaleString() }}</span>
+              </div>
+              <div class="border-t border-gray-700 pt-2 flex justify-between text-sm">
+                <span class="text-gray-400">You'll Receive</span>
+                <span class="text-rose-400 font-bold">TSh {{ netAmount.toLocaleString() }}</span>
+              </div>
+            </div>
 
             <!-- Withdraw Button -->
             <button
@@ -86,7 +178,7 @@
               :disabled="isProcessing || !withdrawAmount || withdrawAmount < 1000 || withdrawAmount > balance"
             >
               <template v-if="!isProcessing">
-                Withdraw 
+                Withdraw TSh {{ withdrawAmount.toLocaleString() || '0' }}
               </template>
               <template v-else>
                 <span class="flex items-center justify-center gap-2">
@@ -120,14 +212,75 @@
                   <polyline points="22 4 12 14.01 9 11.01"/>
                 </svg>
                 <p class="text-rose-400 text-xs">
-                  Funds will be sent to your mobile money within 1-24 hours. Fee: 0% of withdrawal amount.
+                  Funds will be sent to your mobile money within 1-24 hours. Fee: 0.5% of withdrawal amount.
                 </p>
               </div>
             </div>
           </form>
         </div>
 
-     
+        <!-- Recent Withdrawals Sidebar -->
+        <div class="lg:w-80 space-y-4">
+          <div class="bg-gray-800 border border-gray-700 rounded-2xl p-6">
+            <h3 class="text-sm font-semibold text-gray-100 mb-4">Recent Withdrawals</h3>
+            <div class="space-y-3">
+              <div 
+                v-for="withdrawal in recentWithdrawals" 
+                :key="withdrawal.id"
+                class="flex items-center justify-between p-3 bg-gray-900/50 rounded-xl border border-gray-700/50"
+              >
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-lg bg-gray-800 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-4 h-4 text-rose-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M12 2v4M12 22v-4M4 12H2M6 12H4M20 12h-2M22 12h-2M19.07 4.93l-2.83 2.83M4.93 19.07l2.83-2.83M19.07 19.07l-2.83-2.83M4.93 4.93l2.83 2.83"/>
+                      <circle cx="12" cy="12" r="4"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <p class="text-gray-100 text-sm font-medium">TSh {{ withdrawal.amount.toLocaleString() }}</p>
+                    <p class="text-gray-400 text-xs">{{ withdrawal.method }}</p>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <span 
+                    class="text-xs px-2 py-1 rounded-full"
+                    :class="{
+                      'bg-green-500/10 text-green-400': withdrawal.status === 'Completed',
+                      'bg-yellow-500/10 text-yellow-400': withdrawal.status === 'Pending',
+                      'bg-red-500/10 text-red-400': withdrawal.status === 'Failed'
+                    }"
+                  >
+                    {{ withdrawal.status }}
+                  </span>
+                  <p class="text-gray-500 text-[10px] mt-1">{{ withdrawal.date }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Withdrawal Limits -->
+          <div class="bg-gray-800 border border-gray-700 rounded-2xl p-6">
+            <h4 class="text-sm font-semibold text-gray-100 mb-3">Withdrawal Limits</h4>
+            <div class="space-y-2 text-sm">
+              <div class="flex justify-between">
+                <span class="text-gray-400">Minimum</span>
+                <span class="text-gray-100">TSh 1,000</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-400">Maximum (Daily)</span>
+                <span class="text-gray-100">TSh 1,000,000</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-400">Fee</span>
+                <span class="text-rose-400">0.5%</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-400">Processing Time</span>
+                <span class="text-gray-100">1-24 hours</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Success Modal -->
@@ -209,7 +362,7 @@ const isDropdownOpen = ref(false)
 const errorMessage = ref('')
 const totalWithdrawn = ref(125000)
 
-const quickWithdrawAmounts = [100000, 500000, 1000000, 2500000]
+const quickWithdrawAmounts = [1000, 5000, 10000, 50000]
 const withdrawalFeePercent = 0.005 // 0.5%
 
 // Payment Methods
@@ -240,6 +393,30 @@ const netAmount = computed(() => {
   return withdrawAmount.value - withdrawalFee.value
 })
 
+// Recent Withdrawals
+const recentWithdrawals = ref([
+  {
+    id: 1,
+    method: 'M-Pesa',
+    amount: 50000,
+    date: '2024-01-15 14:30',
+    status: 'Completed'
+  },
+  {
+    id: 2,
+    method: 'Airtel Money',
+    amount: 25000,
+    date: '2024-01-14 10:20',
+    status: 'Pending'
+  },
+  {
+    id: 3,
+    method: 'Mix by Yas',
+    amount: 10000,
+    date: '2024-01-12 09:15',
+    status: 'Completed'
+  }
+])
 
 // Methods
 const setMaxAmount = () => {
