@@ -68,7 +68,7 @@
         <template v-else>
           <!-- Balance Chip with animation -->
           <RouterLink
-            to="/wallet"
+            to="/deposite"
             class="flex items-center gap-1 px-2 py-1.5 sm:py-2 rounded-[8px] sm:rounded-[10px] bg-gray-950/40 border border-[#A32D2D]/40 hover:border-[#A32D2D] transition-colors relative"
           >
             <!-- Balance update indicator -->

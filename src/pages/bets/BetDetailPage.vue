@@ -134,7 +134,7 @@
                 </div>
                 <div class="flex  justify-between items-center">
                   <p class="text-[#8E8E8E] font-medium text-sm">{{ selection.match?.name || selection.matchName || 'Match' }}</p>
-                  <span class="text-[#A32D2D] font-bold text-sm  px-1 py-1 rounded-lg">{{ parseFloat(selection.odds).toFixed(2) }}</span>
+                  <span class="text-[#8E8E8E] font-bold text-sm  px-1 py-1 rounded-lg">{{ parseFloat(selection.odds).toFixed(2) }}</span>
                 </div>
                  <div class="flex  justify-between items-center py-1">
                   <span class="text-sm text-[#A0A0A0] font-bold">League name</span>
@@ -142,7 +142,7 @@
                 </div>
                  <div class="flex  justify-between items-center">
                   <span class="text-xs text-[#A0A0A0] font-semibold">{{ selection.match?.market || '1X2' }} | Full Time - <span class="text-[#A9A9A9] font-medium">{{ selection.selection || selection.pick || 'N/A' }}</span></span>
-                  <!-- <span class="text-xs text-green-500 font-semibold">WON</span> -->
+                  <span class="text-xs text-green-500 font-semibold">WON</span>
                 </div>
             </div>
           </div>
