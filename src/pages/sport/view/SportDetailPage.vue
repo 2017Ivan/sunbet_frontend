@@ -43,7 +43,7 @@
           <div class="flex items-center justify-between w-full max-w-2xl gap-1 sm:gap-4">
             <!-- Home Team -->
             <div class="flex flex-col items-center flex-1">
-              <div class="w-10 h-10 sm:w-16 sm:h-16 bg-gradient-to-br from-blue-900 to-blue-700 rounded-full flex items-center justify-center text-sm sm:text-2xl font-bold text-blue-300 mb-1 sm:mb-2 border border-blue-600/30">
+              <div class="w-10 h-10 sm:w-16 sm:h-16  flex items-center justify-center text-sm sm:text-2xl font-bold text-blue-300 mb-1 sm:mb-2 ">
                 {{ getTeamInitials(match?.homeTeam || matchData.homeTeam) }}
               </div>
               <span class="text-[10px] sm:text-sm font-semibold text-gray-300 text-center line-clamp-1">{{ match?.homeTeam || matchData.homeTeam }}</span>
@@ -53,14 +53,14 @@
             <!-- VS / Time -->
             <div class="flex flex-col items-center px-1 sm:px-4">
               <span class="text-[10px] sm:text-xs font-bold text-gray-500 uppercase">vs</span>
-              <div class="w-8 h-8 sm:w-12 sm:h-12 bg-gray-700 rounded-full flex items-center justify-center mt-1 sm:mt-2 border border-gray-600">
+              <div class="w-8 h-8 sm:w-12 sm:h-12  flex items-center justify-center mt-1 sm:mt-2">
                 <span class="text-[10px] sm:text-sm font-bold text-gray-400">{{ match?.time || matchData.time || '00:00' }}</span>
               </div>
             </div>
 
             <!-- Away Team -->
             <div class="flex flex-col items-center flex-1">
-              <div class="w-10 h-10 sm:w-16 sm:h-16 bg-gradient-to-br from-red-900 to-red-700 rounded-full flex items-center justify-center text-sm sm:text-2xl font-bold text-red-300 mb-1 sm:mb-2 border border-red-600/30">
+              <div class="w-10 h-10 sm:w-16 sm:h-16  flex items-center justify-center text-sm sm:text-2xl font-bold text-red-300 mb-1 sm:mb-2 ">
                 {{ getTeamInitials(match?.awayTeam || matchData.awayTeam) }}
               </div>
               <span class="text-[10px] sm:text-sm font-semibold text-gray-300 text-center line-clamp-1">{{ match?.awayTeam || matchData.awayTeam }}</span>
