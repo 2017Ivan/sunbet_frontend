@@ -17,7 +17,7 @@
 
       <!-- Balance Card - Now using authStore -->
       <div class="bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700 rounded-2xl p-6 mb-8">
-        <div class="flex flex-col sm:flex-row items-center sm:items-center justify-center gap-4">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <p class="text-gray-400 text-sm">Available Balance</p>
             <p class="text-sm font-bold text-gray-100 mt-1">{{ formattedBalance }}</p>
@@ -53,6 +53,73 @@
 
          
 
+            <!-- Payment Method Dropdown -->
+            <div>
+              <label class="block text-sm text-gray-400 mb-2">Payment Method</label>
+              <div class="relative">
+                <button
+                  type="button"
+                  @click="toggleDropdown"
+                  class="w-full flex items-center justify-between p-3 bg-gray-900 border border-gray-700 rounded-xl text-gray-100 focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20 transition-all"
+                  :class="{ 'border-rose-500': isDropdownOpen }"
+                >
+                  <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-gray-800 flex items-center justify-center flex-shrink-0">
+                      <span class="text-rose-400 font-bold text-xs">{{ getMethodInitial(selectedMethodName) }}</span>
+                    </div>
+                    <div class="text-left">
+                      <p class="text-gray-100 text-sm font-medium">{{ selectedMethodName }}</p>
+                      <p class="text-gray-400 text-xs">{{ getMethodDescription(selectedMethodName) }}</p>
+                    </div>
+                  </div>
+                  <svg 
+                    class="w-5 h-5 text-gray-400 transition-transform duration-200"
+                    :class="{ 'rotate-180': isDropdownOpen }"
+                    viewBox="0 0 24 24" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    stroke-width="2"
+                  >
+                    <polyline points="6 9 12 15 18 9"/>
+                  </svg>
+                </button>
+
+                <div 
+                  v-if="isDropdownOpen"
+                  class="absolute z-50 w-full mt-2 bg-gray-800 border border-gray-700 rounded-xl shadow-2xl shadow-rose-500/10 overflow-hidden animate-dropdown"
+                >
+                  <div class="max-h-60 overflow-y-auto">
+                    <button
+                      v-for="method in paymentMethods"
+                      :key="method.id"
+                      type="button"
+                      @click="selectMethod(method.id)"
+                      class="w-full flex items-center gap-3 p-3 hover:bg-gray-700 transition-colors border-b border-gray-700 last:border-b-0"
+                      :class="{ 'bg-rose-500/5 border-rose-500/30': selectedMethod === method.id }"
+                    >
+                      <div class="w-8 h-8 rounded-lg bg-gray-900 flex items-center justify-center flex-shrink-0">
+                        <span class="text-rose-400 font-bold text-xs">{{ getMethodInitial(method.name) }}</span>
+                      </div>
+                      <div class="text-left flex-1">
+                        <p class="text-gray-100 text-sm font-medium">{{ method.name }}</p>
+                        <p class="text-gray-400 text-xs">{{ method.description }}</p>
+                      </div>
+                      <svg 
+                        v-if="selectedMethod === method.id"
+                        class="w-4 h-4 text-rose-400 flex-shrink-0"
+                        viewBox="0 0 24 24" 
+                        fill="none" 
+                        stroke="currentColor" 
+                        stroke-width="2.5"
+                      >
+                        <polyline points="20 6 9 17 4 12"/>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <p class="text-gray-400 text-xs mt-1">Select your mobile network provider</p>
+            </div>
 
             <!-- Deposit Button -->
             <button
