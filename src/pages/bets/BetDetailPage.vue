@@ -138,11 +138,11 @@
                 </div>
                  <div class="flex  justify-between items-center py-1">
                   <span class="text-sm text-[#A0A0A0] font-bold">League name</span>
-                  <span class="text-xs text-[#A0A0A0] font-semibold">(<span class="text-xs text-rose-600/40 font-bold">1-2</span>)</span>
+                  <span class="text-xs text-[#A0A0A0] font-semibold"><span class="text-xs text-gray-400 font-bold px-1 ">1 - 2</span></span>
                 </div>
                  <div class="flex  justify-between items-center">
                   <span class="text-xs text-[#A0A0A0] font-semibold">{{ selection.match?.market || '1X2' }} | Full Time - <span class="text-[#A9A9A9] font-medium">{{ selection.selection || selection.pick || 'N/A' }}</span></span>
-                  <span class="text-xs text-green-500 font-semibold">WON</span>
+                  <!-- <span class="text-xs text-green-500 font-semibold">WON</span> -->
                 </div>
             </div>
           </div>
