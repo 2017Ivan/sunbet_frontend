@@ -1,6 +1,6 @@
 <!-- SportsPage.vue -->
 <template>
-  <div class="min-h-screen bg-gray-900 pb-10">
+  <div class="min-h-screen bg-white pb-10">
     <!-- Loading State -->
     <SportsPageSkeleton v-if="isLoading" />
     
@@ -28,7 +28,7 @@
       </div>
 
       <!-- ══ SPORTS CONTENT ══ -->
-      <div class="max-w-7xl mx-auto mt-3 px-0">
+      <div class="max-w-7xl mx-auto  px-0">
 
         <!-- League Groups -->
         <div  
@@ -37,9 +37,9 @@
           class="mb-0"
         >
           <!-- League Header -->
-          <div class="sticky top-12 z-10 py-2 pl-1 bg-gray-900">
+          <div class="sticky top-12 z-10 py-2 pl-1 bg-gradient-to-b from-gray-400 via-gray-700/0 to-gray-400 backdrop-blur-sm">
             <div class="flex items-center justify-between">
-              <span class="text-xs font-bold text-gray-300 truncate">{{ leagueName }}</span>
+              <span class="text-xs font-bold text-gray-800 truncate">{{ leagueName }}</span>
 
               <div class="flex gap-1 flex-shrink-0">
                 <span 

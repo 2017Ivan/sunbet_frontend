@@ -182,14 +182,29 @@
         </div>
 
         <!-- Timestamps & Actions -->
-        <div class="mt-5 bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-4">
-          <div class="flex flex-wrap items-center justify-between gap-3">
-            <div class="flex flex-wrap items-center gap-6 justify-center">
-                <p class="text-[10px] uppercase tracking-wider text-[#606060] font-medium">Placed</p>
-                <p class="text-white text-sm ">{{ formatDate(bet.createdAt) }}</p>
+        <div class="mt-5 bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-2">
+          <div class="flex flex-col items-center justify-center gap-3">
+            <div class="flex flex-wrap items-center gap-3 justify-center">
+                <p class="text-[10px] uppercase tracking-wider text-[#8C8C8C] font-medium">Bet placed on</p>
+                <p class="text-gray-400 text-xs ">{{ formatDate(bet.createdAt) }}</p>
               
              
             </div>
+            <div class="flex flex-row items-center gap-3 justify-center">
+               <div class="flex flex-row gap-1 items-center justify-center">
+                    <div class="h-3 w-3 bg-gray-600 p-1"></div>
+                    <span class="text-gray-300 text-xs">Pending</span>
+               </div>
+               <div class="flex flex-row gap-1 items-center justify-center">
+                    <div class="h-3 w-3 bg-green-600 p-1"></div>
+                    <span class="text-gray-300 text-xs">Won</span>
+               </div>
+               <div class="flex flex-row gap-1 items-center justify-center">
+                    <div class="h-3 w-3 bg-rose-600 p-1"></div>
+                    <span class="text-gray-300 text-xs">Lost</span>
+               </div>
+            </div>
+            
          
           </div>
         </div>
