@@ -143,7 +143,7 @@
       </div>
 
         <!-- Selections -->
-        <div v-if="bet.selections && bet.selections.length > 0" class="mt-3    p-2">
+        <div v-if="bet.selections && bet.selections.length > 0" class="mt-3 bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-2">
           <div class="flex items-center justify-between mb-4">
             <h3 class="text-sm font-semibold text-white flex items-center gap-2">
               <svg class="w-4 h-4 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -155,11 +155,11 @@
             <span class="text-xs text-[#606060] font-medium">{{ bet.selections.length }} picks</span>
           </div>
           
-          <div class="space-y-1">
+          <div class="space-y-2">
             <div 
               v-for="(selection, index) in bet.selections" 
               :key="index"
-              class="bg-[#0D0D0D] rounded-lg p-1 flex  flex-col   group border-amber-600/20 transition-all border border-transparent"
+              class="bg-[#0D0D0D] rounded-lg p-1 flex  flex-col   group hover:border-amber-600/20 transition-all border border-transparent"
             >
              
                 <div class="flex items-center gap-1 ml-0 mt-0.5">
@@ -182,7 +182,7 @@
         </div>
 
         <!-- Timestamps & Actions -->
-        <div class="mt-5 bg-[#1A1A1A] border border-[#2A2A2A]  p-2">
+        <div class="mt-5 bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-2">
           <div class="flex flex-col items-center justify-center gap-3">
             <div class="flex flex-wrap items-center gap-3 justify-center">
                 <p class="text-[10px] uppercase tracking-wider text-[#8C8C8C] font-medium">Bet placed on</p>
@@ -191,40 +191,23 @@
              
             </div>
             <div class="flex flex-row items-center gap-3 justify-center">
-              
-          
-                      <div class="flex flex-row gap-1.5 items-center justify-center">
-                          <div class="w-0 h-0 border-l-[7px] border-r-[7px] border-b-[8px] border-l-transparent border-r-transparent border-b-gray-400">
-                          </div>
-                          <span class="text-gray-300 text-xs font-medium">Pending</span>
-                      </div>
-                      <div class="flex flex-row gap-1.5 items-center justify-center">
-                          <div class="w-0 h-0 border-l-[7px] border-r-[7px] border-b-[8px] border-l-transparent border-r-transparent border-b-green-500">
-                          </div>
-                          <span class="text-gray-300 text-xs font-medium">Won</span>
-                      </div>
-                      <div class="flex flex-row gap-1.5 items-center justify-center">
-                          <div class="w-0 h-0 border-l-[7px] border-r-[7px] border-b-[8px] border-l-transparent border-r-transparent border-b-rose-500">
-                          </div>
-                          <span class="text-gray-300 text-xs font-medium">Lost</span>
-                      </div>
-                      <div class="flex flex-row gap-1.5 items-center justify-center">
-                          <div class="w-0 h-0 border-l-[7px] border-r-[7px] border-b-[8px] border-l-transparent border-r-transparent border-b-gray-500">
-                          </div>
-                          <span class="text-gray-300 text-xs font-medium">Void</span>
-                      </div>
-             
-             
+               <div class="flex flex-row gap-1 items-center justify-center">
+                    <div class="h-3 w-3 bg-gray-600 p-1"></div>
+                    <span class="text-gray-300 text-xs">Pending</span>
+               </div>
+               <div class="flex flex-row gap-1 items-center justify-center">
+                    <div class="h-3 w-3 bg-green-600 p-1"></div>
+                    <span class="text-gray-300 text-xs">Won</span>
+               </div>
+               <div class="flex flex-row gap-1 items-center justify-center">
+                    <div class="h-3 w-3 bg-rose-600 p-1"></div>
+                    <span class="text-gray-300 text-xs">Lost</span>
+               </div>
             </div>
-            
             
          
           </div>
         </div>
-          <div class="flex flex-col items-center justify-center text-center py-2">
-                <span class="text-gray-400 text-[13px] font-bold">All Bets are accepted and settled in accordance with  <span class="text-gray-400 text-xs">our <span class="underline">Terms and Conditions</span> and <span class="underline">Rules</span> </span></span>
-               
-            </div>
       </div>
 
       <!-- Not Found -->
