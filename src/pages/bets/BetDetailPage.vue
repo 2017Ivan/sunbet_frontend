@@ -1,10 +1,10 @@
 <template>
   <div class="min-h-screen bg-[#0D0D0D]">
-    <div class="max-w-2xl mx-auto px-1 py-6">
+    <div class="max-w-2xl mx-auto px-1 py-3">
       
       <!-- Bet ID Header - Fixed null check -->
       <div class="px-0 py-1 bg-[#0D0D0D] flex items-center justify-between">
-        <div class="flex items-center gap-3 my-3">
+        <div class="flex items-center gap-3  mb-6">
           <!-- Back Button -->
           <button 
             class="flex items-center gap-2 text-[#606060] hover:text-white transition-colors mb-0 group"
