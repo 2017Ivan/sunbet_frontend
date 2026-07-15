@@ -98,7 +98,7 @@
             <div class="flex items-center justify-between">
               <p class="text-xs text-white font-medium">Payout</p>
               <div class="text-right">
-                <p class="text-green-400 font-bold text-xl">
+                <p class="text-green-400 font-bold text-sm">
                   TZS {{ formatNumber(payout) }}
                 </p>
                 <span class="text-xs font-semibold" :class="isWon ? 'text-green-400' : isLost ? 'text-red-400' : 'text-amber-400'">
@@ -143,7 +143,7 @@
       </div>
 
         <!-- Selections -->
-        <div v-if="bet.selections && bet.selections.length > 0" class="mt-3    p-2">
+        <div v-if="bet.selections && bet.selections.length > 0" class="mt-0     p-2">
           <div class="flex items-center justify-between mb-4">
             <h3 class="text-sm font-semibold text-white flex items-center gap-2">
               <svg class="w-4 h-4 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -159,7 +159,7 @@
             <div 
               v-for="(selection, index) in bet.selections" 
               :key="index"
-              class="bg-[#0D0D0D] rounded-lg p-1 flex  flex-col   group border-amber-600/20 transition-all border border-transparent"
+              class="bg-[#0D0D0D]  p-1 flex  flex-col   group border-amber-600/20 transition-all border-b border-gray-700"
             >
              
                 <div class="flex items-center gap-1 ml-0 mt-0.5">
@@ -185,7 +185,7 @@
         <div class="mt-5 bg-[#1A1A1A] border border-[#2A2A2A]  p-2">
           <div class="flex flex-col items-center justify-center gap-3">
             <div class="flex flex-wrap items-center gap-3 justify-center">
-                <p class="text-[10px] uppercase tracking-wider text-[#8C8C8C] font-medium">Bet placed on</p>
+                <p class="text-[10px]  tracking-wider text-[#8C8C8C] font-medium">Bet Placed on</p>
                 <p class="text-gray-400 text-xs ">{{ formatDate(bet.createdAt) }}</p>
               
              
