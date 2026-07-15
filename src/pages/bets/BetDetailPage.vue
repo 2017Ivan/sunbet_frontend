@@ -159,7 +159,7 @@
             <div 
               v-for="(selection, index) in bet.selections" 
               :key="index"
-              class="bg-[#0D0D0D]  p-1 flex  flex-col   group border-amber-600/20 transition-all border-b border-[#2A2A2A]"
+              class="bg-[#0D0D0D]  p-1 flex  flex-col   group border-amber-600/20 transition-all border-b border-gray-800"
             >
              
                 <div class="flex items-center gap-1 ml-0 mt-0.5">
