@@ -61,8 +61,14 @@
               :key="bet.id"
               :bet="bet"
               status="open"
-              @click="goToBetDetail(bet.id)"
             />
+             <!-- <BetCard
+              v-for="bet in openBets"
+              :key="bet.id"
+              :bet="bet"
+              status="open"
+              @click="goToBetDetail(bet.id)"
+            /> -->
           </div>
         </div>
 
