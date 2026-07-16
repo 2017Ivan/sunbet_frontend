@@ -1,4 +1,5 @@
-import api from '../api'; // Hakikisha hii ni axios instance yako iliyopo tayari
+// financial.service.js 
+import api from '../api'; 
 
 export const financialService = {
   /**

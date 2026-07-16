@@ -1,6 +1,7 @@
+// financial.store.js 
 import { defineStore } from 'pinia';
-import { financialService } from '../services/financial.service';
-import { useAuthStore } from './authStore'; // Ili ku-update balance kwenye auth store pia ikibidi
+import { financialService } from '../../services/money/financial.service';
+import { useAuthStore } from '../auth/authStore'; 
 
 export const useFinancialStore = defineStore('financial', {
   state: () => ({
@@ -25,7 +26,7 @@ export const useFinancialStore = defineStore('financial', {
         
         if (result && result.data) {
           this.currentTransaction = result.data;
-          return result.data; // Itarudisha order_id na expires_at
+          return result.data; 
         }
         return null;
       } catch (err) {
