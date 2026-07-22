@@ -115,18 +115,13 @@ export const useBetStore = defineStore('bet', () => {
     placeBetError.value = null
     
     try {
-      // Prepare selections from slip - HAKIKISHA TIME, DATE, LEAGUE ZINAPO
+      // Prepare selections from slip
       const selections = slip.value.map(item => ({
         matchId: item.matchId,
         matchName: item.matchName || item.match || 'Match',
         selectionType: item.selectionType || 'HOME',
         selectionValue: item.pick || item.selection || '1',
-        odds: parseFloat(item.odds) || 1,
-        // === HAKIKISHA FIELDS HIZI ZINAPO ===
-        time: item.time || '',
-        date: item.date || '',
-        league: item.league || '',
-        marketType: item.market || item.marketKey || '1X2'
+        odds: parseFloat(item.odds) || 1
       }))
       
       console.log('📤 Store selections being sent:', JSON.stringify(selections, null, 2))
@@ -473,7 +468,7 @@ export const useBetStore = defineStore('bet', () => {
     updateStake,
     
     // Bet actions
-    placeBetFromSlip,
+    placeBetFromSlip,       // ← NEW: Auto-creates booking code if needed
     placeBetWithBackend,
     loadUserBets,
     loadBetById,

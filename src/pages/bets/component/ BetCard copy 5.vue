@@ -11,12 +11,13 @@
           :class="statusClass"
         >
           <span class="w-1.5 h-1.5 rounded-full" :class="statusDotClass"></span>
-          {{ statusLabel }} ({{ selectionCount }})
+          {{ statusLabel }} ({{ getSelectionCount() }})
         </span>
       </div>
       <span class="text-[10px] font-bold text-[#606060]">ID: {{ bet.id }}</span>
     </div>
 
+    
     <!-- Date -->
     <span class="text-[10px] text-[#606060] block mb-2.5 font-bold">{{ formatDate(bet.createdAt) }}</span>
 
@@ -52,7 +53,6 @@
 
 <script setup>
 import { computed } from 'vue'
-import { useBookingCodeStore } from '../../../stores/bookingcode/bookingCodeStore'
 
 const props = defineProps({
   bet: { type: Object, required: true },
@@ -60,8 +60,6 @@ const props = defineProps({
 })
 
 defineEmits(['click'])
-
-const bookingCodeStore = useBookingCodeStore()
 
 // ---- Helper Functions ----
 const formatNumber = (value) => {
@@ -83,28 +81,17 @@ const formatDate = (dateString) => {
   })
 }
 
-// ---- Get Selection Count from Booking Code ----
-const selectionCount = computed(() => {
-  // Try to get selections from bookingCode if available
-  if (props.bet.bookingCode?.selections) {
-    return props.bet.bookingCode.selections.length
+const getEventName = () => {
+  if (!props.bet.selections || props.bet.selections.length === 0) {
+    return 'Unknown Event'
   }
-  
-  // If selections are directly on bet
-  if (props.bet.selections) {
-    return props.bet.selections.length
-  }
-  
-  // Try to find in bookingCodeStore
-  const bookingCode = bookingCodeStore.bookingCodes?.find(
-    bc => bc.id === props.bet.bookingCodeId
-  )
-  if (bookingCode?.selections) {
-    return bookingCode.selections.length
-  }
-  
-  return 0
-})
+  return props.bet.selections[0]?.match?.name || 'Unknown Event'
+}
+
+const getSelectionCount = () => {
+  if (!props.bet.selections) return 0
+  return props.bet.selections.length
+}
 
 // ---- Status ----
 const isWon = computed(() => {

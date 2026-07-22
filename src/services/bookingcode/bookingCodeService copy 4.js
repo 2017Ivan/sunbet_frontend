@@ -12,6 +12,7 @@ const bookingCodeService = {
     try {
       const { formatForBackend } = useSelectionFormatter()
       
+      // Format selections for backend using composable
       const formattedSelections = formatForBackend(selections)
 
       const response = await api.post('/booking-codes/create', { selections: formattedSelections })
@@ -49,6 +50,7 @@ const bookingCodeService = {
       
       const response = await api.get(`/booking-codes/${code}/load`)
       
+      // Format selections for frontend using composable
       if (response.data?.data?.selections) {
         response.data.data.selections = formatForFrontend(response.data.data.selections)
       }
@@ -112,122 +114,6 @@ const bookingCodeService = {
         error: errorMessage,
         status: error.response?.status,
         data: error.response?.data
-      }
-    }
-  },
-
-  /**
-   * Get user's booking codes (AUTHENTICATED)
-   * @returns {Promise} - { success, data: bookingCodes[] }
-   */
-  async getUserBookingCodes() {
-    try {
-      const response = await api.get('/booking-codes/my')
-      return {
-        success: true,
-        data: response.data.data,
-        message: response.data.message
-      }
-    } catch (error) {
-      console.error('Get user booking codes error:', error)
-      return {
-        success: false,
-        error: error.response?.data?.message || 'Failed to load booking codes',
-        status: error.response?.status
-      }
-    }
-  },
-
-  /**
-   * Get all booking codes (ADMIN only)
-   * @param {Object} params - { limit, offset, status, search }
-   * @returns {Promise} - { success, data: { total, bookingCodes, pagination } }
-   */
-  async getAllBookingCodes(params = {}) {
-    try {
-      const queryParams = new URLSearchParams()
-      if (params.limit) queryParams.append('limit', params.limit)
-      if (params.offset) queryParams.append('offset', params.offset)
-      if (params.status) queryParams.append('status', params.status)
-      if (params.search) queryParams.append('search', params.search)
-      
-      const url = `/booking-codes/admin/all${queryParams.toString() ? '?' + queryParams.toString() : ''}`
-      const response = await api.get(url)
-      
-      return {
-        success: true,
-        data: response.data.data,
-        message: response.data.message
-      }
-    } catch (error) {
-      console.error('Get all booking codes error:', error)
-      return {
-        success: false,
-        error: error.response?.data?.message || 'Failed to load booking codes',
-        status: error.response?.status
-      }
-    }
-  },
-
-  /**
-   * Update selection score (ADMIN only) - With selectionType and marketType
-   * @param {string} bookingCodeId - Booking code ID
-   * @param {string} matchId - Match ID
-   * @param {number} homeScore - Home score
-   * @param {number} awayScore - Away score
-   * @param {string} selectionType - HOME, DRAW, AWAY (REQUIRED)
-   * @param {string} marketType - Market type (REQUIRED)
-   * @returns {Promise} - { success, data: updatedBookingCode }
-   */
-  async updateSelectionScore(bookingCodeId, matchId, homeScore, awayScore, selectionType, marketType) {
-    try {
-      const payload = {
-        matchId,
-        homeScore,
-        awayScore,
-        selectionType,
-        marketType
-      }
-      
-      console.log('📤 Updating score with payload:', payload)
-
-      const response = await api.patch(`/booking-codes/admin/${bookingCodeId}/score`, payload)
-      
-      return {
-        success: true,
-        data: response.data.data,
-        message: response.data.message
-      }
-    } catch (error) {
-      console.error('Update selection score error:', error)
-      return {
-        success: false,
-        error: error.response?.data?.message || 'Failed to update score',
-        status: error.response?.status
-      }
-    }
-  },
-
-  /**
-   * Deactivate booking code (ADMIN only)
-   * @param {string} bookingCodeId - Booking code ID
-   * @returns {Promise} - { success, data: updatedBookingCode }
-   */
-  async deactivateBookingCode(bookingCodeId) {
-    try {
-      const response = await api.patch(`/booking-codes/admin/${bookingCodeId}/deactivate`)
-      
-      return {
-        success: true,
-        data: response.data.data,
-        message: response.data.message
-      }
-    } catch (error) {
-      console.error('Deactivate booking code error:', error)
-      return {
-        success: false,
-        error: error.response?.data?.message || 'Failed to deactivate code',
-        status: error.response?.status
       }
     }
   },

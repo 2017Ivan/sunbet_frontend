@@ -170,28 +170,20 @@ const bookingCodeService = {
   },
 
   /**
-   * Update selection score (ADMIN only) - With selectionType and marketType
+   * Update selection score (ADMIN only)
    * @param {string} bookingCodeId - Booking code ID
    * @param {string} matchId - Match ID
    * @param {number} homeScore - Home score
    * @param {number} awayScore - Away score
-   * @param {string} selectionType - HOME, DRAW, AWAY (REQUIRED)
-   * @param {string} marketType - Market type (REQUIRED)
    * @returns {Promise} - { success, data: updatedBookingCode }
    */
-  async updateSelectionScore(bookingCodeId, matchId, homeScore, awayScore, selectionType, marketType) {
+  async updateSelectionScore(bookingCodeId, matchId, homeScore, awayScore) {
     try {
-      const payload = {
+      const response = await api.patch(`/booking-codes/admin/${bookingCodeId}/score`, {
         matchId,
         homeScore,
-        awayScore,
-        selectionType,
-        marketType
-      }
-      
-      console.log('📤 Updating score with payload:', payload)
-
-      const response = await api.patch(`/booking-codes/admin/${bookingCodeId}/score`, payload)
+        awayScore
+      })
       
       return {
         success: true,

@@ -33,9 +33,7 @@
       class="fixed left-0 top-0 h-full bg-[#0D0D0D] border-r border-[#2A2A2A] transition-all duration-300 z-50"
       :class="[
         isSidebarCollapsed ? 'w-20' : 'w-64',
-        // On mobile: slide in/out
         isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full',
-        // On desktop: always visible
         'lg:translate-x-0'
       ]"
     >
@@ -117,9 +115,7 @@
     <main 
       class="transition-all duration-300 min-h-screen"
       :class="[
-        // Desktop margin based on sidebar state
         isSidebarCollapsed ? 'lg:ml-20' : 'lg:ml-64',
-        // Mobile: no margin, has top padding for header
         'ml-0 pt-16 lg:pt-0'
       ]"
     >
@@ -214,19 +210,23 @@ onBeforeUnmount(() => {
   window.removeEventListener('resize', handleResize)
 })
 
+// ── NAVIGATION ITEMS ──────────────────────────────────────────────────────
 const navItems = [
   { path: '/admin', icon: '📊', label: 'Dashboard' },
   { path: '/admin/bets', icon: '🎲', label: 'Bets Management' },
   { path: '/admin/users', icon: '👥', label: 'Users Management' },
+  { path: '/admin/booking-codes', icon: '📋', label: 'Booking Codes' },  // ← ADDED
   { path: '/admin/notifications', icon: '🔔', label: 'Send Notification' },
   { path: '/admin/settings', icon: '⚙️', label: 'Settings' },
   { path: '/admin/fixtures', icon: '📅', label: 'Fixtures' },
 ]
 
+// ── PAGE TITLES ───────────────────────────────────────────────────────────
 const pageTitles = {
   '/admin': { title: 'Dashboard', subtitle: 'Overview of platform performance' },
   '/admin/bets': { title: 'Bets Management', subtitle: 'Manage and settle bets' },
   '/admin/users': { title: 'Users Management', subtitle: 'View and manage users' },
+  '/admin/booking-codes': { title: 'Booking Codes', subtitle: 'Manage booking codes and update match scores' },  // ← ADDED
   '/admin/notifications': { title: 'Send Notification', subtitle: 'Send push notifications to users' },
   '/admin/settings': { title: 'Settings', subtitle: 'Configure admin settings' },
   '/admin/fixtures': { title: 'Fixtures', subtitle: 'Manage and add fixtures' },

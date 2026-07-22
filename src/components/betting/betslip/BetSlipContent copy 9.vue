@@ -425,7 +425,7 @@ const handleRemoveBet = (bet) => {
   })
 }
 
-//  handlePlaceBet
+// BetSlipContent.vue - handlePlaceBet
 
 const handlePlaceBet = async () => {
   if (!isStakeValid.value || !hasEnoughBalance.value || !currentTabItems.value.length) return
@@ -435,16 +435,42 @@ const handlePlaceBet = async () => {
   try {
     betStore.updateStake(stakeAmount.value)
     
+    // SASA inatumia placeBetFromSlip() - inachukua selections kutoka slip
     const result = await betStore.placeBetFromSlip()
     
     if (result.success) {
-      toast.success('🎉 Bet placed successfully!')
-      // ... rest of code
+      toast.success('🎉 Bet placed successfully!', {
+        position: 'bottom-right',
+        timeout: 4000
+      })
+      
+      emit('place-bet', { 
+        success: true,
+        stake: stakeAmount.value, 
+        betType: betType.value,
+        category: activeTab.value.toLowerCase(),
+        bets: currentTabItems.value,
+        totalOdds: totalOdds.value,
+        potentialWin: potentialWin.value,
+        data: result.data
+      })
+      
+      setTimeout(() => {
+        emit('close')
+      }, 1500)
     } else {
-      toast.error(result.error || '❌ Failed to place bet')
+      toast.error(result.error || '❌ Failed to place bet', {
+        position: 'bottom-right',
+        timeout: 4000
+      })
+      console.error('Bet placement failed:', result.error)
     }
   } catch (error) {
-    toast.error('❌ An error occurred while placing bet')
+    toast.error('❌ An error occurred while placing bet', {
+      position: 'bottom-right',
+      timeout: 4000
+    })
+    console.error('Error placing bet:', error)
   } finally {
     isPlacingBet.value = false
   }

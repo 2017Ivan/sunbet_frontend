@@ -8,15 +8,15 @@ import { useSelectionFormatter } from '../composables/useSelectionFormatter'
  */
 
 const BET_ENDPOINTS = {
-  PLACE_BET: '/bets/place',
-  PLACE_MULTIPLE: '/bets/place-multiple',
-  USER_BETS: '/bets',
-  BET_STATS: '/bets/stats/my',
-  GET_BET_BY_ID: (betId) => `/bets/${betId}`,
-  CANCEL_BET: (betId) => `/bets/admin/bets/${betId}/cancel`,
-  UNCHECKED_WINS: '/bets/unchecked-wins',
-  BETS_BY_BOOKING_CODE: (bookingCodeId) => `/bets/booking-code/${bookingCodeId}`,
-  BETS_BY_SELECTION: (selectionId) => `/bets/selection/${selectionId}`,
+  PLACE_BET: '/bets/place',                    // POST /api/bets/place
+  PLACE_MULTIPLE: '/bets/place-multiple',      // POST /api/bets/place-multiple
+  USER_BETS: '/bets',                          // GET /api/bets
+  BET_STATS: '/bets/stats/my',                 // GET /api/bets/stats/my
+  GET_BET_BY_ID: (betId) => `/bets/${betId}`,  // GET /api/bets/:id
+  CANCEL_BET: (betId) => `/bets/admin/bets/${betId}/cancel`, // PATCH /api/bets/admin/bets/:id/cancel
+  UNCHECKED_WINS: '/bets/unchecked-wins',      // GET /api/bets/unchecked-wins
+  BETS_BY_BOOKING_CODE: (bookingCodeId) => `/bets/booking-code/${bookingCodeId}`, // GET /api/bets/booking-code/:bookingCodeId
+  BETS_BY_SELECTION: (selectionId) => `/bets/selection/${selectionId}`, // GET /api/bets/selection/:selectionId
 }
 
 /**
@@ -82,14 +82,8 @@ export const placeMultipleBets = async (bookingCodeId, selections) => {
     }
   }
 }
-
 /**
  * Place a bet from slip (auto-creates booking code if needed)
- * @param {Array} selections - Array of selections from bet slip
- * @param {number} stake - Stake amount
- * @param {string} bookingCodeId - Optional booking code ID
- * @param {string} selectionId - Optional selection ID
- * @returns {Promise<Object>} Placed bet data
  */
 export const placeBetFromSlip = async (selections, stake, bookingCodeId = null, selectionId = null) => {
   try {
@@ -98,12 +92,7 @@ export const placeBetFromSlip = async (selections, stake, bookingCodeId = null, 
       matchName: sel.matchName || sel.match || 'Match',
       selectionType: sel.selectionType || 'HOME',
       selectionValue: sel.selectionValue || sel.pick || '1',
-      odds: parseFloat(sel.odds) || 1,
-      // === ONGEZA FIELDS HIZI ===
-      time: sel.time || '',
-      date: sel.date || '',
-      league: sel.league || '',
-      marketType: sel.marketType || sel.market || '1X2'
+      odds: parseFloat(sel.odds) || 1
     }))
 
     const payload = {
@@ -132,7 +121,6 @@ export const placeBetFromSlip = async (selections, stake, bookingCodeId = null, 
     }
   }
 }
-
 /**
  * Get user's bet history
  * @param {Object} options - Query options

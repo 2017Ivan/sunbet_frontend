@@ -210,6 +210,16 @@ const routes = [
         },
       },
       {
+        path: "booking-codes",
+        name: "admin-booking-codes",
+        component: () => import('../pages/admin/components/bookingcode/AdminBookingCodes.vue'),
+        meta: { 
+          title: "Manage booking-codes", 
+          requiresAuth: true, 
+          requiresRole: 'ADMIN' 
+        },
+      },
+      {
         path: "notifications",
         name: "admin-notifications",
         component: () => import('../pages/admin/components/AdminNotifications.vue'),

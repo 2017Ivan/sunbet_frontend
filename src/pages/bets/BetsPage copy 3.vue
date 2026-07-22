@@ -1,4 +1,4 @@
-<!-- BetsPage.vue -->
+// BetsPage.vue 
 <template>
   <div class="h-full py-8 bg-[#0D0D0D]">
     <div class="max-w-4xl mx-auto px-2">
@@ -61,8 +61,14 @@
               :key="bet.id"
               :bet="bet"
               status="open"
-              @click="goToBetDetail(bet.id)"
             />
+             <!-- <BetCard
+              v-for="bet in openBets"
+              :key="bet.id"
+              :bet="bet"
+              status="open"
+              @click="goToBetDetail(bet.id)"
+            /> -->
           </div>
         </div>
 
@@ -127,12 +133,10 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useBetStore } from '../../stores/bets/betStore.js'
-import { useBookingCodeStore } from '../../stores/bookingcode/bookingCodeStore.js'
 import BetCard from './component/ BetCard.vue'
 
 const router = useRouter()
 const betStore = useBetStore()
-const bookingCodeStore = useBookingCodeStore()
 
 // ---- Tabs ----
 const tabs = [
@@ -173,30 +177,11 @@ const goToBetDetail = (betId) => {
   router.push(`/bets/${betId}`)
 }
 
-// ---- Load Booking Codes for Bets ----
-const loadBookingCodesForBets = async () => {
-  // Get unique booking code IDs from bets
-  const bookingCodeIds = [...new Set(betStore.userBets.map(b => b.bookingCodeId).filter(Boolean))]
-  
-  if (bookingCodeIds.length === 0) return
-  
-  for (const id of bookingCodeIds) {
-    try {
-      await bookingCodeStore.fetchBookingCodeById(id)
-    } catch (error) {
-      console.error('Error loading booking code:', error)
-    }
-  }
-}
-
 // ---- Load Bets ----
 const loadBets = async () => {
   isLoadingBets.value = true
   try {
     await betStore.loadUserBets()
-    
-    // Load booking codes to get selections count
-    await loadBookingCodesForBets()
   } catch (error) {
     console.error('Error loading bets:', error)
   } finally {

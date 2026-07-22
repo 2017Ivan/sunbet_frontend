@@ -3,7 +3,6 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import bookingCodeService from '../../services/bookingcode/bookingCodeService.js'
 import { useBetStore } from '../bets/betStore.js'
-import api from '../../services/api'
 
 export const useBookingCodeStore = defineStore('bookingCode', () => {
   // ---- State ----
@@ -58,10 +57,7 @@ export const useBookingCodeStore = defineStore('bookingCode', () => {
       matchName: item.matchName || item.match || 'Match',
       pick: item.pick || item.selection || '',
       odds: parseFloat(item.odds) || 0,
-      market: item.market || item.marketKey || '1X2',
-      time: item.time || '',
-      date: item.date || '',
-      league: item.league || ''
+      market: item.market || item.marketKey || '1X2'
     }))
 
     if (selections.length === 0) {
@@ -181,12 +177,9 @@ export const useBookingCodeStore = defineStore('bookingCode', () => {
         matchName: selection.matchName || 'Match',
         pick: selection.pick || selection.selectionValue || '',
         odds: parseFloat(selection.odds) || 0,
-        market: selection.marketType || '1X2',
+        market: '1X2',
         marketKey: selection.pick === '1' ? '1' : selection.pick === 'X' ? 'X' : '2',
-        type: 'sports',
-        time: selection.time || '',
-        date: selection.date || '',
-        league: selection.league || ''
+        type: 'sports'
       })
     })
 
@@ -291,9 +284,9 @@ export const useBookingCodeStore = defineStore('bookingCode', () => {
   }
 
   /**
-   * Update selection score (ADMIN only) - With selectionType and marketType
+   * Update selection score (ADMIN only)
    */
-  async function updateSelectionScore(bookingCodeId, matchId, homeScore, awayScore, selectionType, marketType) {
+  async function updateSelectionScore(bookingCodeId, matchId, homeScore, awayScore) {
     isLoading.value = true
     error.value = null
 
@@ -302,9 +295,7 @@ export const useBookingCodeStore = defineStore('bookingCode', () => {
         bookingCodeId,
         matchId,
         homeScore,
-        awayScore,
-        selectionType,
-        marketType
+        awayScore
       )
 
       if (result.success) {
@@ -355,41 +346,6 @@ export const useBookingCodeStore = defineStore('bookingCode', () => {
     }
   }
 
-  // ============================================================
-  // USER: FETCH BOOKING CODE BY ID
-  // ============================================================
-
-  /**
-   * Fetch booking code by ID (AUTHENTICATED)
-   * @param {string} id - Booking code ID
-   * @returns {Promise} - { success, data: bookingCode }
-   */
-  async function fetchBookingCodeById(id) {
-    isLoading.value = true
-    error.value = null
-
-    try {
-      const response = await api.get(`/booking-codes/${id}`)
-      
-      if (response.data.success) {
-        return { 
-          success: true, 
-          data: response.data.data,
-          message: response.data.message
-        }
-      } else {
-        error.value = response.data.message || 'Failed to fetch booking code'
-        return { success: false, error: error.value }
-      }
-    } catch (err) {
-      console.error('Fetch booking code error:', err)
-      error.value = err.response?.data?.message || err.message || 'Failed to fetch booking code'
-      return { success: false, error: error.value }
-    } finally {
-      isLoading.value = false
-    }
-  }
-
   // ---- Reset ----
   function reset() {
     currentCode.value = null
@@ -430,7 +386,6 @@ export const useBookingCodeStore = defineStore('bookingCode', () => {
     clearBookingCode,
     generateShareUrl,
     copyBookingCode,
-    fetchBookingCodeById,  
 
     // Admin Actions
     fetchAllBookingCodes,

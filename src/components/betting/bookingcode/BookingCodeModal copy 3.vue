@@ -3,10 +3,10 @@
   <Teleport to="body">
     <div v-if="isOpen" class="fixed inset-0 z-50 flex items-center justify-center px-4">
       <!-- Overlay -->
-      <div class="absolute inset-0 bg-black/10 backdrop-blur-sm" @click="handleClose"></div>
+      <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" @click="handleClose"></div>
       
       <!-- Modal -->
-      <div class="relative bg-gray-800 border border-[#2A2A2A] rounded-2xl p-6 w-full max-w-md shadow-2xl animate-fadeIn max-h-[90vh] overflow-y-auto">
+      <div class="relative bg-[#1E1E1E] border border-[#2A2A2A] rounded-2xl p-6 w-full max-w-md shadow-2xl animate-fadeIn max-h-[90vh] overflow-y-auto">
         <!-- Header -->
         <div class="flex items-center justify-between mb-4">
           <div class="flex items-center gap-2">
@@ -27,10 +27,10 @@
         </div>
 
         <!-- Show selections count -->
-        <!-- <div class="bg-gray-800/90 rounded-xl p-3 mb-4 flex items-center justify-between">
+        <div class="bg-[#2A2A2A] rounded-xl p-3 mb-4 flex items-center justify-between">
           <span class="text-[#606060] text-sm">Selections in slip</span>
           <span class="text-white font-bold">{{ selectionsCount }}</span>
-        </div> -->
+        </div>
 
         <!-- ============ CREATE CODE ============ -->
         <div class="space-y-4">
@@ -39,7 +39,7 @@
           </p>
 
           <!-- Created Code Display - Show when code exists -->
-          <div v-if="createdCode" class="bg-gray-900 rounded-xl p-4 space-y-3 border border-rose-500/20">
+          <div v-if="createdCode" class="bg-[#2A2A2A] rounded-xl p-4 space-y-3 border border-rose-500/20">
             <div class="flex items-center justify-between">
               <span class="text-[#606060] text-xs">Your Code</span>
               <div class="flex items-center gap-2">
@@ -114,7 +114,7 @@
         <!-- Footer info -->
         <div class="mt-4 pt-4 border-t border-[#2A2A2A]">
           <p class="text-[10px] text-[#606060] text-center">
-            ⏱️ This Booking codes must be used before it Expires
+            ⏱️ This booking code must be used before it expires
           </p>
         </div>
       </div>

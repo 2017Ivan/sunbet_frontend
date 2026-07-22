@@ -3,14 +3,14 @@
   <Teleport to="body">
     <div v-if="isOpen" class="fixed inset-0 z-50 flex items-center justify-center px-4">
       <!-- Overlay -->
-      <div class="absolute inset-0 bg-black/10 backdrop-blur-sm" @click="handleClose"></div>
+      <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" @click="handleClose"></div>
       
       <!-- Modal -->
-      <div class="relative bg-gray-800 border border-[#2A2A2A] rounded-2xl p-6 w-full max-w-md shadow-2xl animate-fadeIn max-h-[90vh] overflow-y-auto">
+      <div class="relative bg-[#1E1E1E] border border-[#2A2A2A] rounded-2xl p-6 w-full max-w-md shadow-2xl animate-fadeIn max-h-[90vh] overflow-y-auto">
         <!-- Header -->
         <div class="flex items-center justify-between mb-4">
           <div class="flex items-center gap-2">
-            <svg class="w-5 h-5 text-rose-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg class="w-5 h-5 text-[#A32D2D]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <rect x="2" y="4" width="20" height="16" rx="2"/>
               <path d="M8 12h8"/>
             </svg>
@@ -27,10 +27,10 @@
         </div>
 
         <!-- Show selections count -->
-        <!-- <div class="bg-gray-800/90 rounded-xl p-3 mb-4 flex items-center justify-between">
+        <div class="bg-[#2A2A2A] rounded-xl p-3 mb-4 flex items-center justify-between">
           <span class="text-[#606060] text-sm">Selections in slip</span>
           <span class="text-white font-bold">{{ selectionsCount }}</span>
-        </div> -->
+        </div>
 
         <!-- ============ CREATE CODE ============ -->
         <div class="space-y-4">
@@ -38,12 +38,12 @@
             Create a booking code from your current bet slip selections
           </p>
 
-          <!-- Created Code Display - Show when code exists -->
-          <div v-if="createdCode" class="bg-gray-900 rounded-xl p-4 space-y-3 border border-rose-500/20">
+          <!-- Created Code Display -->
+          <div v-if="createdCode" class="bg-[#2A2A2A] rounded-xl p-4 space-y-3 border border-[#A32D2D]/20">
             <div class="flex items-center justify-between">
               <span class="text-[#606060] text-xs">Your Code</span>
               <div class="flex items-center gap-2">
-                <span class="font-mono font-bold text-rose-500 text-2xl tracking-wider">{{ createdCode }}</span>
+                <span class="font-mono font-bold text-[#A32D2D] text-2xl tracking-wider">{{ createdCode }}</span>
                 <button 
                   class="p-1.5 rounded-lg bg-[#3A3A3A] hover:bg-[#4A4A4A] transition-colors"
                   @click="handleCopyCode"
@@ -56,15 +56,17 @@
                 </button>
               </div>
             </div>
-           
+            <div class="flex items-center justify-between">
+              <span class="text-[#606060] text-xs">Expires in</span>
+              <span class="text-white text-sm font-semibold">{{ expiryTime || '5 hours' }}</span>
+            </div>
           </div>
 
           <!-- Buttons -->
           <div class="flex gap-3">
-            <!-- Show CREATE button ONLY when no code exists yet -->
             <button 
               v-if="!createdCode"
-              class="flex-1 py-2.5 rounded-xl text-sm font-bold bg-rose-500 text-white hover:bg-rose-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              class="flex-1 py-2.5 rounded-xl text-sm font-bold bg-[#A32D2D] text-white hover:bg-[#8B2424] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               :disabled="isCreating || selectionsCount === 0"
               @click="handleCreateCode"
             >
@@ -74,13 +76,11 @@
                 </svg>
                 Creating...
               </span>
-              <span v-else>Create Booking Code</span>
+              <span v-else>Create Code</span>
             </button>
-
-            <!-- Share button - Show ONLY when code exists -->
             <button 
-              v-if="createdCode"
-              class="flex-1 py-2.5 rounded-xl text-sm font-bold bg-emerald-500 text-white hover:bg-emerald-600 transition-colors"
+              v-else
+              class="flex-1 py-2.5 rounded-xl text-sm font-bold bg-[#22C55E] text-white hover:bg-[#16A34A] transition-colors"
               @click="handleShareCode"
             >
               <span class="flex items-center justify-center gap-2">
@@ -94,27 +94,26 @@
                 Share Code
               </span>
             </button>
-
-         
           </div>
+<!-- 
+          <button 
+            v-if="createdCode"
+            class="w-full py-2 rounded-xl text-sm font-medium border border-[#2A2A2A] text-[#606060] hover:text-white hover:border-[#3A3A3A] transition-colors"
+            @click="handleClearCreatedCode"
+          >
+            Clear Code
+          </button> -->
 
           <!-- Error message -->
-          <div v-if="createError" class="bg-red-500/10 border border-red-500/20 rounded-xl p-2">
-            <p class="text-xs text-red-400 text-center">{{ createError }}</p>
-          </div>
-
-          <!-- Success message with info -->
-          <div v-if="createdCode" class="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3">
-            <p class="text-xs text-emerald-400 text-center">
-              ✅ Share this code with friends so they can load your selections!
-            </p>
+          <div v-if="createError" class="bg-[#EF4444]/10 border border-[#EF4444]/20 rounded-xl p-2">
+            <p class="text-xs text-[#EF4444] text-center">{{ createError }}</p>
           </div>
         </div>
 
         <!-- Footer info -->
         <div class="mt-4 pt-4 border-t border-[#2A2A2A]">
           <p class="text-[10px] text-[#606060] text-center">
-            ⏱️ This Booking codes must be used before it Expires
+            ⏱️ Booking codes expire after 5 hours
           </p>
         </div>
       </div>
@@ -149,7 +148,6 @@ const isCreating = ref(false)
 const createdCode = ref(null)
 const codeExpiry = ref(null)
 const createError = ref('')
-const hasAttemptedCreate = ref(false)
 
 // ---- Computed ----
 const selectionsCount = computed(() => betStore.slip.length)
@@ -168,7 +166,6 @@ const expiryTime = computed(() => {
 // ---- Methods ----
 const handleClose = () => {
   emit('close')
-  // Reset state when closing
   resetState()
 }
 
@@ -177,8 +174,6 @@ const resetState = () => {
   codeExpiry.value = null
   createError.value = ''
   isCreating.value = false
-  hasAttemptedCreate.value = false
-  bookingCodeStore.clearBookingCode()
 }
 
 const handleCreateCode = async () => {
@@ -193,24 +188,16 @@ const handleCreateCode = async () => {
 
   isCreating.value = true
   createError.value = ''
-  hasAttemptedCreate.value = true
 
   try {
     const result = await bookingCodeStore.createBookingCodeFromSlip()
-    
     if (result.success) {
-      // Extract code from response - handle both formats
-      const code = result.data?.bookingCode?.code || result.data?.bookingCode
-      const expiry = result.data?.bookingCode?.expiresAt || result.data?.expiresAt
-      
-      createdCode.value = code
-      codeExpiry.value = expiry
-      
-      toast.success(`✅ Booking code created: ${code}`, {
+      createdCode.value = result.data.bookingCode
+      codeExpiry.value = result.data.expiresAt
+      toast.success(`✅ Booking code created: ${result.data.bookingCode}`, {
         position: 'bottom-right',
         timeout: 5000
       })
-      
       emit('code-created', result.data)
     } else {
       createError.value = result.error || 'Failed to create code'
@@ -233,22 +220,14 @@ const handleCreateCode = async () => {
 
 const handleCopyCode = async () => {
   if (!createdCode.value) return
-  
-  try {
-    await navigator.clipboard.writeText(createdCode.value)
+  const result = await bookingCodeStore.copyBookingCode(createdCode.value)
+  if (result.success) {
     toast.success('📋 Code copied to clipboard!', {
       position: 'bottom-right',
       timeout: 2000
     })
-  } catch {
-    // Fallback
-    const textArea = document.createElement('textarea')
-    textArea.value = createdCode.value
-    document.body.appendChild(textArea)
-    textArea.select()
-    document.execCommand('copy')
-    document.body.removeChild(textArea)
-    toast.success('📋 Code copied to clipboard!', {
+  } else {
+    toast.error('❌ Failed to copy code', {
       position: 'bottom-right',
       timeout: 2000
     })
@@ -257,7 +236,6 @@ const handleCopyCode = async () => {
 
 const handleShareCode = () => {
   if (!createdCode.value) return
-  
   const url = `${window.location.origin}/booking/${createdCode.value}`
   
   if (navigator.share) {
@@ -267,12 +245,14 @@ const handleShareCode = () => {
       url: url
     }).catch(() => {})
   } else {
+    // Fallback: copy to clipboard
     navigator.clipboard.writeText(url).then(() => {
       toast.success('✅ Link copied to clipboard!', {
         position: 'bottom-right',
         timeout: 3000
       })
     }).catch(() => {
+      // Manual copy
       const textArea = document.createElement('textarea')
       textArea.value = url
       document.body.appendChild(textArea)
@@ -287,21 +267,27 @@ const handleShareCode = () => {
   }
 }
 
+const handleClearCreatedCode = () => {
+  createdCode.value = null
+  codeExpiry.value = null
+  bookingCodeStore.clearBookingCode()
+  toast.info('Code cleared', {
+    position: 'bottom-right',
+    timeout: 2000
+  })
+}
+
 // ---- Watchers ----
 watch(() => props.isOpen, (isOpen) => {
   if (isOpen) {
     resetState()
-    // Auto-create code when modal opens if there are selections
-    if (selectionsCount.value > 0) {
-      handleCreateCode()
-    }
+    bookingCodeStore.clearBookingCode()
   }
 })
 
 // ---- Expose ----
 defineExpose({
-  resetState,
-  handleCreateCode
+  resetState
 })
 </script>
 

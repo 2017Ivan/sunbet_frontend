@@ -190,129 +190,6 @@
       </div>
     </div>
 
-    <!-- Bet Details Modal -->
-    <div v-if="showDetailsModal" 
-         class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4" 
-         @click.self="closeDetailsModal">
-      <div class="bg-[#1A1A1A] rounded-2xl border border-[#2A2A2A] p-6 w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-2xl shadow-rose-500/10 animate-fadeIn">
-        <!-- Header -->
-        <div class="flex items-center justify-between mb-4 pb-4 border-b border-[#2A2A2A]">
-          <div>
-            <h3 class="text-xl font-bold text-white">Bet Details</h3>
-            <p class="text-sm text-gray-500 font-mono">Bet #{{ selectedBet?.id }}</p>
-          </div>
-          <button @click="closeDetailsModal" class="text-gray-500 hover:text-rose-400 transition-colors">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-            </svg>
-          </button>
-        </div>
-
-        <!-- Bet Info Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          <div class="bg-[#0D0D0D] rounded-xl p-4 border border-[#2A2A2A]">
-            <p class="text-xs text-gray-500 uppercase tracking-wider">User</p>
-            <p class="text-white font-medium mt-1">{{ selectedBet?.user?.phone_number || 'N/A' }}</p>
-          </div>
-          <div class="bg-[#0D0D0D] rounded-xl p-4 border border-[#2A2A2A]">
-            <p class="text-xs text-gray-500 uppercase tracking-wider">Booking Code</p>
-            <p class="text-rose-400 font-mono font-bold mt-1">{{ selectedBet?.bookingCode?.code || 'N/A' }}</p>
-          </div>
-          <div class="bg-[#0D0D0D] rounded-xl p-4 border border-[#2A2A2A]">
-            <p class="text-xs text-gray-500 uppercase tracking-wider">Stake</p>
-            <p class="text-white font-bold mt-1">TZS {{ formatMoney(selectedBet?.stake) }}</p>
-          </div>
-          <div class="bg-[#0D0D0D] rounded-xl p-4 border border-[#2A2A2A]">
-            <p class="text-xs text-gray-500 uppercase tracking-wider">Potential Return</p>
-            <p class="text-rose-400 font-bold mt-1">TZS {{ formatMoney(selectedBet?.potentialReturn) }}</p>
-          </div>
-          <div class="bg-[#0D0D0D] rounded-xl p-4 border border-[#2A2A2A]">
-            <p class="text-xs text-gray-500 uppercase tracking-wider">Status</p>
-            <span class="px-3 py-1 rounded-full text-xs font-medium inline-block mt-1" :class="getStatusClass(selectedBet)">
-              {{ selectedBet?.status }} · {{ selectedBet?.result }}
-            </span>
-          </div>
-          <div class="bg-[#0D0D0D] rounded-xl p-4 border border-[#2A2A2A]">
-            <p class="text-xs text-gray-500 uppercase tracking-wider">Placed At</p>
-            <p class="text-white mt-1">{{ formatDate(selectedBet?.createdAt) }}</p>
-          </div>
-        </div>
-
-        <!-- Selections List -->
-        <div class="mt-4">
-          <h4 class="text-white font-semibold mb-3 flex items-center gap-2">
-            <span>📋 Selections</span>
-            <span class="text-xs text-gray-500">({{ selectedBet?.selections?.length || 0 }})</span>
-          </h4>
-          
-          <div v-if="selectedBet?.selections?.length === 0" class="text-gray-400 text-sm">
-            No selections found for this bet.
-          </div>
-          
-          <div v-for="(sel, idx) in selectedBet?.selections" :key="idx"
-               class="bg-[#0D0D0D] rounded-xl p-4 border border-[#2A2A2A] mb-3 hover:border-rose-500/30 transition-all duration-300">
-            <div class="flex justify-between items-start mb-2">
-              <div>
-                <p class="text-white font-medium text-sm">{{ sel.matchName || sel.match?.name || 'Match' }}</p>
-                <div class="flex flex-wrap gap-2 mt-1">
-                  <span class="text-xs text-gray-400">{{ sel.league || '' }}</span>
-                  <span v-if="sel.time" class="text-xs text-gray-500">{{ sel.time }}</span>
-                  <span v-if="sel.date" class="text-xs text-gray-500">{{ sel.date }}</span>
-                </div>
-              </div>
-              <span class="text-xs text-gray-500">Match ID: {{ sel.matchId }}</span>
-            </div>
-            
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
-              <div>
-                <p class="text-gray-500 text-xs">Selection</p>
-                <p class="text-white font-medium">{{ sel.selectionValue }} ({{ sel.selectionType }})</p>
-              </div>
-              <div>
-                <p class="text-gray-500 text-xs">Odds</p>
-                <p class="text-rose-400 font-bold">{{ sel.odds }}</p>
-              </div>
-              <div>
-                <p class="text-gray-500 text-xs">Score</p>
-                <p class="text-white font-medium">{{ sel.score ? `${sel.score.home} - ${sel.score.away}` : '—' }}</p>
-              </div>
-              <div>
-                <p class="text-gray-500 text-xs">Result</p>
-                <span class="px-2 py-1 rounded text-xs font-medium"
-                  :class="{
-                    'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20': sel.result === 'PENDING',
-                    'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20': sel.result === 'WON',
-                    'bg-red-500/10 text-red-400 border border-red-500/20': sel.result === 'LOST'
-                  }"
-                >
-                  {{ sel.result || 'PENDING' }}
-                </span>
-              </div>
-            </div>
-            
-            <!-- Market Type -->
-            <div class="mt-2 pt-2 border-t border-[#2A2A2A]">
-              <p class="text-gray-500 text-xs">Market</p>
-              <p class="text-gray-400 text-sm">{{ getMarketDisplay(sel.marketType) }}</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Actions -->
-        <div class="mt-4 pt-4 border-t border-[#2A2A2A] flex flex-wrap gap-3">
-          <button v-if="selectedBet?.status === 'OPEN' && selectedBet?.result === 'PENDING'" 
-                  @click="closeDetailsModal(); openSettleModal(selectedBet)" 
-                  class="flex-1 px-4 py-2 bg-gradient-to-r from-rose-500 to-rose-600 text-white rounded-lg hover:from-rose-600 hover:to-rose-700 transition-all duration-300 shadow-lg shadow-rose-500/20">
-            ⚖️ Settle Bet
-          </button>
-          <button @click="closeDetailsModal" 
-                  class="flex-1 px-4 py-2 bg-[#2A2A2A] text-gray-300 rounded-lg hover:bg-[#3A3A3A] hover:text-white transition-all duration-300">
-            Close
-          </button>
-        </div>
-      </div>
-    </div>
-
     <!-- Loading Overlay -->
     <div v-if="isLoading" class="fixed inset-0 z-40 flex items-center justify-center bg-black/50 backdrop-blur-sm">
       <div class="bg-[#1A1A1A] rounded-2xl border border-[#2A2A2A] p-8 flex flex-col items-center gap-4">
@@ -326,15 +203,16 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useBetStore } from '../../../stores/bets/betStore'
+import { useRouter } from 'vue-router'
 
 const betStore = useBetStore()
+const router = useRouter()
 
 const bets = ref([])
 const total = ref(0)
 const page = ref(1)
 const limit = ref(20)
 const showSettleModal = ref(false)
-const showDetailsModal = ref(false)
 const selectedBet = ref(null)
 const isLoading = ref(false)
 
@@ -348,32 +226,7 @@ function formatMoney(n) {
   return new Intl.NumberFormat('en-TZ').format(n || 0)
 }
 
-function formatDate(d) {
-  if (!d) return 'N/A'
-  return new Date(d).toLocaleDateString('en-US', { 
-    year: 'numeric', 
-    month: 'short', 
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  })
-}
-
-function getMarketDisplay(marketKey) {
-  const marketMap = {
-    '1X2': '1X2 | Full Time',
-    'Double Chance': 'Double Chance | Full Time',
-    'BTTS': 'Both Teams to Score | Full Time',
-    'Over/Under': 'Over/Under | Full Time',
-    'Correct Score': 'Correct Score | Full Time',
-    'CS_FH': 'Correct Score | First Half',
-    'CS_SH': 'Correct Score | Second Half'
-  }
-  return marketMap[marketKey] || marketKey || '1X2 | Full Time'
-}
-
 function getStatusClass(bet) {
-  if (!bet) return ''
   if (bet.result === 'WON') return 'bg-rose-500/20 text-rose-400 border border-rose-500/20'
   if (bet.result === 'LOST') return 'bg-gray-500/20 text-gray-400 border border-gray-500/20'
   if (bet.status === 'OPEN') return 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
@@ -432,17 +285,7 @@ async function confirmSettle(result) {
 }
 
 function viewBetDetails(bet) {
-  selectedBet.value = bet
-  showDetailsModal.value = true
-}
-
-function closeDetailsModal() {
-  showDetailsModal.value = false
-  setTimeout(() => {
-    if (!showDetailsModal.value) {
-      // Clean up if needed
-    }
-  }, 300)
+  router.push(`/admin/bets/${bet.id}`)
 }
 
 function prevPage() {
@@ -572,17 +415,5 @@ input:focus, select:focus {
 button:disabled {
   cursor: not-allowed;
   opacity: 0.5;
-}
-
-/* Modal max height */
-.max-h-\[90vh\] {
-  max-height: 90vh;
-}
-
-/* Grid responsive */
-@media (max-width: 640px) {
-  .grid-cols-2.md\:grid-cols-4 {
-    grid-template-columns: 1fr 1fr;
-  }
 }
 </style>
