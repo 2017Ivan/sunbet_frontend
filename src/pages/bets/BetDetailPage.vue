@@ -144,13 +144,19 @@
               :key="index"
               class="bg-[#0D0D0D] p-1 flex flex-col group border-amber-600/20 transition-all border-b border-gray-900"
             >
+            <!-- Time and Date -->
+              <div v-if="selection.time || selection.date" class="flex gap-2 mt-1 text-[10px] text-gray-500">
+                <span v-if="selection.time">{{ selection.time }}</span>
+                <span v-if="selection.date">{{ selection.date }}</span>
+              </div>
+
               <div class="flex justify-between items-center">
-                <p class="text-[#8E8E8E] font-medium text-sm">{{ selection.matchName || 'Match' }}</p>
+                <p class="text-[#A7A7A7] font-medium text-sm">{{ selection.matchName || 'Match' }}</p>
                 <span class="text-[#8E8E8E] font-bold text-sm px-1 py-1 rounded-lg">{{ parseFloat(selection.odds).toFixed(2) }}</span>
               </div>
               
               <div class="flex justify-between items-center py-1">
-                <span class="text-sm text-[#A0A0A0] font-bold">{{ selection.league || '' }}</span>
+                <span class="text-sm text-gray-500 font-bold">{{ selection.league || '' }}</span>
                 <span class="text-xs text-[#A0A0A0] font-semibold">
                   <span class="text-xs text-gray-400 font-bold px-1">
                     {{ selection.score ? `${selection.score.home} - ${selection.score.away}` : '—' }}
@@ -171,11 +177,7 @@
                 </span>
               </div>
               
-              <!-- Time and Date -->
-              <div v-if="selection.time || selection.date" class="flex gap-2 mt-1 text-[10px] text-gray-500">
-                <span v-if="selection.time">{{ selection.time }}</span>
-                <span v-if="selection.date">{{ selection.date }}</span>
-              </div>
+              
             </div>
           </div>
         </div>
