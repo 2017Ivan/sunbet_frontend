@@ -116,38 +116,6 @@
           </div>
         </div>
       </div>
-      <!-- Pending Modal - Shows while waiting for payment -->
-          <div v-if="showPendingModal" class="fixed inset-0 z-50 flex items-center justify-center px-4">
-            <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" @click="closePendingModal"></div>
-            <div class="relative bg-gray-800 border border-yellow-500/20 rounded-2xl p-8 w-full max-w-md shadow-2xl shadow-yellow-500/5 animate-fadeIn">
-              <div class="text-center">
-                <div class="w-20 h-20 bg-yellow-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg class="w-10 h-10 text-yellow-400 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-opacity="0.25"/>
-                    <path d="M12 2a10 10 0 0110 10" stroke="currentColor" stroke-linecap="round"/>
-                  </svg>
-                </div>
-                <h3 class="text-2xl font-bold text-gray-100 mb-2">Awaiting Payment</h3>
-                <p class="text-gray-400 text-sm mb-4">
-                  Please check your phone for the M-Pesa prompt
-                </p>
-                <p class="text-gray-500 text-xs mb-4">
-                  Amount: TSh {{ lastDepositAmount.toLocaleString() }}
-                </p>
-                <div class="bg-gray-900 border border-gray-700 rounded-xl p-4 mb-4">
-                  <p class="text-gray-400 text-xs">Transaction ID</p>
-                  <p class="text-gray-100 font-mono text-sm break-all">{{ transactionId }}</p>
-                </div>
-                <p class="text-yellow-400 text-xs mb-4">⏳ Waiting for confirmation...</p>
-                <button
-                  @click="closePendingModal"
-                  class="w-full py-3 bg-gray-700 hover:bg-gray-600 text-white font-semibold rounded-xl transition-all duration-200"
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-          </div>
 
       <!-- Error Modal -->
       <div v-if="showErrorModal" class="fixed inset-0 z-50 flex items-center justify-center px-4">
@@ -178,7 +146,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../../../stores/auth/authStore'
 import { useFinancialStore } from '../../../stores/financial/financialStore'
@@ -195,12 +163,8 @@ const depositAmount = ref(0)
 const isProcessing = ref(false)
 const showSuccessModal = ref(false)
 const showErrorModal = ref(false)
-const showPendingModal = ref(false)
 const lastDepositAmount = ref(0)
 const errorMessage = ref('')
-const transactionId = ref('')
-const paymentStatus = ref('pending')
-let statusCheckInterval = null
 
 // Computed
 const balance = computed(() => authStore.userBalance)
@@ -225,38 +189,23 @@ const handleDeposit = async () => {
     return
   }
   
-  // Get user's phone number
-  const phoneNumber = authStore.user?.phone_number || authStore.user?.phone || ''
-  
-  if (!phoneNumber) {
-    errorMessage.value = 'Phone number not found. Please update your profile.'
-    showErrorModal.value = true
-    return
-  }
-  
   isProcessing.value = true
   
   try {
     lastDepositAmount.value = depositAmount.value
     
-    // Call financialStore depositViaPalmPesa
-    const result = await financialStore.depositViaPalmPesa(
-      depositAmount.value,
-      phoneNumber
-    )
+    // Call financialStore deposit
+    const result = await financialStore.deposit(depositAmount.value)
     
     console.log('Deposit result:', result)
     
     if (result.success) {
-      transactionId.value = result.data?.transaction_id
-      paymentStatus.value = 'pending'
-      
-      // Show pending modal with transaction info
-      showPendingModal.value = true
+      // Deposit successful
+      showSuccessModal.value = true
       depositAmount.value = 0
       
-      // Start checking status manually
-      startStatusCheck(transactionId.value)
+      // Refresh balance
+      await authStore.fetchUserBalance()
     } else {
       throw new Error(result.message || 'Deposit failed')
     }
@@ -270,90 +219,15 @@ const handleDeposit = async () => {
   }
 }
 
-const startStatusCheck = (txId) => {
-  let attempts = 0
-  const maxAttempts = 30 // 30 * 5 seconds = 2.5 minutes
-  
-  // Clear any existing interval
-  if (statusCheckInterval) {
-    clearInterval(statusCheckInterval)
-    statusCheckInterval = null
-  }
-  
-  statusCheckInterval = setInterval(async () => {
-    attempts++
-    
-    try {
-      const status = await financialStore.checkStatus(txId)
-      console.log(`Status check ${attempts}:`, status)
-      
-      if (status.success) {
-        const currentStatus = status.data?.status
-        
-        if (currentStatus === 'completed') {
-          clearInterval(statusCheckInterval)
-          statusCheckInterval = null
-          paymentStatus.value = 'completed'
-          
-          // Close pending modal and show success
-          showPendingModal.value = false
-          showSuccessModal.value = true
-          
-          // Refresh balance
-          await authStore.fetchUserBalance()
-          return
-        }
-        
-        if (currentStatus === 'failed') {
-          clearInterval(statusCheckInterval)
-          statusCheckInterval = null
-          paymentStatus.value = 'failed'
-          
-          showPendingModal.value = false
-          errorMessage.value = 'Payment was not completed. Please try again.'
-          showErrorModal.value = true
-          return
-        }
-      }
-      
-      if (attempts >= maxAttempts) {
-        clearInterval(statusCheckInterval)
-        statusCheckInterval = null
-        paymentStatus.value = 'timeout'
-        
-        // Keep pending modal open but show timeout message
-        // User can still check later
-      }
-    } catch (error) {
-      console.error('Status check error:', error)
-    }
-  }, 5000) // Check every 5 seconds
-}
-
 const closeSuccessModal = () => {
   showSuccessModal.value = false
+  // Refresh balance when closing
   authStore.fetchUserBalance()
-  if (statusCheckInterval) {
-    clearInterval(statusCheckInterval)
-    statusCheckInterval = null
-  }
 }
 
 const closeErrorModal = () => {
   showErrorModal.value = false
   errorMessage.value = ''
-  if (statusCheckInterval) {
-    clearInterval(statusCheckInterval)
-    statusCheckInterval = null
-  }
-}
-
-const closePendingModal = () => {
-  showPendingModal.value = false
-  if (statusCheckInterval) {
-    clearInterval(statusCheckInterval)
-    statusCheckInterval = null
-  }
 }
 
 // Lifecycle
@@ -361,15 +235,6 @@ onMounted(() => {
   if (authStore.isLoggedIn) {
     authStore.fetchUserBalance()
   }
-})
-
-onBeforeUnmount(() => {
-  if (statusCheckInterval) {
-    clearInterval(statusCheckInterval)
-    statusCheckInterval = null
-  }
-  // Stop polling in store
-  financialStore.stopPolling()
 })
 </script>
 
