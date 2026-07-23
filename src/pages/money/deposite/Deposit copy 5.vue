@@ -39,21 +39,21 @@
                 <input
                   v-model.number="depositAmount"
                   type="number"
-                  :min="MINIMUM_DEPOSIT"
+                  min="168000"
                   step="100"
                   placeholder="0"
                   class="w-full pl-12 pr-4 py-3 bg-gray-900 border border-gray-700 rounded-xl text-gray-100 text-lg focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20 transition-all"
                   required
                 />
               </div>
-              <p class="text-gray-400 text-xs mt-1">Minimum deposit: TSh {{ MINIMUM_DEPOSIT.toLocaleString() }}.00</p>
+              <p class="text-gray-400 text-xs mt-1">Minimum deposit: TSh 168,000.00</p>
             </div>
 
             <!-- Deposit Button -->
             <button
               type="submit"
               class="w-full py-3 bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400 text-white font-semibold rounded-xl transition-all duration-200 shadow-lg shadow-rose-500/20 hover:shadow-rose-500/40 disabled:opacity-50 disabled:cursor-not-allowed"
-              :disabled="isProcessing || !depositAmount || depositAmount < MINIMUM_DEPOSIT"
+              :disabled="isProcessing || !depositAmount || depositAmount < 168000"
             >
               <template v-if="!isProcessing">
                 Deposit TSh {{ depositAmount.toLocaleString() || '0' }}
@@ -77,7 +77,7 @@
                   <polyline points="22 4 12 14.01 9 11.01"/>
                 </svg>
                 <p class="text-gray-400 text-xs">
-                  Funds will be added to your account instantly. Minimum deposit: TSh {{ MINIMUM_DEPOSIT.toLocaleString() }}.00
+                  Funds will be added to your account instantly. Minimum deposit: TSh 168,000.00
                 </p>
               </div>
             </div>
@@ -156,10 +156,6 @@ const router = useRouter()
 const authStore = useAuthStore()
 const financialStore = useFinancialStore()
 
-// ============ CONFIGURATION ============
-// Change this number to update minimum deposit everywhere
-const MINIMUM_DEPOSIT = 500
-
 // State
 const depositAmount = ref(0)
 const isProcessing = ref(false)
@@ -189,8 +185,8 @@ const generateTransactionId = () => {
 }
 
 const handleDeposit = async () => {
-  if (!depositAmount.value || depositAmount.value < MINIMUM_DEPOSIT) {
-    alert(`Minimum deposit is TSh ${MINIMUM_DEPOSIT.toLocaleString()}.00`)
+  if (!depositAmount.value || depositAmount.value < 168000) {
+    alert('Minimum deposit is TSh 168,000.00')
     return
   }
   
