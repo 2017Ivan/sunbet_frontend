@@ -96,16 +96,17 @@
                 <polyline points="22 4 12 14.01 9 11.01"/>
               </svg>
             </div>
-            <h3 class="text-2xl font-bold text-gray-100 mb-2">Deposit Successful!</h3>
+            <h3 class="text-2xl font-bold text-gray-100 mb-2">Deposit Initiated!</h3>
             <p class="text-gray-400 text-sm mb-4">
-              Funds have been added to your account
+              Please check your phone for M-Pesa prompt
             </p>
             <p class="text-gray-500 text-xs mb-4">
               Amount: TSh {{ lastDepositAmount.toLocaleString() }}
             </p>
             <div class="bg-gray-900 border border-gray-700 rounded-xl p-4 mb-6">
-              <p class="text-gray-400 text-xs">New Balance</p>
-              <p class="text-gray-100 font-bold text-lg">{{ formattedBalance }}</p>
+              <p class="text-gray-400 text-xs">Transaction Reference</p>
+              <p class="text-gray-100 font-mono text-sm break-all">{{ transactionId }}</p>
+              <p class="text-rose-400 text-xs mt-2">⏳ Awaiting payment confirmation...</p>
             </div>
             <button
               @click="closeSuccessModal"
@@ -145,15 +146,14 @@
   </div>
 </template>
 
+<!-- pages/money/deposite/Deposit.vue -->
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../../../stores/auth/authStore'
-import { useFinancialStore } from '../../../stores/financial/financialStore'
 
 const router = useRouter()
 const authStore = useAuthStore()
-const financialStore = useFinancialStore()
 
 // ============ CONFIGURATION ============
 const MINIMUM_DEPOSIT = 500
@@ -164,7 +164,9 @@ const isProcessing = ref(false)
 const showSuccessModal = ref(false)
 const showErrorModal = ref(false)
 const lastDepositAmount = ref(0)
+const transactionId = ref('')
 const errorMessage = ref('')
+const orderId = ref('')
 
 // Computed
 const balance = computed(() => authStore.userBalance)
@@ -176,14 +178,21 @@ const formattedBalance = computed(() => {
 })
 
 // Methods
+const generateTransactionId = () => {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+  let result = 'TXN-'
+  for (let i = 0; i < 8; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length))
+  }
+  return result
+}
+
 const handleDeposit = async () => {
-  // Validate amount
   if (!depositAmount.value || depositAmount.value < MINIMUM_DEPOSIT) {
     alert(`Minimum deposit is TSh ${MINIMUM_DEPOSIT.toLocaleString()}.00`)
     return
   }
   
-  // Check authentication
   if (!authStore.isLoggedIn) {
     router.push('/login')
     return
@@ -192,22 +201,37 @@ const handleDeposit = async () => {
   isProcessing.value = true
   
   try {
+    transactionId.value = generateTransactionId()
     lastDepositAmount.value = depositAmount.value
     
-    // Call financialStore deposit
-    const result = await financialStore.deposit(depositAmount.value)
+    // Get user's phone number
+    const phoneNumber = authStore.user?.phone_number || authStore.user?.phone || ''
+    
+    if (!phoneNumber) {
+      throw new Error('Phone number not found. Please update your profile.')
+    }
+    
+    // ============================================================
+    // CALL THE MOBILE DEPOSIT ENDPOINT (USSD Push)
+    // ============================================================
+    const result = await authStore.initiateMobileDeposit({
+      amount: depositAmount.value,
+      phone_number: phoneNumber
+    })
     
     console.log('Deposit result:', result)
     
-    if (result.success) {
-      // Deposit successful
+    if (result && result.success) {
+      orderId.value = result.order_id || result.data?.order_id || result.data?.transaction_id
       showSuccessModal.value = true
       depositAmount.value = 0
       
-      // Refresh balance
-      await authStore.fetchUserBalance()
+      // Start polling for payment status
+      if (orderId.value) {
+        startPolling(orderId.value)
+      }
     } else {
-      throw new Error(result.message || 'Deposit failed')
+      throw new Error(result?.message || 'Deposit initiation failed')
     }
     
   } catch (error) {
@@ -219,15 +243,68 @@ const handleDeposit = async () => {
   }
 }
 
+let pollingInterval = null
+
+const startPolling = async (orderId) => {
+  let attempts = 0
+  const maxAttempts = 30 // 30 * 5 seconds = 2.5 minutes
+  
+  // Clear any existing interval
+  if (pollingInterval) {
+    clearInterval(pollingInterval)
+  }
+  
+  pollingInterval = setInterval(async () => {
+    attempts++
+    
+    try {
+      const status = await authStore.checkPaymentStatus(orderId)
+      console.log(`Poll attempt ${attempts}:`, status)
+      
+      if (status.success && status.status === 'completed') {
+        clearInterval(pollingInterval)
+        pollingInterval = null
+        await authStore.fetchUserBalance()
+        // Update success message or show notification
+        return
+      }
+      
+      if (status.status === 'failed' || status.status === 'expired') {
+        clearInterval(pollingInterval)
+        pollingInterval = null
+        errorMessage.value = 'Payment was not completed. Please try again.'
+        showErrorModal.value = true
+        showSuccessModal.value = false
+        return
+      }
+      
+      if (attempts >= maxAttempts) {
+        clearInterval(pollingInterval)
+        pollingInterval = null
+        console.log('Polling timeout - payment still pending')
+      }
+    } catch (error) {
+      console.error('Error polling status:', error)
+    }
+  }, 5000) // Poll every 5 seconds
+}
+
 const closeSuccessModal = () => {
   showSuccessModal.value = false
-  // Refresh balance when closing
   authStore.fetchUserBalance()
+  if (pollingInterval) {
+    clearInterval(pollingInterval)
+    pollingInterval = null
+  }
 }
 
 const closeErrorModal = () => {
   showErrorModal.value = false
   errorMessage.value = ''
+  if (pollingInterval) {
+    clearInterval(pollingInterval)
+    pollingInterval = null
+  }
 }
 
 // Lifecycle
@@ -236,7 +313,16 @@ onMounted(() => {
     authStore.fetchUserBalance()
   }
 })
+
+onBeforeUnmount(() => {
+  if (pollingInterval) {
+    clearInterval(pollingInterval)
+    pollingInterval = null
+  }
+})
 </script>
+
+<!-- Template stays the same -->
 
 <style scoped>
 @keyframes fadeIn {

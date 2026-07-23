@@ -96,16 +96,17 @@
                 <polyline points="22 4 12 14.01 9 11.01"/>
               </svg>
             </div>
-            <h3 class="text-2xl font-bold text-gray-100 mb-2">Deposit Successful!</h3>
+            <h3 class="text-2xl font-bold text-gray-100 mb-2">Deposit Initiated!</h3>
             <p class="text-gray-400 text-sm mb-4">
-              Funds have been added to your account
+              Please check your phone for M-Pesa prompt
             </p>
             <p class="text-gray-500 text-xs mb-4">
               Amount: TSh {{ lastDepositAmount.toLocaleString() }}
             </p>
             <div class="bg-gray-900 border border-gray-700 rounded-xl p-4 mb-6">
-              <p class="text-gray-400 text-xs">New Balance</p>
-              <p class="text-gray-100 font-bold text-lg">{{ formattedBalance }}</p>
+              <p class="text-gray-400 text-xs">Transaction Reference</p>
+              <p class="text-gray-100 font-mono text-sm break-all">{{ transactionId }}</p>
+              <p class="text-rose-400 text-xs mt-2">⏳ Awaiting payment confirmation...</p>
             </div>
             <button
               @click="closeSuccessModal"
@@ -146,16 +147,17 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../../../stores/auth/authStore'
-import { useFinancialStore } from '../../../stores/financial/financialStore'
+import { useFinancialStore } from '../../../stores/money/financial.store'
 
 const router = useRouter()
 const authStore = useAuthStore()
 const financialStore = useFinancialStore()
 
 // ============ CONFIGURATION ============
+// Change this number to update minimum deposit everywhere
 const MINIMUM_DEPOSIT = 500
 
 // State
@@ -164,6 +166,7 @@ const isProcessing = ref(false)
 const showSuccessModal = ref(false)
 const showErrorModal = ref(false)
 const lastDepositAmount = ref(0)
+const transactionId = ref('')
 const errorMessage = ref('')
 
 // Computed
@@ -176,14 +179,22 @@ const formattedBalance = computed(() => {
 })
 
 // Methods
+const generateTransactionId = () => {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+  let result = 'TXN-'
+  for (let i = 0; i < 8; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length))
+  }
+  return result
+}
+
 const handleDeposit = async () => {
-  // Validate amount
   if (!depositAmount.value || depositAmount.value < MINIMUM_DEPOSIT) {
     alert(`Minimum deposit is TSh ${MINIMUM_DEPOSIT.toLocaleString()}.00`)
     return
   }
   
-  // Check authentication
+  // Check if user is authenticated
   if (!authStore.isLoggedIn) {
     router.push('/login')
     return
@@ -192,22 +203,24 @@ const handleDeposit = async () => {
   isProcessing.value = true
   
   try {
+    // Generate transaction ID
+    transactionId.value = generateTransactionId()
     lastDepositAmount.value = depositAmount.value
     
-    // Call financialStore deposit
-    const result = await financialStore.deposit(depositAmount.value)
+    // Call the deposit action from financialStore
+    const result = await financialStore.initiateDeposit({
+      amount: depositAmount.value,
+      phoneNumber: authStore.user?.phone_number || ''
+    })
     
-    console.log('Deposit result:', result)
-    
-    if (result.success) {
-      // Deposit successful
+    if (result) {
+      // Deposit initiated successfully
+      // The user will receive an M-Pesa prompt on their phone
       showSuccessModal.value = true
       depositAmount.value = 0
       
-      // Refresh balance
-      await authStore.fetchUserBalance()
-    } else {
-      throw new Error(result.message || 'Deposit failed')
+      // Start polling for payment status
+      await pollPaymentStatus(result.order_id)
     }
     
   } catch (error) {
@@ -217,6 +230,43 @@ const handleDeposit = async () => {
   } finally {
     isProcessing.value = false
   }
+}
+
+const pollPaymentStatus = async (orderId) => {
+  let attempts = 0
+  const maxAttempts = 30 // 30 * 5 seconds = 2.5 minutes
+  
+  const pollInterval = setInterval(async () => {
+    attempts++
+    
+    try {
+      const status = await financialStore.checkPaymentStatus(orderId)
+      
+      if (status.success && status.status === 'completed') {
+        clearInterval(pollInterval)
+        // Balance has been updated in the store
+        await authStore.fetchUserBalance() // Refresh balance
+        // Update success message
+        return
+      }
+      
+      if (status.status === 'failed' || status.status === 'expired') {
+        clearInterval(pollInterval)
+        errorMessage.value = 'Payment was not completed. Please try again.'
+        showErrorModal.value = true
+        showSuccessModal.value = false
+        return
+      }
+      
+      if (attempts >= maxAttempts) {
+        clearInterval(pollInterval)
+        // Still pending, but we stop polling
+        console.log('Polling timeout - payment still pending')
+      }
+    } catch (error) {
+      console.error('Error polling status:', error)
+    }
+  }, 5000) // Poll every 5 seconds
 }
 
 const closeSuccessModal = () => {
@@ -232,9 +282,14 @@ const closeErrorModal = () => {
 
 // Lifecycle
 onMounted(() => {
+  // Refresh balance when component mounts
   if (authStore.isLoggedIn) {
     authStore.fetchUserBalance()
   }
+})
+
+onBeforeUnmount(() => {
+  // Cleanup any intervals if needed
 })
 </script>
 
