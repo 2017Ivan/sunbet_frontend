@@ -43,17 +43,17 @@
 
               <div class="flex gap-1 flex-shrink-0">
                 <span 
-                  class="w-12 sm:w-14 text-center text-xs sm:text-sm font-bold text-gray-500 hover:text-gray-300 rounded transition-colors duration-200"
+                  class="w-12  text-center text-xs sm:text-sm font-bold text-gray-500 hover:text-gray-300 rounded transition-colors duration-200"
                 >
                   1
                 </span>
                 <span 
-                  class="w-12 sm:w-14 text-center text-xs sm:text-sm font-bold text-gray-500 hover:text-gray-300 rounded transition-colors duration-200"
+                  class="w-12  text-center text-xs sm:text-sm font-bold text-gray-500 hover:text-gray-300 rounded transition-colors duration-200"
                 >
                   x
                 </span>
                 <span 
-                  class="w-12 sm:w-14 text-center text-xs sm:text-sm font-bold text-gray-500 hover:text-gray-300 rounded transition-colors duration-200"
+                  class="w-12  text-center text-xs sm:text-sm font-bold text-gray-500 hover:text-gray-300 rounded transition-colors duration-200"
                 >
                   2
                 </span>
