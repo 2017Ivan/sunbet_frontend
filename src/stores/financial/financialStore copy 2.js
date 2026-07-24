@@ -42,7 +42,7 @@ export const useFinancialStore = defineStore('financial', {
           this.transactionId = result.data?.transaction_id
           this.paymentStatus = 'pending'
           
-          // Anzisha Polling kutoka store
+          // Start polling for status
           this.startPolling(this.transactionId)
           
           return result
@@ -60,10 +60,14 @@ export const useFinancialStore = defineStore('financial', {
 
     // ── POLL PAYMENT STATUS ─────────────────────────────────────────────────
     startPolling(transactionId) {
-      this.stopPolling()
+      // Clear any existing interval
+      if (this.pollingInterval) {
+        clearInterval(this.pollingInterval)
+        this.pollingInterval = null
+      }
 
       let attempts = 0
-      const maxAttempts = 36 // 36 * 5 seconds = 3 minutes
+      const maxAttempts = 30 // 30 * 5 seconds = 2.5 minutes
 
       this.pollingInterval = setInterval(async () => {
         attempts++
@@ -72,36 +76,39 @@ export const useFinancialStore = defineStore('financial', {
           const result = await financialService.checkPalmPesaStatus(transactionId)
           
           if (result.success) {
-            const currentStatus = result.data?.status
-            this.paymentStatus = currentStatus
+            const status = result.data?.status
+            this.paymentStatus = status
             
-            // Unapoona COMPLETED au FAILED, simamisha polling
-            if (currentStatus === 'completed' || currentStatus === 'failed') {
-              this.stopPolling()
+            // If payment is completed or failed, stop polling
+            if (status === 'completed' || status === 'failed') {
+              clearInterval(this.pollingInterval)
+              this.pollingInterval = null
               
-              if (currentStatus === 'completed') {
+              // If completed, update balance
+              if (status === 'completed') {
                 const authStore = useAuthStore()
-                if (result.data?.new_balance) {
-                  authStore.updateBalanceLocally?.(result.data.new_balance)
-                }
                 await authStore.fetchUserBalance()
                 
+                // Update transaction
                 this.transaction = {
                   ...this.transaction,
-                  ...result.data
+                  ...result.data,
+                  new_balance: result.data?.new_balance
                 }
               }
             }
           }
           
+          // Stop if max attempts reached
           if (attempts >= maxAttempts) {
-            this.stopPolling()
+            clearInterval(this.pollingInterval)
+            this.pollingInterval = null
             this.paymentStatus = 'timeout'
           }
         } catch (error) {
           console.error('Polling error:', error)
         }
-      }, 5000)
+      }, 5000) // Poll every 5 seconds
     },
 
     // ── STOP POLLING ────────────────────────────────────────────────────────
@@ -118,11 +125,7 @@ export const useFinancialStore = defineStore('financial', {
         const result = await financialService.checkPalmPesaStatus(transactionId)
         if (result.success) {
           this.paymentStatus = result.data?.status
-          return {
-            success: true,
-            data: result.data,
-            message: result.message
-          }
+          return result
         }
         return { success: false, message: result.message }
       } catch (error) {
@@ -147,7 +150,7 @@ export const useFinancialStore = defineStore('financial', {
         if (result.success) {
           this.transaction = result.data
           if (result.data?.new_balance) {
-            authStore.updateBalanceLocally?.(result.data.new_balance)
+            authStore.updateBalanceLocally(result.data.new_balance)
           }
           return result
         } else {
@@ -201,6 +204,6 @@ export const useFinancialStore = defineStore('financial', {
   persist: {
     key: 'financial-store',
     storage: localStorage,
-    paths: ['transaction']
+    paths: ['transactions']
   }
 })
