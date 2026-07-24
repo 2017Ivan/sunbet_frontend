@@ -151,7 +151,7 @@
               </div>
 
               <div class="flex justify-between items-center">
-                <p class="text-[#A7A7A7] font-medium text-sm">{{ selection.matchName || 'Match' }}</p>
+                <p class="text-[#A7A7A7] font-medium text-xs">{{ selection.matchName || 'Match' }}</p>
                 <span class="text-[#8E8E8E] font-bold text-sm px-1 py-1 rounded-lg">{{ parseFloat(selection.odds).toFixed(2) }}</span>
               </div>
               
