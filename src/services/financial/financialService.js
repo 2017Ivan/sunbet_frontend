@@ -60,7 +60,7 @@ const financialService = {
   // ── WITHDRAW ──────────────────────────────────────────────────────────────
   async withdraw(amount) {
     try {
-      const response = await api.post('/financial/withdraw', { amount })
+      const response = await api.post('/financial/withdra', { amount })
       
       if (response.data && response.data.success) {
         return {

@@ -175,7 +175,7 @@ const ProfileIcon = {
 const menuLinks = [
   { to: '/', name: 'home', label: 'Home', icon: HomeIcon },
   { to: '/sports', name: 'sports', label: 'Sports', icon: SportsIcon },
-  { to: '/live', name: 'live', label: 'Live', icon: LiveIcon, badge: 'LIVE' },
+  { to: '/sports', name: 'live', label: 'Live', icon: LiveIcon, badge: 'LIVE' },
   { to: '/promotions', name: 'promotions', label: 'Promos', icon: PromoIcon },
   { to: '/leaderboard', name: 'leaderboard', label: 'VIP', icon: VipIcon },
   { to: '/dashboard', name: 'dashboard', label: 'Dashboard', icon: DashboardIcon },
