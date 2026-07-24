@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <!-- Defs for gradients -->
+  <defs>
+    <linearGradient id="roseGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#E11D48"/>
+      <stop offset="100%" style="stop-color:#BE123C"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Background gray-800 -->
+  <rect width="120" height="120" rx="24" fill="#1F2937"/>
+  
+  <!-- Outer border -->
+  <rect x="4" y="4" width="112" height="112" rx="20" fill="none" stroke="#374151" stroke-width="2"/>
+  
+  <!-- Letter S - White (left side) -->
+  <path d="M58 40H40C38.8954 40 38 40.8954 38 42V48C38 49.1046 38.8954 50 40 50H54C55.1046 50 56 50.8954 56 52V58C56 59.1046 55.1046 60 54 60H38" 
+    stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  
+  <!-- Letter B - Rose Gradient (right side) - ANDIKA VIZURI -->
+  <path d="M78 40H62V60H78C81.3137 60 84 57.3137 84 54C84 50.6863 81.3137 48 78 48C81.3137 48 84 45.3137 84 42C84 38.6863 81.3137 40 78 40Z" 
+    stroke="url(#roseGrad)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  
+  <!-- Straight line for B - to make it look better -->
+  <line x1="62" y1="40" x2="62" y2="60" stroke="url(#roseGrad)" stroke-width="6" stroke-linecap="round"/>
+</svg>
