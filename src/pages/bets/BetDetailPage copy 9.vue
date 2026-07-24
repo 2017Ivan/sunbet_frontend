@@ -144,7 +144,7 @@
               :key="index"
               class="bg-[#0D0D0D] p-1 flex flex-col group border-amber-600/20 transition-all border-b border-gray-900"
             >
-              <!-- Time and Date -->
+            <!-- Time and Date -->
               <div v-if="selection.time || selection.date" class="flex gap-2 mt-1 text-[10px] text-gray-500">
                 <span v-if="selection.time">{{ selection.time }}</span>
                 <span v-if="selection.date">{{ selection.date }}</span>
@@ -167,7 +167,7 @@
               <div class="flex justify-between items-center">
                 <span class="text-xs text-[#A0A0A0] font-semibold">
                   {{ getMarketDisplay(selection.marketType) }} - 
-                  <span class="text-[#A9A9A9] font-medium">{{ getSelectionDisplay(selection) }}</span>
+                  <span class="text-[#A9A9A9] font-medium">{{ selection.selectionValue || selection.pick || 'N/A' }}</span>
                 </span>
                 <span 
                   class="text-xs font-semibold px-2 py-0.5 rounded"
@@ -176,6 +176,8 @@
                   {{ selection.result || 'PENDING' }}
                 </span>
               </div>
+              
+              
             </div>
           </div>
         </div>
@@ -273,32 +275,6 @@ const getResultClass = (result) => {
   if (result === 'WON') return 'bg-green-500/20 text-green-400 border border-green-500/20'
   if (result === 'LOST') return 'bg-red-500/20 text-red-400 border border-red-500/20'
   return 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20'
-}
-
-// ---- Selection Display - FIXED ----
-const getSelectionDisplay = (selection) => {
-  if (!selection) return 'N/A'
-  
-  // Map selectionType to display value
-  const typeMap = {
-    'HOME': '1',
-    'DRAW': 'X',
-    'AWAY': '2',
-    'OVER': 'Over',
-    'UNDER': 'Under',
-    'YES': 'Yes',
-    'NO': 'No'
-  }
-  
-  const type = selection.selectionType || ''
-  
-  // Kama type ipo kwenye map, return thamani sahihi
-  if (typeMap[type]) {
-    return typeMap[type]
-  }
-  
-  // Vinginevyo tumia selectionValue ikiwa ipo
-  return selection.selectionValue || selection.pick || 'N/A'
 }
 
 // ---- Computed ----

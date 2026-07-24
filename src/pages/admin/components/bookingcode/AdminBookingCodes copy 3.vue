@@ -204,8 +204,7 @@
             <div class="grid grid-cols-2 gap-2 text-sm">
               <div>
                 <p class="text-gray-500">Selection</p>
-                <!-- === FIXED: Use getSelectionDisplay() === -->
-                <p class="text-white font-medium">{{ getSelectionDisplay(selection) }} ({{ selection.selectionType }})</p>
+                <p class="text-white font-medium">{{ selection.selectionValue }} ({{ selection.selectionType }})</p>
               </div>
               <div>
                 <p class="text-gray-500">Odds</p>
@@ -270,9 +269,8 @@
           <select v-model="selectedMatchId" 
                   class="w-full px-4 py-2 rounded-lg bg-[#0D0D0D] border border-[#2A2A2A] text-white focus:border-rose-500/50 focus:outline-none transition-colors">
             <option value="">Select a match...</option>
-            <!-- === FIXED: Use getSelectionDisplay() === -->
             <option v-for="(sel, idx) in selectedCode?.selections" :key="idx" :value="sel.matchId">
-              {{ sel.matchName }} ({{ getSelectionDisplay(sel) }})
+              {{ sel.matchName }} ({{ sel.selectionValue }})
             </option>
           </select>
         </div>
@@ -396,30 +394,6 @@ const totalSelections = computed(() => {
     return sum + (code.selections?.length || 0)
   }, 0)
 })
-
-// ── Selection Display Helper ──────────────────────────────────────────────
-function getSelectionDisplay(selection) {
-  if (!selection) return ''
-  
-  // Map selectionType to display value
-  const typeMap = {
-    'HOME': '1',
-    'DRAW': 'X',
-    'AWAY': '2',
-    'OVER': 'Over',
-    'UNDER': 'Under',
-    'YES': 'Yes',
-    'NO': 'No'
-  }
-  
-  const type = selection.selectionType || ''
-  
-  if (typeMap[type]) {
-    return typeMap[type]
-  }
-  
-  return selection.selectionValue || ''
-}
 
 // ── Watch for match selection ──────────────────────────────────────────────
 watch(selectedMatchId, (newMatchId) => {

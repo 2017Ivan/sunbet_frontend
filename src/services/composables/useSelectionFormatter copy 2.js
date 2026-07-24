@@ -24,25 +24,6 @@ export function useSelectionFormatter() {
   }
 
   /**
-   * Map selectionType to selectionValue (BACKEND FORMAT)
-   */
-  const mapSelectionTypeToValue = (selectionType) => {
-    if (!selectionType) return '1'
-    
-    const typeMap = {
-      'HOME': '1',
-      'DRAW': 'X',
-      'AWAY': '2',
-      'OVER': 'Over',
-      'UNDER': 'Under',
-      'YES': 'Yes',
-      'NO': 'No'
-    }
-    
-    return typeMap[selectionType] || selectionType
-  }
-
-  /**
    * Map frontend pick to backend selectionType
    */
   const mapPickToSelectionType = (pick) => {
@@ -98,82 +79,64 @@ export function useSelectionFormatter() {
 
   /**
    * Format frontend selections to backend format
-   * === HAPA NDIO FIX KUU ===
-   * selectionValue inatokana na selectionType, siyo pick moja kwa moja
+   * - HAPA NDIO TIME, DATE, LEAGUE ZINAPASWA KUONGEZWA
    */
   const formatForBackend = (selections) => {
     if (!selections || !Array.isArray(selections)) {
       return []
     }
 
-    console.log('📤 Formatting selections for backend:', selections)
-
     return selections.map(item => {
       const pick = item.pick || item.selection || ''
       
-      // GET selectionType kutoka kwenye pick
-      const selectionType = mapPickToSelectionType(pick)
-      
-      // GET correct selectionValue based on selectionType
-      const selectionValue = mapSelectionTypeToValue(selectionType)
-      
-      const result = {
+      return {
         matchId: item.matchId || item.matchId,
         matchName: item.matchName || item.match || 'Match',
-        selectionType: selectionType,
-        selectionValue: selectionValue, // HAPA NDIO SAHIHI SASA
+        selectionType: mapPickToSelectionType(pick),
+        selectionValue: pick,
         odds: parseFloat(item.odds) || 0,
+        // === HAPA NDIO ZILIKUWA ZINAKOSEKANA ===
         time: item.time || '',
         date: item.date || '',
         league: item.league || '',
         marketType: item.market || item.marketKey || '1X2'
       }
-
-      console.log(`✅ Selection:`, {
-        original_pick: pick,
-        selectionType: result.selectionType,
-        selectionValue: result.selectionValue,
-        marketType: result.marketType
-      })
-
-      return result
     })
   }
 
   /**
    * Format backend selections to frontend format
-   * === HAPA NDIO FIX ===
-   * pick inatokana na selectionType, siyo selectionValue
    */
   const formatForFrontend = (selections) => {
     if (!selections || !Array.isArray(selections)) {
       return []
     }
 
-    console.log('📥 Formatting selections from backend:', selections)
-
     return selections.map(item => {
-      // GET selectionType from backend
-      const selectionType = item.selectionType || 'HOME'
+      let pick = item.selectionValue || ''
       
-      // GET pick based on selectionType
-      const pick = mapSelectionTypeToValue(selectionType)
-      
-      // Market key based on pick
-      let marketKey = '2'
-      if (pick === '1') marketKey = '1'
-      else if (pick === 'X') marketKey = 'X'
-      else if (pick === '2') marketKey = '2'
+      if (!pick) {
+        const typeMap = {
+          'HOME': '1',
+          'DRAW': 'X',
+          'AWAY': '2',
+          'OVER': 'Over',
+          'UNDER': 'Under',
+          'YES': 'Yes',
+          'NO': 'No'
+        }
+        pick = typeMap[item.selectionType] || ''
+      }
 
-      const result = {
+      return {
         matchId: item.matchId,
         matchName: item.matchName || 'Match',
         pick: pick,
         odds: parseFloat(item.odds) || 0,
         market: item.marketType || '1X2',
-        marketKey: marketKey,
-        selectionType: selectionType,
-        selectionValue: pick,
+        marketKey: pick === '1' ? '1' : pick === 'X' ? 'X' : '2',
+        selectionType: item.selectionType,
+        selectionValue: item.selectionValue,
         score: item.score || null,
         result: item.result || 'PENDING',
         isSettled: item.isSettled || false,
@@ -182,15 +145,6 @@ export function useSelectionFormatter() {
         league: item.league || '',
         marketType: item.marketType || '1X2'
       }
-
-      console.log(`✅ Formatted for frontend:`, {
-        matchId: result.matchId,
-        pick: result.pick,
-        selectionType: result.selectionType,
-        selectionValue: result.selectionValue
-      })
-
-      return result
     })
   }
 
@@ -279,24 +233,6 @@ export function useSelectionFormatter() {
     return mapPickToSelectionType(pick)
   }
 
-  /**
-   * Get correct selection display (1, X, 2)
-   */
-  const getCorrectSelectionDisplay = (selection) => {
-    if (!selection) return ''
-    
-    const pick = selection.pick || selection.selectionValue || ''
-    const type = selection.selectionType || ''
-    
-    // Kama pick ni 1, X, au 2 - return hiyo
-    if (pick === '1' || pick === 'X' || pick === '2') {
-      return pick
-    }
-    
-    // Vinginevyo tumia selectionType
-    return mapSelectionTypeToValue(type)
-  }
-
   return {
     formatForBackend,
     formatForFrontend,
@@ -304,9 +240,7 @@ export function useSelectionFormatter() {
     validateSelections,
     getDisplayValue,
     getSelectionTypeFromPick,
-    getCorrectSelectionDisplay,
     mapPickToSelectionType,
-    mapSelectionTypeToValue,
     getMarketDisplay,
     getSelectionDisplay,
     marketMap
