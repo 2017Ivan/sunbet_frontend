@@ -140,8 +140,8 @@
             <p class="text-sm text-gray-400 truncate">{{ bet.matchName || bet.match || 'Match' }}</p>
             <div class="mt-0.5 flex flex-row gap-1 items-center">
               <p class="text-xs text-gray-400">{{ getMarketDisplay(bet) }}</p>
-              <p class="text-xs font-semibold text-gray-400 truncate">
-                - {{ bet.fromBookingCode ? 'sunbet_xxx' : getSelectionDisplay(bet) }}
+              <p class="text-xs font-semibold text-gray-300 truncate">
+                - {{ getSelectionDisplay(bet) }}
               </p>
             </div>
             <div class="flex items-center gap-2 mt-0.5">
@@ -161,9 +161,7 @@
                 <path d="M18 6L6 18M6 6l12 12"/>
               </svg>
             </button>
-            <span class="text-sm font-bold text-rose-400">
-              {{ parseFloat(bet.odds).toFixed(2) }}
-            </span>
+            <span class="text-sm font-bold text-rose-400">{{ parseFloat(bet.odds).toFixed(2) }}</span>
           </div>
         </div>
       </div>
@@ -339,6 +337,7 @@ const isLoadCodeValid = computed(() => {
 const getMarketDisplay = (bet) => {
   const market = bet.market || bet.marketKey || '1X2'
   
+  // Map market keys to display names
   const marketMap = {
     '1X2': '1X2 | Full Time',
     'Double Chance': 'Double Chance | Full Time',
@@ -361,6 +360,7 @@ const getSelectionDisplay = (bet) => {
   let pick = bet.pick || bet.selection || ''
   const market = bet.market || bet.marketKey || '1X2'
   
+  // For 1X2 market - show as is (1, X, 2)
   if (market === '1X2' || market === '1X2 | Full Time') {
     if (pick === '1' || pick === 'home') return '1'
     if (pick === 'X' || pick === 'draw') return 'X'
@@ -368,6 +368,7 @@ const getSelectionDisplay = (bet) => {
     return pick
   }
   
+  // For Double Chance market - show as is (1X, X2, 12)
   if (market === 'Double Chance' || market === 'Double Chance | Full Time') {
     if (pick === '1X' || pick === '1X') return '1X'
     if (pick === 'X2' || pick === 'X2') return 'X2'
@@ -375,6 +376,7 @@ const getSelectionDisplay = (bet) => {
     return pick
   }
   
+  // For Over/Under, format nicely
   if (pick.toLowerCase().includes('over')) {
     return pick.toUpperCase()
   }
@@ -382,9 +384,11 @@ const getSelectionDisplay = (bet) => {
     return pick.toUpperCase()
   }
   
+  // For BTTS
   if (pick.toLowerCase() === 'yes') return 'Yes'
   if (pick.toLowerCase() === 'no') return 'No'
   
+  // For Correct Score, already has format like "2-1"
   return pick
 }
 
@@ -421,6 +425,8 @@ const handleRemoveBet = (bet) => {
   })
 }
 
+//  handlePlaceBet
+
 const handlePlaceBet = async () => {
   if (!isStakeValid.value || !hasEnoughBalance.value || !currentTabItems.value.length) return
   
@@ -433,6 +439,7 @@ const handlePlaceBet = async () => {
     
     if (result.success) {
       toast.success('🎉 Bet placed successfully!')
+      // ... rest of code
     } else {
       toast.error(result.error || '❌ Failed to place bet')
     }
@@ -471,22 +478,16 @@ const handleLoadCodeFromEmpty = async () => {
     if (result.success) {
       loadError.value = ''
       if (bookingCodeStore.loadedSelections.length > 0) {
-        // Weka alama ya fromBookingCode = true kwa kila selection iliyopakiwa
-        const selectionsWithFlag = bookingCodeStore.loadedSelections.map(sel => ({
-          ...sel,
-          fromBookingCode: true
-        }))
-
-        // Ongeza kwenye slip kupitia store au apply direct
-        selectionsWithFlag.forEach(item => {
-          betStore.addToSlip(item)
-        })
-
-        toast.success(`✅ ${selectionsWithFlag.length} selections loaded!`, {
-          position: 'bottom-right',
-          timeout: 3000
-        })
-        loadCodeInput.value = ''
+        const success = bookingCodeStore.applyLoadedSelectionsToSlip()
+        if (success) {
+          toast.success(`✅ ${bookingCodeStore.loadedSelections.length} selections loaded!`, {
+            position: 'bottom-right',
+            timeout: 3000
+          })
+          loadCodeInput.value = ''
+        } else {
+          loadError.value = 'Failed to apply selections'
+        }
       } else {
         loadError.value = 'No selections found in this code'
       }
@@ -518,21 +519,15 @@ const handleCodeCreated = (data) => {
     position: 'bottom-right',
     timeout: 5000
   })
+  console.log('✅ Code created:', data)
 }
 
 const handleCodeLoaded = (selections) => {
-  // Weka flag ya fromBookingCode = true endapo zitapakiwa kupitia Modal
-  selections.forEach(sel => {
-    betStore.addToSlip({
-      ...sel,
-      fromBookingCode: true
-    })
-  })
-
   toast.success(`✅ ${selections.length} selections loaded to bet slip`, {
     position: 'bottom-right',
     timeout: 3000
   })
+  console.log('✅ Code loaded:', selections.length, 'selections')
 }
 
 // ---- Watchers ----

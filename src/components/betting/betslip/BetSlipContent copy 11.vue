@@ -140,8 +140,8 @@
             <p class="text-sm text-gray-400 truncate">{{ bet.matchName || bet.match || 'Match' }}</p>
             <div class="mt-0.5 flex flex-row gap-1 items-center">
               <p class="text-xs text-gray-400">{{ getMarketDisplay(bet) }}</p>
-              <p class="text-xs font-semibold text-gray-400 truncate">
-                - {{ bet.fromBookingCode ? 'sunbet_xxx' : getSelectionDisplay(bet) }}
+              <p class="text-xs font-semibold text-gray-300 truncate">
+                - {{ getSelectionDisplay(bet) }}
               </p>
             </div>
             <div class="flex items-center gap-2 mt-0.5">
@@ -162,7 +162,7 @@
               </svg>
             </button>
             <span class="text-sm font-bold text-rose-400">
-              {{ parseFloat(bet.odds).toFixed(2) }}
+              {{ isLoadedFromCode ? 'xxx' : parseFloat(bet.odds).toFixed(2) }}
             </span>
           </div>
         </div>
@@ -197,19 +197,27 @@
         <div class="space-y-1.5 bg-gray-800 rounded-[10px] px-3 py-2.5 border border-gray-700">
           <div class="flex justify-between text-xs">
             <span class="text-gray-500">Total Odds</span>
-            <span class="text-white font-semibold">{{ totalOdds.toFixed(2) }}</span>
+            <span class="text-white font-semibold">
+              {{ isLoadedFromCode ? 'xxx' : totalOdds.toFixed(2) }}
+            </span>
           </div>
           <div class="flex justify-between text-xs">
             <span class="text-gray-500">Potential Win</span>
-            <span class="text-emerald-400 font-semibold">TZS {{ potentialWin.toLocaleString() }}</span>
+            <span class="text-emerald-400 font-semibold">
+              {{ isLoadedFromCode ? 'xxx' : 'TZS ' + potentialWin.toLocaleString() }}
+            </span>
           </div>
           <div class="flex justify-between text-xs">
             <span class="text-gray-500">Tax 12%</span>
-            <span class="text-emerald-400 font-semibold">TZS {{ tax.toLocaleString() }}</span>
+            <span class="text-emerald-400 font-semibold">
+              {{ isLoadedFromCode ? 'xxx' : 'TZS ' + tax.toLocaleString() }}
+            </span>
           </div>
           <div class="flex justify-between text-xs">
             <span class="text-gray-500">Payout</span>
-            <span class="text-emerald-400 font-semibold">TZS {{ payout.toLocaleString() }}</span>
+            <span class="text-emerald-400 font-semibold">
+              {{ isLoadedFromCode ? 'xxx' : 'TZS ' + payout.toLocaleString() }}
+            </span>
           </div>
         </div>
 
@@ -282,6 +290,7 @@ const stakeAmount = ref(0)
 const betType = ref('Single')
 const isPlacingBet = ref(false)
 const showBookingCodeModal = ref(false)
+const isLoadedFromCode = ref(false) // Traks if current selections came from a booking code
 
 // ---- Load Code State (Empty State) ----
 const loadCodeInput = ref('')
@@ -306,19 +315,22 @@ const isLoggedIn = computed(() => authStore.isLoggedIn)
 const userBalance = computed(() => authStore.user?.balance || 0)
 
 const totalOdds = computed(() => {
-  if (!currentTabItems.value.length) return 1
+  if (!currentTabItems.value.length || isLoadedFromCode.value) return 1
   return currentTabItems.value.reduce((acc, bet) => acc * (parseFloat(bet.odds) || 1), 1)
 })
 
 const potentialWin = computed(() => {
+  if (isLoadedFromCode.value) return 0
   return Math.round((stakeAmount.value || 0) * (totalOdds.value - 1))
 })
 
 const tax = computed(() => {
+  if (isLoadedFromCode.value) return 0
   return Math.round((potentialWin.value || 0) * 0.12)
 })
 
 const payout = computed(() => {
+  if (isLoadedFromCode.value) return 0
   return Math.round((potentialWin.value - tax.value) + stakeAmount.value)
 })
 
@@ -404,6 +416,7 @@ const handleClearCurrentTab = () => {
     betStore.removeFromSlip(item.matchId, item.marketKey)
   })
   stakeAmount.value = 0
+  isLoadedFromCode.value = false
   toast.info('Bet slip cleared', {
     position: 'bottom-right',
     timeout: 2000
@@ -414,6 +427,7 @@ const handleRemoveBet = (bet) => {
   betStore.removeFromSlip(bet.matchId, bet.marketKey)
   if (currentTabItems.value.length === 0) {
     stakeAmount.value = 0
+    isLoadedFromCode.value = false
   }
   toast.info('Selection removed', {
     position: 'bottom-right',
@@ -433,6 +447,7 @@ const handlePlaceBet = async () => {
     
     if (result.success) {
       toast.success('🎉 Bet placed successfully!')
+      isLoadedFromCode.value = false
     } else {
       toast.error(result.error || '❌ Failed to place bet')
     }
@@ -471,22 +486,17 @@ const handleLoadCodeFromEmpty = async () => {
     if (result.success) {
       loadError.value = ''
       if (bookingCodeStore.loadedSelections.length > 0) {
-        // Weka alama ya fromBookingCode = true kwa kila selection iliyopakiwa
-        const selectionsWithFlag = bookingCodeStore.loadedSelections.map(sel => ({
-          ...sel,
-          fromBookingCode: true
-        }))
-
-        // Ongeza kwenye slip kupitia store au apply direct
-        selectionsWithFlag.forEach(item => {
-          betStore.addToSlip(item)
-        })
-
-        toast.success(`✅ ${selectionsWithFlag.length} selections loaded!`, {
-          position: 'bottom-right',
-          timeout: 3000
-        })
-        loadCodeInput.value = ''
+        const success = bookingCodeStore.applyLoadedSelectionsToSlip()
+        if (success) {
+          isLoadedFromCode.value = true // Set flag to true to hide odds
+          toast.success(`✅ ${bookingCodeStore.loadedSelections.length} selections loaded!`, {
+            position: 'bottom-right',
+            timeout: 3000
+          })
+          loadCodeInput.value = ''
+        } else {
+          loadError.value = 'Failed to apply selections'
+        }
       } else {
         loadError.value = 'No selections found in this code'
       }
@@ -521,14 +531,7 @@ const handleCodeCreated = (data) => {
 }
 
 const handleCodeLoaded = (selections) => {
-  // Weka flag ya fromBookingCode = true endapo zitapakiwa kupitia Modal
-  selections.forEach(sel => {
-    betStore.addToSlip({
-      ...sel,
-      fromBookingCode: true
-    })
-  })
-
+  isLoadedFromCode.value = true // Set flag to true when loaded via modal
   toast.success(`✅ ${selections.length} selections loaded to bet slip`, {
     position: 'bottom-right',
     timeout: 3000
@@ -540,6 +543,7 @@ watch(currentTabItems, (newItems) => {
   if (newItems.length === 0) {
     stakeAmount.value = 0
     loadError.value = ''
+    isLoadedFromCode.value = false
   }
 }, { deep: true })
 

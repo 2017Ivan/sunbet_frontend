@@ -140,8 +140,8 @@
             <p class="text-sm text-gray-400 truncate">{{ bet.matchName || bet.match || 'Match' }}</p>
             <div class="mt-0.5 flex flex-row gap-1 items-center">
               <p class="text-xs text-gray-400">{{ getMarketDisplay(bet) }}</p>
-              <p class="text-xs font-semibold text-gray-400 truncate">
-                - {{ bet.fromBookingCode ? 'sunbet_xxx' : getSelectionDisplay(bet) }}
+              <p class="text-xs font-semibold text-gray-300 truncate">
+                - {{ bet.fromBookingCode ? 'sunbet_xxx' :  getSelectionDisplay(bet) }}
               </p>
             </div>
             <div class="flex items-center gap-2 mt-0.5">
@@ -161,8 +161,12 @@
                 <path d="M18 6L6 18M6 6l12 12"/>
               </svg>
             </button>
-            <span class="text-sm font-bold text-rose-400">
-              {{ parseFloat(bet.odds).toFixed(2) }}
+            <!-- Ficha odds kwa mechi zile tu zilizotoka kwenye booking code -->
+            <!-- <span class="text-sm font-bold text-rose-400">
+              {{ bet.fromBookingCode ? 'xxx' : parseFloat(bet.odds).toFixed(2) }}
+            </span> -->
+             <span class="text-sm font-bold text-rose-400">
+              {{parseFloat(bet.odds).toFixed(2) }}
             </span>
           </div>
         </div>
@@ -301,24 +305,32 @@ const currentTabItems = computed(() => {
   return activeTab.value === 'Sports' ? sportsItems.value : virtualsItems.value
 })
 
+// Check kama kuna selection yoyote kwenye slip iliyotoka kwenye Booking Code
+const hasBookingCodeSelections = computed(() => {
+  return currentTabItems.value.some(item => item.fromBookingCode === true)
+})
+
 // ---- Computed Calculations ----
 const isLoggedIn = computed(() => authStore.isLoggedIn)
 const userBalance = computed(() => authStore.user?.balance || 0)
 
 const totalOdds = computed(() => {
-  if (!currentTabItems.value.length) return 1
+  if (!currentTabItems.value.length || hasBookingCodeSelections.value) return 1
   return currentTabItems.value.reduce((acc, bet) => acc * (parseFloat(bet.odds) || 1), 1)
 })
 
 const potentialWin = computed(() => {
+  if (hasBookingCodeSelections.value) return 0
   return Math.round((stakeAmount.value || 0) * (totalOdds.value - 1))
 })
 
 const tax = computed(() => {
+  if (hasBookingCodeSelections.value) return 0
   return Math.round((potentialWin.value || 0) * 0.12)
 })
 
 const payout = computed(() => {
+  if (hasBookingCodeSelections.value) return 0
   return Math.round((potentialWin.value - tax.value) + stakeAmount.value)
 })
 
