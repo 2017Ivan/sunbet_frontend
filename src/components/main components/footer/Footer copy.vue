@@ -49,18 +49,9 @@
       
       <!-- Region Links -->
       <div class="flex items-center justify-center space-x-2 text-center my-6">
-
-        <div class="flex items-center gap-2">
-    
-    <span class="text-xs font-medium text-gray-400 tracking-wider">Sunbet </span>
-
-    <svg class="w-5 h-5 text-rose-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <circle cx="12" cy="12" r="10"/>
-      <line x1="2" y1="12" x2="22" y2="12"/>
-      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-    </svg>
-     <span class="text-xs font-medium text-gray-400 tracking-wider"> Worldwide</span>
-  </div>
+        <a href="#" class="text-xs text-gray-500 hover:text-rose-400 transition-colors underline decoration-dotted underline-offset-2">SunBet TZ</a>
+        <span class="text-gray-600 text-xs">|</span>
+        <a href="#" class="text-xs text-gray-500 hover:text-rose-400 transition-colors underline decoration-dotted underline-offset-2">SunBet UG</a>
       </div>
       
   
