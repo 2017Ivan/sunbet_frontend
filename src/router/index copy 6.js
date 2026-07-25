@@ -1,3 +1,4 @@
+// router/index.js
 import { createRouter, createWebHistory } from "vue-router";
 import { useAuthStore } from "../stores/auth/authStore.js";
 
@@ -28,7 +29,7 @@ const WithdrawPage = () => import("../pages/money/withdraw/Withdraw.vue");
 // ── Routes ────────────────────────────────────────────────────────────────────
 const routes = [
   // ════════════════════════════════════════════════════════════════════
-  // 1. AUTH ROUTES
+  // 1. AUTH ROUTES (no main layout)
   // ════════════════════════════════════════════════════════════════════
   {
     path: "/auth",
@@ -53,16 +54,18 @@ const routes = [
     ],
   },
 
+  // Shortcuts za auth
   { path: "/login", redirect: "/auth/login" },
   { path: "/register", redirect: "/auth/register" },
 
   // ════════════════════════════════════════════════════════════════════
-  // 2. MAIN LAYOUT ROUTES
+  // 2. MAIN LAYOUT ROUTES (DefaultLayout)
   // ════════════════════════════════════════════════════════════════════
   {
     path: "/",
     component: DefaultLayout,
     children: [
+      // ── PUBLIC ROUTES (No authentication required) ──
       {
         path: "",
         name: "home",
@@ -80,7 +83,7 @@ const routes = [
         name: "sport-detail",
         component: SportDetailPage,
         meta: { title: "Match Details" },
-        props: true
+        props: true // This passes route params as props to the component
       },
       {
         path: "sports/live",
@@ -131,7 +134,7 @@ const routes = [
         meta: { title: "Withdraw" },
       },
       
-      // ── PROTECTED ROUTES ──
+      // ── PROTECTED ROUTES (requiresAuth: true) ──
       {
         path: "dashboard",
         name: "dashboard",
@@ -166,14 +169,14 @@ const routes = [
   },
 
   // ════════════════════════════════════════════════════════════════════
-  // 3. ADMIN / AGENT ROUTES
+  // 3. ADMIN ROUTES (AdminLayout)
   // ════════════════════════════════════════════════════════════════════
   {
     path: "/admin",
     component: AdminLayout,
     meta: { 
       requiresAuth: true, 
-      requiresRole: ['ADMIN', 'AGENT'] // 👈 Tumoruhusu zote mbili hapa
+      requiresRole: 'ADMIN'
     },
     children: [
       {
@@ -183,7 +186,7 @@ const routes = [
         meta: { 
           title: "Admin Dashboard", 
           requiresAuth: true, 
-          requiresRole: ['ADMIN', 'AGENT'] 
+          requiresRole: 'ADMIN' 
         },
       },
       {
@@ -193,7 +196,7 @@ const routes = [
         meta: { 
           title: "Manage Users", 
           requiresAuth: true, 
-          requiresRole: ['ADMIN', 'AGENT'] 
+          requiresRole: 'ADMIN' 
         },
       },
       {
@@ -203,7 +206,7 @@ const routes = [
         meta: { 
           title: "Manage Bets", 
           requiresAuth: true, 
-          requiresRole: ['ADMIN', 'AGENT'] 
+          requiresRole: 'ADMIN' 
         },
       },
       {
@@ -213,7 +216,7 @@ const routes = [
         meta: { 
           title: "Manage booking-codes", 
           requiresAuth: true, 
-          requiresRole: ['ADMIN', 'AGENT'] 
+          requiresRole: 'ADMIN' 
         },
       },
       {
@@ -223,7 +226,7 @@ const routes = [
         meta: { 
           title: "Notifications", 
           requiresAuth: true, 
-          requiresRole: ['ADMIN', 'AGENT'] 
+          requiresRole: 'ADMIN' 
         },
       },
       {
@@ -233,7 +236,7 @@ const routes = [
         meta: { 
           title: "Settings", 
           requiresAuth: true, 
-          requiresRole: ['ADMIN', 'AGENT'] 
+          requiresRole: 'ADMIN' 
         },
       },
       {
@@ -243,14 +246,14 @@ const routes = [
         meta: { 
           title: "Fixtures", 
           requiresAuth: true, 
-          requiresRole: ['ADMIN', 'AGENT'] 
+          requiresRole: 'ADMIN' 
         },
       },
     ],
   },
 
   // ════════════════════════════════════════════════════════════════════
-  // 4. 404 NOT FOUND
+  // 4. 404 NOT FOUND (Always last)
   // ════════════════════════════════════════════════════════════════════
   {
     path: "/:pathMatch(.*)*",
@@ -271,18 +274,22 @@ const router = createRouter({
 });
 
 // ── Navigation guards with RBAC ──────────────────────────────────────────────
+// router/index.js - Navigation guard
 router.beforeEach(async (to, from, next) => {
   document.title = to.meta.title ? `${to.meta.title} — SunBet` : "SunBet";
 
   const authStore = useAuthStore();
   const token = localStorage.getItem('access_token');
   
+  // ALWAYS check token and initialize if needed
   if (token) {
+    // If store not initialized OR store says not logged in but token exists
     if (!authStore.initialized || !authStore.isLoggedIn) {
       console.log('⏳ Initializing auth store...');
       await authStore.initialize();
     }
   } else {
+    // No token, clear store if needed
     if (authStore.isLoggedIn) {
       authStore.clearAuth();
     }
@@ -291,27 +298,29 @@ router.beforeEach(async (to, from, next) => {
   const isLoggedIn = authStore.isLoggedIn;
   const userRole = authStore.user?.role;
 
-  console.log(`🔐 Navigation to: ${to.path} | isLoggedIn: ${isLoggedIn} | Role: ${userRole}`);
+  console.log(`🔐 Navigation to: ${to.path} | isLoggedIn: ${isLoggedIn} | Role: ${userRole} | Token: ${!!token} | initialized: ${authStore.initialized}`);
 
-  // 1. Guest routes
+  // ── 1. Guest routes (login/register) ──────────────────────────────────────
   if (to.meta.guest) {
     if (isLoggedIn) {
+      console.log("⛔ Guest route but user logged in, redirecting to home");
       return next({ name: "home" });
     }
     return next();
   }
 
-  // 2. Protected routes
+  // ── 2. Protected routes - check authentication ────────────────────────────
   if (to.meta.requiresAuth && !isLoggedIn) {
+    console.log("🔒 Protected route requires auth, redirecting to login");
     return next({ 
       name: "login", 
       query: { redirect: to.fullPath } 
     });
   }
 
- 
+  // ── 3. Role-based access control (RBAC) ──────────────────────────────────
   if (to.meta.requiresRole) {
-    const requiredRoles = to.meta.requiresRole;
+    const requiredRole = to.meta.requiresRole;
     
     if (!isLoggedIn) {
       return next({ 
@@ -319,16 +328,15 @@ router.beforeEach(async (to, from, next) => {
         query: { redirect: to.fullPath } 
       });
     }
-
     
-    const allowedRolesArray = Array.isArray(requiredRoles) ? requiredRoles : [requiredRoles];
-    
-    // Check kama user's role ipo kwenye allowedRolesArray
-    if (!allowedRolesArray.includes(userRole)) {
-      console.log(`⛔ Access denied: Allowed roles: [${allowedRolesArray.join(', ')}], but user has '${userRole}'`);
+    if (userRole !== requiredRole) {
+      console.log(`⛔ Access denied: Required role '${requiredRole}', but user has '${userRole}'`);
       
-      // Ukimzuia asiyeingia
-      return next({ name: 'home' });
+      if (userRole === 'AGENT') {
+        return next({ name: 'dashboard' });
+      } else {
+        return next({ name: 'home' });
+      }
     }
     
     console.log(`✅ Role check passed: ${userRole} has access to ${to.path}`);

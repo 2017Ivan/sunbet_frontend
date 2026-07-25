@@ -345,9 +345,9 @@ const quickLinks = computed(() => {
     { to: '/transactions', icon: '💳', label: 'Transactions' },
     { to: '/promotions', icon: '🎁', label: 'Promotions' },
   ]
-  if (user.value?.role === 'ADMIN') {
-    links.push({ to: '/admin', icon: '🛠️', label: 'Admin Panel' })
-  }
+ if (user.value?.role === 'ADMIN' || user.value?.role === 'AGENT') {
+  links.push({ to: '/admin', icon: '🛠️', label: 'Admin Panel' })
+}
   return links
 })
 
