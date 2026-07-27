@@ -352,7 +352,7 @@ const tax = computed(() => {
 
 const payout = computed(() => {
   if (!potentialWin.value) return 0
-  return Math.round(potentialWin.value - tax.value + stakeAmount.value)
+  return Math.round((potentialWin.value - tax.value) + stakeAmount.value)
 })
 
 // ---- Helpers ----
