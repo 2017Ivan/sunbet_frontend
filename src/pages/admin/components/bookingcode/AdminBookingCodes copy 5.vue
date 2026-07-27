@@ -204,6 +204,7 @@
             <div class="grid grid-cols-2 gap-2 text-sm">
               <div>
                 <p class="text-gray-500">Selection</p>
+                <!-- KAMA NI CORRECT SCORE, PRINT GOAL DIRECT (e.g. 2 - 3) -->
                 <p class="text-white font-medium">
                   {{ getSelectionDisplay(selection) }}
                   <span class="text-xs text-gray-400" v-if="selection.selectionType">({{ selection.selectionType }})</span>
@@ -278,7 +279,7 @@
           </select>
         </div>
 
-        <!-- Selection Type -->
+        <!-- Selection Type (Yameongezwa machaguo mengine ikiwemo Correct Score) -->
         <div class="mb-4">
           <label class="text-gray-400 text-sm block mb-2">Selection Type</label>
           <select v-model="selectedSelectionType" 
@@ -403,36 +404,22 @@ const totalSelections = computed(() => {
   }, 0)
 })
 
-// ── Selection Display Helper (FIXED) ─────────────────────────────────────────
+// ── Selection Display Helper ──────────────────────────────────────────────
 function getSelectionDisplay(selection) {
   if (!selection) return ''
   
-  const type = (selection.selectionType || '').toString().toUpperCase()
-  const market = (selection.marketType || selection.market || '').toString().toLowerCase()
-  const pick = (selection.pick || selection.selectionValue || selection.selection || '').toString().trim()
-
-  // 1. Kama pick ina mfumo wa goli (k.m "0-0", "2-1", "1-0") au "OTHER", ionyeshe moja kwa moja
-  if (/^\d+[\s:\-]+\d+$/.test(pick) || pick.toUpperCase().includes('OTHER')) {
-    return pick
-  }
-
-  // 2. Kama ni market/type ya Correct Score
-  if (type === 'CORRECT_SCORE' || market.includes('correct score') || market.includes('cs_')) {
-    if (selection.selectionValue && selection.selectionValue !== '1') {
-      return selection.selectionValue
-    }
-    if (pick) return pick
+  const type = selection.selectionType || ''
+  const market = selection.marketType || ''
+  
+  // Kama ni market ya Correct Score au type ni Correct Score, toa magoli moja kwa moja (k.m 2 - 3)
+  if (type === 'CORRECT_SCORE' || market.toLowerCase().includes('correct score') || market === 'CS_FH' || market === 'CS_SH') {
+    if (selection.selectionValue) return selection.selectionValue
     if (selection.score && selection.score.home !== undefined) {
       return `${selection.score.home} - ${selection.score.away}`
     }
   }
 
-  // 3. Kama ni Double Chance (1X, X2, 12)
-  if (['1X', 'X2', '12'].includes(pick.toUpperCase())) {
-    return pick.toUpperCase()
-  }
-
-  // 4. Ramani ya aina nyingine za picks (1X2, BTTS, O/U)
+  // Ramani ya aina nyingine za picks
   const typeMap = {
     'HOME': '1',
     'DRAW': 'X',
@@ -447,7 +434,7 @@ function getSelectionDisplay(selection) {
     return typeMap[type]
   }
   
-  return pick || selection.selectionValue || type
+  return selection.selectionValue || type
 }
 
 // ── Watch for match selection ──────────────────────────────────────────────
@@ -455,32 +442,10 @@ watch(selectedMatchId, (newMatchId) => {
   if (newMatchId && selectedCode.value?.selections) {
     const selection = selectedCode.value.selections.find(s => s.matchId === newMatchId)
     if (selection) {
-      // Set selection type and market type directly from selection object
-      selectedSelectionType.value = selection.selectionType || 'CORRECT_SCORE'
-      
-      // Normalize Market Type
-      const marketRaw = (selection.marketType || selection.market || '').toString().toLowerCase()
-      if (marketRaw.includes('correct score')) {
-        selectedMarketType.value = 'Correct Score'
-      } else if (marketRaw.includes('1x2')) {
-        selectedMarketType.value = '1X2'
-      } else {
-        selectedMarketType.value = selection.marketType || selection.market || '1X2'
-      }
-
-      // Check if selection value has score format like "2-0" or "0-2"
-      const val = selection.selectionValue || selection.pick || ''
-      if (val && /^\d+[\s:\-]+\d+$/.test(val.trim())) {
-        const parts = val.trim().split(/[\s:\-]+/)
-        homeScore.value = parseInt(parts[0], 10)
-        awayScore.value = parseInt(parts[1], 10)
-      } else if (selection.score && selection.score.home !== undefined) {
-        homeScore.value = selection.score.home
-        awayScore.value = selection.score.away
-      } else {
-        homeScore.value = ''
-        awayScore.value = ''
-      }
+      selectedSelectionType.value = selection.selectionType || 'HOME'
+      selectedMarketType.value = selection.marketType || '1X2'
+      homeScore.value = selection.score?.home ?? ''
+      awayScore.value = selection.score?.away ?? ''
     }
   }
 })
