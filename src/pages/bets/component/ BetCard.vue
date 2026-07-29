@@ -11,7 +11,8 @@
           :class="statusClass"
         >
           <span class="w-1.5 h-1.5 rounded-full" :class="statusDotClass"></span>
-          {{ statusLabel }} ({{ selectionCount }})
+          {{ statusLabel }} 
+          <!-- ({{ selectionCount }}) -->
         </span>
       </div>
       <span class="text-[10px] font-bold text-[#606060]">ID: {{ bet.id }}</span>
