@@ -361,7 +361,7 @@ export const useBetStore = defineStore('bet', () => {
     isLoadingBets.value = true
 
     try {
-      const { status, result, userId, limit = 100, offset = 0 } = options
+      const { status, result, userId, limit = 20, offset = 0 } = options
 
       const params = new URLSearchParams()
       if (status) params.append('status', status)
