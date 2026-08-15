@@ -5,15 +5,15 @@
     
 
       <!-- Tabs -->
-      <div class="flex gap-1 bg-transparent  mb-6 overflow-x-auto">
+      <div class="flex gap-1 bg-[#1A1A1A] rounded-xl border border-[#2A2A2A] mb-6 overflow-x-auto">
         <button
           v-for="tab in tabs"
           :key="tab.key"
           @click="switchTab(tab.key)"
-          class="flex-1 px-4 py-2.5 text-sm font-semibold cursor-pointer  whitespace-nowrap"
+          class="flex-1 px-4 py-2.5 text-sm font-semibold rounded-lg transition-all duration-200 whitespace-nowrap"
           :class="activeTab === tab.key
-            ? 'bg-transparent border-b-1 border-rose-800 text-white '
-            : 'text-[#606060] hover:text-white '"
+            ? 'bg-transparent border-2 border-rose-500 text-white shadow-lg shadow-rose-600/25'
+            : 'text-[#606060] hover:text-white hover:bg-[#2A2A2A]'"
         >
           <span class="flex items-center justify-center gap-2">
             {{ tab.label }}
