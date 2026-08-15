@@ -1,6 +1,6 @@
 <template>
   <div 
-    class="bg-gray-900 border border-[#2A2A2A] rounded-xl p-1 hover:border-rose-600/40 transition-all duration-300 cursor-pointer hover:bg-[#1A1A1A] group"
+    class="bg-gray-900 border border-[#2A2A2A] rounded-t-xl p-1 hover:border-rose-600/40 transition-all duration-300 cursor-pointer hover:bg-[#1A1A1A] group"
     @click="$emit('click')"
   >
     <!-- Header: Status + Selection Count + Booking Code -->
