@@ -4,7 +4,7 @@
     @click="$emit('click')"
   >
     <!-- Header: Status + Selection Count + Booking Code -->
-    <div class="flex items-center justify-between mb-2.5">
+    <div class="flex items-center justify-between mb-1">
       <div class="flex items-center gap-2">
         <span 
           class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-full"
@@ -12,14 +12,13 @@
         >
           <span class="w-1.5 h-1.5 rounded-full" :class="statusDotClass"></span>
           {{ statusLabel }} 
-          <!-- ({{ selectionCount }}) -->
         </span>
       </div>
       <span class="text-[10px] font-bold text-[#606060]">ID: {{ bet.id }}</span>
     </div>
 
     <!-- Date -->
-    <span class="text-[10px] text-[#606060] block mb-2.5 font-bold">{{ formatDate(bet.createdAt) }}</span>
+    <span class="text-[10px] text-[#606060] block  font-bold">{{ formatDate(bet.createdAt) }}</span>
 
     <!-- Stats Grid - 3 columns -->
     <div class="grid grid-cols-3 gap-2 bg-gray-900 rounded-lg p-2.5">
@@ -42,12 +41,7 @@
       </div>
     </div>
 
-    <!-- Arrow Indicator on Hover -->
-    <div class="flex justify-end mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
-      <svg class="w-4 h-4 text-rose-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <polyline points="9 18 15 12 9 6"/>
-      </svg>
-    </div>
+   
   </div>
 </template>
 

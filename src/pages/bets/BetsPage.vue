@@ -2,12 +2,7 @@
 <template>
   <div class="h-full py-8 bg-[#0D0D0D]">
     <div class="max-w-4xl mx-auto px-2">
-      
-      <!-- Header -->
-      <div class="mb-6">
-        <h1 class="text-2xl font-bold text-white">My Bets</h1>
-        <p class="text-sm text-[#606060] mt-1">Track all your betting activity</p>
-      </div>
+    
 
       <!-- Tabs -->
       <div class="flex gap-1 p-1 bg-[#1A1A1A] rounded-xl border border-[#2A2A2A] mb-6 overflow-x-auto">
