@@ -107,7 +107,7 @@
         </div>
 
         <!-- Jackpot Bets -->
-        <div v-if="activeTab === 'jackpot'">
+        <!-- <div v-if="activeTab === 'jackpot'">
           <div class="text-center py-12">
             <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-[#0D0D0D] flex items-center justify-center">
               <svg class="w-8 h-8 text-[#333]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -117,7 +117,7 @@
             <p class="text-[#606060] font-medium">Jackpot Bets</p>
             <p class="text-xs text-[#606060] mt-1">Coming soon</p>
           </div>
-        </div>
+        </div> -->
       </div>
 
     </div>
@@ -140,7 +140,7 @@ const tabs = [
   { key: 'open', label: 'Open', badge: true },
   { key: 'settled', label: 'Settled', badge: true },
   { key: 'virtual', label: 'Virtual' },
-  { key: 'jackpot', label: 'Jackpot' },
+
 ]
 
 const activeTab = ref('open')
