@@ -155,19 +155,15 @@
                 <span class="text-[#8E8E8E] font-bold text-sm px-1 py-1 rounded-lg">{{ parseFloat(selection.odds).toFixed(2) }}</span>
               </div>
               
-              <div class="flex items-center justify-between py-1 min-w-0 w-full">
-  <!-- Container ya kwanza inapewa flex-1 na min-w-0 ili ichukue nafasi iliyobaki tu na ikatwe ikizidi -->
-  <span class="truncate min-w-0 flex-1 text-xs font-bold text-gray-500 mr-2">
-    {{ selection.league || '' }}
-  </span>
-
-  <!-- Container ya pili inapewa flex-shrink-0 ili ISIPUNGUZWE wala kusukumwa kabisa -->
-  <span class="flex-shrink-0 text-xs font-semibold text-[#A0A0A0]">
-    <span class="px-1 text-xs font-bold text-gray-400">
-      {{ selection.score ? `${selection.score.home} - ${selection.score.away}` : '—' }}
-    </span>
-  </span>
-</div>
+              <div class="flex justify-between items-center py-1">
+                <span class="inline-block max-w-full truncate text-xs text-gray-500 font-bold ">{{ selection.league || '' }}</span>
+     
+                <span class="text-xs text-[#A0A0A0] font-semibold">
+                  <span class="text-xs text-gray-400 font-bold px-1">
+                    {{ selection.score ? `${selection.score.home} - ${selection.score.away}` : '—' }}
+                  </span>
+                </span>
+              </div>
               
               <div class="flex justify-between items-center">
                 <span class="text-xs text-[#A0A0A0] font-semibold">
