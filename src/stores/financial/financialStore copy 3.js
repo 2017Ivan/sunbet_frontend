@@ -21,8 +21,8 @@ export const useFinancialStore = defineStore('financial', {
   },
 
   actions: {
-    // ── SNIPPE MOBILE DEPOSIT ─────────────────────────────────────────────
-    async deposit(amount, phone_number) {
+    // ── PALMPESA MOBILE DEPOSIT ─────────────────────────────────────────────
+    async depositViaPalmPesa(amount, phone_number) {
       const authStore = useAuthStore()
       
       if (!authStore.isLoggedIn) {
@@ -35,14 +35,14 @@ export const useFinancialStore = defineStore('financial', {
       this.paymentStatus = null
 
       try {
-        const result = await financialService.deposit(amount, phone_number)
+        const result = await financialService.depositViaPalmPesa(amount, phone_number)
         
         if (result.success) {
           this.transaction = result.data
           this.transactionId = result.data?.transaction_id
           this.paymentStatus = 'pending'
           
-          // Anzisha Polling
+          // Anzisha Polling kutoka store
           this.startPolling(this.transactionId)
           
           return result
@@ -69,14 +69,14 @@ export const useFinancialStore = defineStore('financial', {
         attempts++
         
         try {
-          const result = await financialService.checkPaymentStatus(transactionId)
+          const result = await financialService.checkPalmPesaStatus(transactionId)
           
           if (result.success) {
             const currentStatus = result.data?.status
             this.paymentStatus = currentStatus
             
             // Unapoona COMPLETED au FAILED, simamisha polling
-            if (currentStatus === 'completed' || currentStatus === 'failed' || currentStatus === 'expired') {
+            if (currentStatus === 'completed' || currentStatus === 'failed') {
               this.stopPolling()
               
               if (currentStatus === 'completed') {
@@ -115,7 +115,7 @@ export const useFinancialStore = defineStore('financial', {
     // ── CHECK STATUS MANUALLY ──────────────────────────────────────────────
     async checkStatus(transactionId) {
       try {
-        const result = await financialService.checkPaymentStatus(transactionId)
+        const result = await financialService.checkPalmPesaStatus(transactionId)
         if (result.success) {
           this.paymentStatus = result.data?.status
           return {

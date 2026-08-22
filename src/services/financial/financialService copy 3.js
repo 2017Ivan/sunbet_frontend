@@ -2,11 +2,10 @@
 import api from '../api'
 
 const financialService = {
-  // ── SNIPPE MOBILE DEPOSIT ──────────────────────────────────────────────
-  async deposit(amount, phone_number) {
+  // ── PALMPESA MOBILE DEPOSIT ──────────────────────────────────────────────
+  async depositViaPalmPesa(amount, phone_number) {
     try {
-      // Hii ndio URL inayoendana na backend: /deposit/snipe (single 'p')
-      const response = await api.post('/financial/deposit/snipe', {
+      const response = await api.post('/financial/deposit/palmpesa', {
         amount,
         phone_number
       })
@@ -24,9 +23,7 @@ const financialService = {
         message: response.data?.message || 'Deposit failed'
       }
     } catch (error) {
-      console.error('Snippe deposit error:', error)
-      console.error('Error response:', error.response?.data)
-      console.error('Status:', error.response?.status)
+      console.error('PalmPesa deposit error:', error)
       return {
         success: false,
         message: error.response?.data?.message || 'Failed to initiate payment'
@@ -34,8 +31,8 @@ const financialService = {
     }
   },
 
-  // ── CHECK PAYMENT STATUS ────────────────────────────────────────────────
-  async checkPaymentStatus(transactionId) {
+  // ── CHECK PALMPESA PAYMENT STATUS ────────────────────────────────────────
+  async checkPalmPesaStatus(transactionId) {
     try {
       const response = await api.get(`/financial/payment/status/${transactionId}`)
       
@@ -89,7 +86,7 @@ const financialService = {
   // ── GET BALANCE ──────────────────────────────────────────────────────────
   async getBalance() {
     try {
-      const response = await api.get('/financial/balance')
+      const response = await api.get('/balance')
       
       if (response.data && response.data.success) {
         return {

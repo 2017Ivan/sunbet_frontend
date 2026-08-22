@@ -12,7 +12,7 @@
           Back to Profile
         </RouterLink>
         <h1 class="text-lg font-bold text-gray-300">Deposit Funds</h1>
-        <p class="text-gray-400 text-sm mt-1">Add funds to your account via mobile money</p>
+        <p class="text-gray-400 text-sm mt-1">Add funds to your account securely</p>
       </div>
 
       <!-- Balance Card -->
@@ -77,17 +77,9 @@
                   <polyline points="22 4 12 14.01 9 11.01"/>
                 </svg>
                 <p class="text-gray-400 text-xs">
-                  You will receive a USSD push notification on your registered phone number. 
-                  Enter your PIN to authorize the payment. Payment expires after 4 hours.
+                  Funds will be added to your account instantly. Minimum deposit: TSh {{ MINIMUM_DEPOSIT.toLocaleString() }}.00
                 </p>
               </div>
-            </div>
-
-            <!-- Supported Networks -->
-            <div class="p-3 bg-gray-900/50 rounded-xl">
-              <p class="text-gray-400 text-xs">
-                <span class="font-semibold">Supported Networks:</span> Airtel Money, M-Pesa, Mixx by Yas, Halotel
-              </p>
             </div>
           </form>
         </div>
@@ -138,7 +130,7 @@
             </div>
             <h3 class="text-2xl font-bold text-gray-100 mb-2">Awaiting Payment</h3>
             <p class="text-gray-400 text-sm mb-4">
-              Please check your phone for the USSD push notification
+              Please check your phone for the mobile money prompt
             </p>
             <p class="text-gray-500 text-xs mb-4">
               Amount: TSh {{ lastDepositAmount.toLocaleString() }}
@@ -147,9 +139,8 @@
               <p class="text-gray-400 text-xs">Transaction ID</p>
               <p class="text-gray-100 font-mono text-sm break-all">{{ transactionId }}</p>
             </div>
-            <p v-if="financialStore.status === 'pending'" class="text-yellow-400 text-xs mb-2">⏳ Waiting for confirmation...</p>
-            <p v-else-if="financialStore.status === 'timeout'" class="text-red-400 text-xs mb-2">⚠️ Payment confirmation timed out.</p>
-            <p class="text-gray-500 text-xs mb-4">Payment expires after 4 hours</p>
+            <p v-if="financialStore.status === 'pending'" class="text-yellow-400 text-xs mb-4">⏳ Waiting for confirmation...</p>
+            <p v-else-if="financialStore.status === 'timeout'" class="text-red-400 text-xs mb-4">⚠️ Payment confirmation timed out. Check balance manually.</p>
             
             <button
               @click="closePendingModal"
@@ -200,7 +191,7 @@ const authStore = useAuthStore()
 const financialStore = useFinancialStore()
 
 // CONFIG
-const MINIMUM_DEPOSIT = 12500
+const MINIMUM_DEPOSIT = 125000
 
 // State
 const depositAmount = ref(0)
@@ -226,14 +217,10 @@ watch(() => financialStore.status, (newStatus) => {
   if (newStatus === 'completed') {
     showPendingModal.value = false
     showSuccessModal.value = true
-    isProcessing.value = false
-  } else if (newStatus === 'failed' || newStatus === 'expired') {
+  } else if (newStatus === 'failed') {
     showPendingModal.value = false
-    errorMessage.value = newStatus === 'expired' 
-      ? 'Payment expired after 4 hours. Please try again.' 
-      : 'Payment was cancelled or failed.'
+    errorMessage.value = 'Payment was cancelled or failed.'
     showErrorModal.value = true
-    isProcessing.value = false
   }
 })
 
@@ -262,8 +249,8 @@ const handleDeposit = async () => {
   try {
     lastDepositAmount.value = depositAmount.value
     
-    // Anzisha muamala kwa Snippe
-    const result = await financialStore.deposit(
+    // Anzisha muamala (hii hapo ita-trigger startPolling ya store moja kwa moja)
+    const result = await financialStore.depositViaPalmPesa(
       depositAmount.value,
       phoneNumber
     )
@@ -280,6 +267,7 @@ const handleDeposit = async () => {
     console.error('Deposit failed:', error)
     errorMessage.value = error.message || 'Deposit failed. Please try again.'
     showErrorModal.value = true
+  } finally {
     isProcessing.value = false
   }
 }
@@ -288,20 +276,17 @@ const closeSuccessModal = () => {
   showSuccessModal.value = false
   financialStore.clearTransaction()
   authStore.fetchUserBalance()
-  isProcessing.value = false
 }
 
 const closeErrorModal = () => {
   showErrorModal.value = false
   errorMessage.value = ''
   financialStore.clearTransaction()
-  isProcessing.value = false
 }
 
 const closePendingModal = () => {
   showPendingModal.value = false
   financialStore.stopPolling()
-  isProcessing.value = false
 }
 
 // Lifecycle
