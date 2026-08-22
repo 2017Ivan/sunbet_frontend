@@ -12,12 +12,7 @@
           Back to Profile
         </RouterLink>
         <h1 class="text-3xl font-bold text-gray-100">Withdraw Funds</h1>
-        <p class="text-gray-400 text-sm mt-1">
-          {{ isAdmin ? 'Admin withdrawal via Snippe' : 'Withdraw your winnings securely' }}
-        </p>
-        <p v-if="isAdmin" class="text-rose-400 text-xs mt-1">
-          ⚡ Admin: Withdrawal will be sent via Snippe disbursement
-        </p>
+        <p class="text-gray-400 text-sm mt-1">Withdraw your winnings securely</p>
       </div>
 
       <!-- Balance Card -->
@@ -64,22 +59,6 @@
               </div>
             </div>
 
-            <!-- Admin Only - Phone Number Input -->
-            <div v-if="isAdmin">
-              <label class="block text-sm text-gray-400 mb-2">Phone Number</label>
-              <div class="relative">
-                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-semibold">+255</span>
-                <input
-                  v-model="phoneNumber"
-                  type="tel"
-                  placeholder="712345678"
-                  class="w-full pl-14 pr-4 py-2 bg-gray-900 border border-gray-700 rounded-xl text-gray-100 text-lg focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20 transition-all"
-                  required
-                />
-              </div>
-              <p class="text-gray-400 text-xs mt-1">Enter recipient phone number for Snippe disbursement</p>
-            </div>
-
             <!-- Quick Amount Buttons -->
             <div>
               <label class="block text-sm text-gray-400 mb-2">Quick Amount</label>
@@ -105,10 +84,10 @@
             <button
               type="submit"
               class="w-full py-3 bg-gradient-to-r from-green-600 to-green-500 hover:from-rose-500 hover:to-rose-400 text-white font-semibold rounded-xl transition-all duration-200 shadow-lg shadow-rose-500/20 hover:shadow-rose-500/40 disabled:opacity-50 disabled:cursor-not-allowed"
-              :disabled="isProcessing || !withdrawAmount || withdrawAmount < MINIMUM_WITHDRAW || withdrawAmount > balance || withdrawAmount > MAXIMUM_WITHDRAW || (isAdmin && !phoneNumber)"
+              :disabled="isProcessing || !withdrawAmount || withdrawAmount < MINIMUM_WITHDRAW || withdrawAmount > balance || withdrawAmount > MAXIMUM_WITHDRAW"
             >
               <template v-if="!isProcessing">
-                {{ isAdmin ? 'Admin Withdraw via Snippe' : 'Withdraw' }} TSh {{ withdrawAmount.toLocaleString() || '0' }}
+                Withdraw TSh {{ withdrawAmount.toLocaleString() || '0' }}
               </template>
               <template v-else>
                 <span class="flex items-center justify-center gap-2">
@@ -168,7 +147,7 @@
                   <polyline points="22 4 12 14.01 9 11.01"/>
                 </svg>
                 <p class="text-gray-400 text-xs">
-                  {{ isAdmin ? 'Funds will be sent via Snippe disbursement to the provided phone number.' : 'Funds will be sent to your mobile money within 1-24 hours.' }}
+                  Funds will be sent to your mobile money within 1-24 hours.
                 </p>
               </div>
             </div>
@@ -187,9 +166,9 @@
                 <polyline points="22 4 12 14.01 9 11.01"/>
               </svg>
             </div>
-            <h3 class="text-2xl font-bold text-gray-100 mb-2">Withdrawal {{ isAdmin ? 'Initiated' : 'Successful' }}!</h3>
+            <h3 class="text-2xl font-bold text-gray-100 mb-2">Withdrawal Successful!</h3>
             <p class="text-gray-400 text-sm mb-4">
-              TSh {{ lastWithdrawAmount.toLocaleString() }} has been {{ isAdmin ? 'initiated for disbursement' : 'withdrawn' }}
+              TSh {{ lastWithdrawAmount.toLocaleString() }} has been withdrawn
             </p>
             <div class="bg-gray-900 border border-gray-700 rounded-xl p-4 mb-6">
               <p class="text-gray-400 text-xs">New Balance</p>
@@ -249,7 +228,6 @@ const MAXIMUM_WITHDRAW = 5000000
 
 // State
 const withdrawAmount = ref(0)
-const phoneNumber = ref('')
 const isProcessing = ref(false)
 const showSuccessModal = ref(false)
 const showErrorModal = ref(false)
@@ -259,7 +237,19 @@ const errorMessage = ref('')
 // Computed
 const balance = computed(() => authStore.userBalance)
 const formattedBalance = computed(() => authStore.formattedBalance)
-const isAdmin = computed(() => authStore.user?.role === 'admin')
+
+// Check if user is admin - from authStore
+const isAdmin = computed(() => {
+  const user = authStore.user || {}
+  const role = user.role || user.user?.role || user.data?.role || ''
+  return role === 'admin' || role === 'ADMIN'
+})
+
+// Get phone number from user data
+const userPhone = computed(() => {
+  const user = authStore.user || {}
+  return user.phone || user.phone_number || user.mobile || ''
+})
 
 // Quick amounts
 const quickWithdrawAmounts = [
@@ -301,21 +291,21 @@ const handleWithdraw = async () => {
     return
   }
 
-  // Admin validation - phone number required
-  if (isAdmin.value && !phoneNumber.value) {
-    errorMessage.value = 'Phone number is required for admin withdrawal'
-    showErrorModal.value = true
-    return
-  }
-
   isProcessing.value = true
 
   try {
     let result
     
     if (isAdmin.value) {
-      // Admin uses Snippe disbursement
-      result = await financialStore.adminWithdraw(withdrawAmount.value, phoneNumber.value)
+      // Admin uses Snippe disbursement - phone number from user data
+      const phone = userPhone.value
+      if (!phone) {
+        errorMessage.value = 'Phone number not found in your profile. Please update your profile.'
+        showErrorModal.value = true
+        isProcessing.value = false
+        return
+      }
+      result = await financialStore.adminWithdraw(withdrawAmount.value, phone)
     } else {
       // Normal user uses regular withdrawal
       result = await financialStore.withdraw(withdrawAmount.value)
@@ -325,7 +315,6 @@ const handleWithdraw = async () => {
       lastWithdrawAmount.value = withdrawAmount.value
       showSuccessModal.value = true
       withdrawAmount.value = 0
-      phoneNumber.value = ''
       
       await authStore.fetchUserBalance()
     } else {
