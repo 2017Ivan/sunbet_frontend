@@ -200,7 +200,7 @@ const authStore = useAuthStore()
 const financialStore = useFinancialStore()
 
 // CONFIG
-const MINIMUM_DEPOSIT = 12500
+const MINIMUM_DEPOSIT = 125000
 
 // State
 const depositAmount = ref(0)
