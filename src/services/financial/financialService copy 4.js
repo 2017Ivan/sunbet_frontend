@@ -5,6 +5,7 @@ const financialService = {
   // ── SNIPPE MOBILE DEPOSIT ──────────────────────────────────────────────
   async deposit(amount, phone_number) {
     try {
+      // Hii ndio URL inayoendana na backend: /deposit/snipe (single 'p')
       const response = await api.post('/financial/deposit', {
         amount,
         phone_number
@@ -59,7 +60,7 @@ const financialService = {
     }
   },
 
-  // ── WITHDRAW (For normal users) ─────────────────────────────────────────
+  // ── WITHDRAW ──────────────────────────────────────────────────────────────
   async withdraw(amount) {
     try {
       const response = await api.post('/financial/withdraw', { amount })
@@ -81,35 +82,6 @@ const financialService = {
       return {
         success: false,
         message: error.response?.data?.message || 'Withdrawal failed'
-      }
-    }
-  },
-
-  // ── ADMIN WITHDRAW (via Snippe) ─────────────────────────────────────────
-  async adminWithdraw(amount, phone_number) {
-    try {
-      const response = await api.post('/financial/admin/withdraw', {
-        amount,
-        phone_number
-      })
-      
-      if (response.data && response.data.success) {
-        return {
-          success: true,
-          data: response.data.data,
-          message: response.data.message
-        }
-      }
-      
-      return {
-        success: false,
-        message: response.data?.message || 'Admin withdrawal failed'
-      }
-    } catch (error) {
-      console.error('Admin withdraw error:', error)
-      return {
-        success: false,
-        message: error.response?.data?.message || 'Failed to initiate admin withdrawal'
       }
     }
   },

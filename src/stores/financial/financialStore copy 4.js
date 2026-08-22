@@ -63,7 +63,7 @@ export const useFinancialStore = defineStore('financial', {
       this.stopPolling()
 
       let attempts = 0
-      const maxAttempts = 36
+      const maxAttempts = 36 // 36 * 5 seconds = 3 minutes
 
       this.pollingInterval = setInterval(async () => {
         attempts++
@@ -75,6 +75,7 @@ export const useFinancialStore = defineStore('financial', {
             const currentStatus = result.data?.status
             this.paymentStatus = currentStatus
             
+            // Unapoona COMPLETED au FAILED, simamisha polling
             if (currentStatus === 'completed' || currentStatus === 'failed' || currentStatus === 'expired') {
               this.stopPolling()
               
@@ -129,7 +130,7 @@ export const useFinancialStore = defineStore('financial', {
       }
     },
 
-    // ── WITHDRAW (For normal users) ────────────────────────────────────────
+    // ── WITHDRAW ────────────────────────────────────────────────────────────
     async withdraw(amount) {
       const authStore = useAuthStore()
       
@@ -148,39 +149,6 @@ export const useFinancialStore = defineStore('financial', {
           if (result.data?.new_balance) {
             authStore.updateBalanceLocally?.(result.data.new_balance)
           }
-          return result
-        } else {
-          this.error = result.message
-          return result
-        }
-      } catch (error) {
-        this.error = error.message
-        return { success: false, message: error.message }
-      } finally {
-        this.isLoading = false
-      }
-    },
-
-    // ── ADMIN WITHDRAW (via Snippe) ────────────────────────────────────────
-    async adminWithdraw(amount, phone_number) {
-      const authStore = useAuthStore()
-      
-      if (!authStore.isLoggedIn) {
-        return { success: false, message: 'Please login first' }
-      }
-
-      this.isLoading = true
-      this.error = null
-
-      try {
-        const result = await financialService.adminWithdraw(amount, phone_number)
-        
-        if (result.success) {
-          this.transaction = result.data
-          if (result.data?.new_balance) {
-            authStore.updateBalanceLocally?.(result.data.new_balance)
-          }
-          await authStore.fetchUserBalance()
           return result
         } else {
           this.error = result.message
