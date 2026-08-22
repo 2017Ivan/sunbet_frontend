@@ -6,7 +6,7 @@ const financialService = {
   async deposit(amount, phone_number) {
     try {
       // Hii ndio URL inayoendana na backend: /deposit/snipe (single 'p')
-      const response = await api.post('/financial/deposit/snipe', {
+      const response = await api.post('/financial/deposit', {
         amount,
         phone_number
       })
