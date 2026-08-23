@@ -5,7 +5,7 @@ const financialService = {
   // ── SNIPPE MOBILE DEPOSIT ──────────────────────────────────────────────
   async deposit(amount, phone_number) {
     try {
-      const response = await api.post('/financial/deposit', {
+      const response = await api.post('/financial/deposit/snipe', {
         amount,
         phone_number
       })
