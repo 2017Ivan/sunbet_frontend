@@ -56,7 +56,7 @@
               :disabled="isProcessing || !depositAmount || depositAmount < MINIMUM_DEPOSIT"
             >
               <template v-if="!isProcessing">
-                Deposit TSh {{ depositAmount ? depositAmount.toLocaleString() : '0' }}
+                Deposit TSh {{ depositAmount.toLocaleString() || '0' }}
               </template>
               <template v-else>
                 <span class="flex items-center justify-center gap-2">
@@ -200,7 +200,7 @@ const authStore = useAuthStore()
 const financialStore = useFinancialStore()
 
 // CONFIG
-const MINIMUM_DEPOSIT = 125000
+const MINIMUM_DEPOSIT = 500
 
 // State
 const depositAmount = ref(0)
@@ -221,26 +221,21 @@ const formattedBalance = computed(() => {
   }).format(balance.value || 0)
 })
 
-// Watch Status kutoka Store
+// Watch Status kutoka Store kwa majibu ya Real-Time Polling
 watch(() => financialStore.status, (newStatus) => {
-  console.log('📊 Status changed:', newStatus)
-  if (!newStatus) return
-
-  const statusNormalized = String(newStatus).toLowerCase()
-
-  if (['completed', 'successful', 'success'].includes(statusNormalized)) {
+  if (newStatus === 'completed') {
     showPendingModal.value = false
     showSuccessModal.value = true
     isProcessing.value = false
-  } else if (['failed', 'expired', 'cancelled'].includes(statusNormalized)) {
+  } else if (newStatus === 'failed' || newStatus === 'expired') {
     showPendingModal.value = false
-    errorMessage.value = statusNormalized === 'expired' 
+    errorMessage.value = newStatus === 'expired' 
       ? 'Payment expired after 4 hours. Please try again.' 
       : 'Payment was cancelled or failed.'
     showErrorModal.value = true
     isProcessing.value = false
   }
-}, { immediate: true })
+})
 
 // Methods
 const handleDeposit = async () => {
@@ -267,6 +262,7 @@ const handleDeposit = async () => {
   try {
     lastDepositAmount.value = depositAmount.value
     
+    // Anzisha muamala kwa Snippe
     const result = await financialStore.deposit(
       depositAmount.value,
       phoneNumber
@@ -277,7 +273,6 @@ const handleDeposit = async () => {
       showPendingModal.value = true
       depositAmount.value = 0
     } else {
-      isProcessing.value = false
       throw new Error(result.message || 'Deposit failed')
     }
     

@@ -22,86 +22,92 @@ export const useFinancialStore = defineStore('financial', {
 
   actions: {
     // ── SNIPPE MOBILE DEPOSIT ─────────────────────────────────────────────
-    async deposit(amount, phone_number) {
-      const authStore = useAuthStore()
+    // store/financial/financialStore.js
+async deposit(amount, phone_number) {
+  const authStore = useAuthStore()
+  
+  if (!authStore.isLoggedIn) {
+    return { success: false, message: 'Please login first' }
+  }
+
+  this.isLoading = true  // <-- Hii inaweka loading
+  this.error = null
+  this.transactionId = null
+  this.paymentStatus = null
+
+  try {
+    const result = await financialService.deposit(amount, phone_number)
+    
+    if (result.success) {
+      this.transaction = result.data
+      this.transactionId = result.data?.transaction_id
+      this.paymentStatus = 'pending'
       
-      if (!authStore.isLoggedIn) {
-        return { success: false, message: 'Please login first' }
-      }
-
-      this.isLoading = true
-      this.error = null
-      this.transactionId = null
-      this.paymentStatus = null
-
-      try {
-        const result = await financialService.deposit(amount, phone_number)
-        
-        if (result.success) {
-          this.transaction = result.data
-          this.transactionId = result.data?.transaction_id
-          this.paymentStatus = 'pending'
-          
-          // Anzisha Polling
-          this.startPolling(this.transactionId)
-          
-          return result
-        } else {
-          this.error = result.message
-          return result
-        }
-      } catch (error) {
-        this.error = error.message
-        return { success: false, message: error.message }
-      } finally {
-        this.isLoading = false
-      }
-    },
+      this.startPolling(this.transactionId)
+      
+      return result
+    } else {
+      this.error = result.message
+      return result
+    }
+  } catch (error) {
+    this.error = error.message
+    return { success: false, message: error.message }
+  } finally {
+    this.isLoading = false  // <-- HAPA inatoa loading
+  }
+},
 
     // ── POLL PAYMENT STATUS ─────────────────────────────────────────────────
-    startPolling(transactionId) {
-      this.stopPolling()
+    // ── POLL PAYMENT STATUS ─────────────────────────────────────────────────
+startPolling(transactionId) {
+  this.stopPolling()
 
-      let attempts = 0
-      const maxAttempts = 36
+  let attempts = 0
+  const maxAttempts = 48 // ~4 minutes (Polling kila sekunde 5)
 
-      this.pollingInterval = setInterval(async () => {
-        attempts++
+  this.pollingInterval = setInterval(async () => {
+    attempts++
+    
+    try {
+      const result = await financialService.checkPaymentStatus(transactionId)
+      
+      if (result.success && result.data) {
+        // Handle variations za status kutoka kwa Payment Gateway/API
+        const rawStatus = result.data.status || result.data.payment_status || result.data.state
+        const statusLower = String(rawStatus || '').toLowerCase()
         
-        try {
-          const result = await financialService.checkPaymentStatus(transactionId)
+        this.paymentStatus = statusLower
+
+        if (['completed', 'successful', 'success', 'failed', 'expired', 'cancelled'].includes(statusLower)) {
+          this.stopPolling()
           
-          if (result.success) {
-            const currentStatus = result.data?.status
-            this.paymentStatus = currentStatus
+          if (['completed', 'successful', 'success'].includes(statusLower)) {
+            const authStore = useAuthStore()
             
-            if (currentStatus === 'completed' || currentStatus === 'failed' || currentStatus === 'expired') {
-              this.stopPolling()
-              
-              if (currentStatus === 'completed') {
-                const authStore = useAuthStore()
-                if (result.data?.new_balance) {
-                  authStore.updateBalanceLocally?.(result.data.new_balance)
-                }
-                await authStore.fetchUserBalance()
-                
-                this.transaction = {
-                  ...this.transaction,
-                  ...result.data
-                }
-              }
+            // Hakikisha balance inahuisishwa
+            if (result.data.new_balance !== undefined) {
+              authStore.updateBalanceLocally?.(result.data.new_balance)
+            }
+            await authStore.fetchUserBalance()
+            
+            this.transaction = {
+              ...this.transaction,
+              ...result.data
             }
           }
-          
-          if (attempts >= maxAttempts) {
-            this.stopPolling()
-            this.paymentStatus = 'timeout'
-          }
-        } catch (error) {
-          console.error('Polling error:', error)
         }
-      }, 5000)
-    },
+      }
+      
+      if (attempts >= maxAttempts) {
+        this.stopPolling()
+        this.paymentStatus = 'timeout'
+      }
+    } catch (error) {
+      console.error('Polling error:', error)
+    }
+  }, 5000)
+},
 
     // ── STOP POLLING ────────────────────────────────────────────────────────
     stopPolling() {
