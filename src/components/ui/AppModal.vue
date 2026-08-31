@@ -13,19 +13,19 @@
           <div :class="modalClasses">
             <!-- Handle bar (mobile) -->
             <div class="flex justify-center pt-3 pb-1 sm:hidden">
-              <div class="w-10 h-1 rounded-full bg-[#333]" />
+              <div class="w-10 h-1 rounded-full bg-gray-300" />
             </div>
   
             <!-- Header -->
             <div v-if="title || $slots.header" class="flex items-center justify-between px-5 pt-4 pb-0">
               <div>
-                <h2 class="text-base font-semibold text-[#F0F0F0]">{{ title }}</h2>
-                <p v-if="subtitle" class="text-xs text-[#A0A0A0] mt-0.5">{{ subtitle }}</p>
+                <h2 class="text-base font-semibold text-gray-900">{{ title }}</h2>
+                <p v-if="subtitle" class="text-xs text-gray-500 mt-0.5">{{ subtitle }}</p>
               </div>
               <slot name="header" />
               <button
                 v-if="showClose"
-                class="w-8 h-8 rounded-full bg-[#2A2A2A] hover:bg-[#333] flex items-center justify-center text-[#A0A0A0] hover:text-white transition-colors ml-4"
+                class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 hover:text-gray-900 transition-colors ml-4"
                 @click="close"
               >
                 <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -81,7 +81,7 @@
   
   const modalClasses = computed(() => [
     'relative w-full z-10',
-    'bg-[#161616] border-t border-[#2A2A2A] sm:border rounded-t-[20px] sm:rounded-[20px]',
+    'bg-white border-t border-gray-200 sm:border rounded-t-[20px] sm:rounded-[20px]',
     'shadow-[0_-8px_40px_rgba(0,0,0,0.6)] sm:shadow-[0_8px_40px_rgba(0,0,0,0.6)]',
     sizes[props.size] || sizes.md,
   ])

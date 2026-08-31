@@ -1,5 +1,5 @@
 <template>
-    <div :class="['flex items-center justify-center', fullScreen ? 'fixed inset-0 bg-[#0D0D0D]/80 z-50' : '']">
+    <div :class="['flex items-center justify-center', fullScreen ? 'fixed inset-0 bg-white/80 z-50' : '']">
       <div class="flex flex-col items-center gap-3">
         <svg
           :class="['animate-spin text-[#A32D2D]', sizes[size]]"
@@ -9,7 +9,7 @@
           <circle class="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"/>
           <path class="opacity-90" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/>
         </svg>
-        <p v-if="text" class="text-xs text-[#606060]">{{ text }}</p>
+        <p v-if="text" class="text-xs text-gray-500">{{ text }}</p>
       </div>
     </div>
   </template>

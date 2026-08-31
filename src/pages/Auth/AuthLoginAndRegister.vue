@@ -1,14 +1,14 @@
 // loginAndRegister.vue 
 <template>
   <div>
-    <div class="flex gap-1 p-1 bg-[#161616] rounded-[14px] mb-8 border border-[#2A2A2A]">
+    <div class="flex gap-1 p-1 bg-white rounded-[14px] mb-8 border border-gray-200">
       <button
         v-for="tab in ['Login', 'Register']"
         :key="tab"
         class="flex-1 py-2.5 text-sm font-semibold rounded-[10px] transition-all duration-200"
         :class="activeTab === tab
           ? 'bg-[#A32D2D] text-white shadow-[0_4px_12px_rgba(163,45,45,0.35)]'
-          : 'text-[#606060] hover:text-[#A0A0A0]'"
+          : 'text-gray-500 hover:text-gray-500'"
         @click="switchTab(tab)"
       >
         {{ tab }}
@@ -19,7 +19,7 @@
       <div v-if="activeTab === 'Login'" key="login">
         <div class="mb-6">
           <h2 class="text-2xl font-bold text-white">Welcome back 👋</h2>
-          <p class="text-sm text-[#606060] mt-1">Login to continue betting</p>
+          <p class="text-sm text-gray-500 mt-1">Login to continue betting</p>
         </div>
 
         <form class="space-y-4" @submit.prevent="handleLogin">
@@ -69,7 +69,7 @@
                   <polyline points="20 6 9 17 4 12"/>
                 </svg>
               </div>
-              <span class="text-xs text-[#606060]">Remember me</span>
+              <span class="text-xs text-gray-500">Remember me</span>
             </label>
             <button type="button" class="text-xs text-[#A32D2D] hover:text-[#C94040] transition-colors" @click="goToForgotPassword">
               Forgot password?
@@ -94,7 +94,7 @@
           </AppButton>
         </form>
 
-        <p class="text-center text-sm text-[#606060] mt-6">
+        <p class="text-center text-sm text-gray-500 mt-6">
           Don't have an account?
           <button class="text-[#A32D2D] font-semibold hover:text-[#C94040] transition-colors" @click="switchTab('Register')">
             Register free
@@ -105,7 +105,7 @@
       <div v-else key="register">
         <div class="mb-6">
           <h2 class="text-2xl font-bold text-white">Create account 🎯</h2>
-          <p class="text-sm text-[#606060] mt-1">Join 2M+ bettors on SunBet</p>
+          <p class="text-sm text-gray-500 mt-1">Join 2M+ bettors on SunBet</p>
         </div>
 
         <form class="space-y-4" @submit.prevent="handleRegister">
@@ -148,7 +148,7 @@
                 v-for="i in 4"
                 :key="i"
                 class="flex-1 h-1 rounded-full transition-all duration-300"
-                :class="i <= passwordStrength.score ? passwordStrength.color : 'bg-[#2A2A2A]'"
+                :class="i <= passwordStrength.score ? passwordStrength.color : 'bg-gray-100'"
               />
             </div>
             <p class="text-xs" :class="passwordStrength.textColor">
@@ -168,7 +168,7 @@
                 <polyline points="20 6 9 17 4 12"/>
               </svg>
             </div>
-            <span class="text-xs text-[#606060] leading-relaxed">
+            <span class="text-xs text-gray-500 leading-relaxed">
               I confirm I am 18+ years old and agree to the
               <a href="#" class="text-[#A32D2D] hover:underline">Terms</a> &
               <a href="#" class="text-[#A32D2D] hover:underline">Privacy Policy</a>
@@ -194,7 +194,7 @@
           </AppButton>
         </form>
 
-        <p class="text-center text-sm text-[#606060] mt-6">
+        <p class="text-center text-sm text-gray-500 mt-6">
           Already have an account?
           <button class="text-[#A32D2D] font-semibold hover:text-[#C94040] transition-colors" @click="switchTab('Login')">
             Login here

@@ -1,14 +1,14 @@
 <!-- BetSlipContent.vue -->
 <template>
-  <div class="h-full flex flex-col bg-gray-900">
+  <div class="h-full flex flex-col bg-white">
     <!-- Header -->
-    <div class="flex items-center justify-between px-3 h-16 border-b border-gray-700 flex-shrink-0">
+    <div class="flex items-center justify-between px-3 h-16 border-b border-gray-200 flex-shrink-0">
       <div class="flex items-center gap-2">
         <svg class="w-5 h-5 text-rose-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
           <rect x="9" y="3" width="6" height="4" rx="2"/>
         </svg>
-        <h2 class="text-base font-semibold text-white">Bet Slip</h2>
+        <h2 class="text-base font-semibold text-gray-900">Bet Slip</h2>
       </div>
       <div class="flex items-center gap-2">
         <!-- Balance display -->
@@ -18,7 +18,7 @@
 
         <button
           v-if="showCloseButton"
-          class="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center text-gray-400 hover:text-white transition-colors"
+          class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:text-gray-900 transition-colors"
           @click="$emit('close')"
         >
           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -29,18 +29,18 @@
     </div>
 
     <!-- Sports / Virtuals Tabs -->
-    <div class="flex border-b border-gray-700 bg-gray-800 flex-shrink-0">
+    <div class="flex border-b border-gray-200 bg-gray-50 flex-shrink-0">
       <button
         v-for="tab in ['Sports', 'Virtuals']"
         :key="tab"
         @click="activeTab = tab"
         class="flex-1 py-3 text-xs font-semibold uppercase tracking-wider transition-all relative flex items-center justify-center gap-1.5"
-        :class="activeTab === tab ? 'text-white' : 'text-gray-500 hover:text-gray-300'"
+        :class="activeTab === tab ? 'text-gray-900' : 'text-gray-500 hover:text-gray-700'"
       >
         <span>{{ tab }}</span>
         <span
           class="px-1.5 py-0.5 text-[10px] rounded-full font-bold transition-colors"
-          :class="activeTab === tab ? 'bg-rose-500 text-white' : 'bg-gray-700 text-gray-400'"
+          :class="activeTab === tab ? 'bg-rose-500 text-white' : 'bg-gray-100 text-gray-500'"
         >
           {{ tab === 'Sports' ? sportsItems.length : virtualsItems.length }}
         </span>
@@ -51,15 +51,15 @@
     <!-- ============ EMPTY STATE WITH LOAD CODE ============ -->
     <div v-if="!currentTabItems.length" class="flex-1 flex flex-col items-center justify-center gap-4 px-6 py-8">
       <!-- Empty Icon -->
-      <div class="w-20 h-20 rounded-full bg-gray-800 flex items-center justify-center">
-        <svg class="w-10 h-10 text-gray-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+      <div class="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center">
+        <svg class="w-10 h-10 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
           <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
           <rect x="9" y="3" width="6" height="4" rx="2"/>
         </svg>
       </div>
 
       <div class="text-center">
-        <p class="text-sm font-medium text-gray-400">{{ activeTab }} bet slip is empty</p>
+        <p class="text-sm font-medium text-gray-600">{{ activeTab }} bet slip is empty</p>
         <p class="text-xs text-gray-500 mt-1">Load a booking code or click on odds to add selections</p>
       </div>
 
@@ -71,7 +71,7 @@
             type="text"
             placeholder="Enter code e.g. ABC123"
             maxlength="6"
-            class="flex-1 min-w-0 h-10 px-3 rounded-xl bg-gray-800 border border-gray-700 focus:border-rose-500 text-white text-sm uppercase tracking-wider focus:outline-none focus:ring-1 focus:ring-rose-500/30 transition-all placeholder:text-gray-500"
+            class="flex-1 min-w-0 h-10 px-3 rounded-xl bg-white border border-gray-300 focus:border-rose-500 text-gray-900 text-sm uppercase tracking-wider focus:outline-none focus:ring-1 focus:ring-rose-500/30 transition-all placeholder:text-gray-400"
             @input="handleLoadCodeInput"
             @keyup.enter="handleLoadCodeFromEmpty"
           />
@@ -96,9 +96,9 @@
         </div>
 
         <div class="flex items-center gap-2 text-[10px] text-gray-500 justify-center">
-          <span class="w-8 h-px bg-gray-700"></span>
+          <span class="w-8 h-px bg-gray-200"></span>
           <span>or</span>
-          <span class="w-8 h-px bg-gray-700"></span>
+          <span class="w-8 h-px bg-gray-200"></span>
         </div>
 
         <AppButton variant="outline" size="sm" fullWidth @click="handleBrowseSports">
@@ -112,7 +112,7 @@
       <!-- Actions row -->
       <div class="flex justify-between items-center gap-2 mb-3">
         <button
-          class="text-xs text-rose-400 hover:text-rose-300 transition-colors flex items-center gap-1.5 font-medium"
+          class="text-xs text-rose-400 hover:text-rose-700 transition-colors flex items-center gap-1.5 font-medium"
           @click="toggleBookingCodeModal"
         >
           <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -133,15 +133,15 @@
       <div
         v-for="(bet, index) in currentTabItems"
         :key="bet.matchId || index"
-        class="bg-gray-800 border border-gray-700 rounded-[12px] p-3 hover:border-gray-600 transition-colors"
+        class="bg-white border border-gray-200 rounded-[12px] p-3 hover:border-gray-300 transition-colors"
       >
         <div class="flex items-start justify-between gap-2">
           <div class="flex-1 min-w-0">
-            <p class="text-sm text-gray-400 truncate">{{ bet.matchName || bet.match || 'Match' }}</p>
+            <p class="text-sm text-gray-700 truncate">{{ bet.matchName || bet.match || 'Match' }}</p>
             <div class="mt-0.5 flex flex-row gap-1 items-center">
-              <p class="text-xs text-gray-400">{{ getMarketDisplay(bet) }}</p>
-              <p class="text-xs font-semibold text-gray-400 truncate">
-                - {{ bet.fromBookingCode ? 'sunbet_xxx' : getSelectionDisplay(bet) }}
+              <p class="text-xs font-semibold text-gray-600">{{ getMarketDisplay(bet) }}</p>
+              <p class="text-xs font-semibold text-gray-600 truncate">
+                - {{ getSelectionDisplay(bet) }}
               </p>
             </div>
             <div class="flex items-center gap-2 mt-0.5">
@@ -169,7 +169,7 @@
       </div>
 
       <!-- Footer: Summary + Place bet -->
-      <div class="border-t border-gray-700 px-0 py-2 space-y-3 flex-shrink-0">
+      <div class="border-t border-gray-200 px-0 py-2 space-y-3 flex-shrink-0">
         <!-- Insufficient balance warning -->
         <div v-if="isLoggedIn && stakeAmount > 0 && !hasEnoughBalance" class="bg-red-500/10 border border-red-500/20 rounded-[10px] p-3">
           <p class="text-xs text-red-400 text-center">
@@ -184,32 +184,32 @@
             <input
               v-model.number="stakeAmount"
               type="number"
-              min="100"
+              :min="MINIMUM_STAKE"
               placeholder="Enter stake"
               :disabled="!isLoggedIn"
-              class="flex-1 h-10 px-3 rounded-[10px] bg-gray-800 border border-gray-700 focus:border-rose-500 text-white text-sm focus:outline-none focus:ring-1 focus:ring-rose-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
+              class="flex-1 h-10 px-3 rounded-[10px] bg-white border border-gray-300 focus:border-rose-500 text-gray-900 text-sm focus:outline-none focus:ring-1 focus:ring-rose-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
             />
           </div>
-          <p v-if="stakeAmount > 0 && stakeAmount < 100" class="text-red-400 text-[10px] mt-1">Minimum stake is TZS 100</p>
+          <p v-if="stakeAmount > 0 && stakeAmount < MINIMUM_STAKE" class="text-red-400 text-[10px] mt-1">Minimum stake is TZS {{ MINIMUM_STAKE }}</p>
         </div>
 
         <!-- Summary -->
-        <div class="space-y-1.5 bg-gray-800 rounded-[10px] px-3 py-2.5 border border-gray-700">
+        <div class="space-y-1.5 bg-gray-50 rounded-[10px] px-3 py-2.5 border border-gray-200">
           <div class="flex justify-between text-xs">
             <span class="text-gray-500">Total Odds</span>
-            <span class="text-white font-semibold">{{ totalOdds.toFixed(2) }}</span>
+            <span class="text-gray-900 font-semibold">{{ totalOdds.toFixed(2) }}</span>
           </div>
           <div class="flex justify-between text-xs">
             <span class="text-gray-500">Potential Win</span>
-            <span class="text-emerald-400 font-semibold">TZS {{ potentialWin.toLocaleString() }}</span>
+            <span class="text-emerald-600 font-semibold">TZS {{ potentialWin.toLocaleString() }}</span>
           </div>
           <div class="flex justify-between text-xs">
             <span class="text-gray-500">Tax 12%</span>
-            <span class="text-emerald-400 font-semibold">TZS {{ tax.toLocaleString() }}</span>
+            <span class="text-emerald-600 font-semibold">TZS {{ tax.toLocaleString() }}</span>
           </div>
           <div class="flex justify-between text-xs">
             <span class="text-gray-500">Payout</span>
-            <span class="text-emerald-400 font-semibold">TZS {{ payout.toLocaleString() }}</span>
+            <span class="text-emerald-600 font-semibold">TZS {{ payout.toLocaleString() }}</span>
           </div>
         </div>
 
@@ -248,6 +248,13 @@
       @code-created="handleCodeCreated"
       @code-loaded="handleCodeLoaded"
     />
+
+    <!-- Bet Placed Success Modal -->
+    <BetPlacedModal
+      :placed-bet="placedBet"
+      @close="placedBet = null"
+      @view-bets="handleViewBets"
+    />
   </div>
 </template>
 
@@ -256,10 +263,12 @@ import { ref, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useToast } from 'vue-toastification'
 import { useAuthStore } from '../../../stores/auth/authStore.js'
-import { useBetStore } from '../../../stores/bets/betStore.js'
-import { useBookingCodeStore } from '../../../stores/bookingcode/bookingCodeStore.js'
+import { useBetStore } from '../../../stores/bet/betStore.js'
+import { useBookingCodeStore } from '../../../stores/bookingCode/useBookingCodeStore.js'
 import AppButton from '../../../components/ui/AppButton.vue'
 import BookingCodeModal from '../../betting/bookingcode/BookingCodeModal.vue'
+import BetPlacedModal from './BetPlacedModal.vue'
+import { MINIMUM_STAKE } from '../../../constants/betting'
 
 const props = defineProps({
   showCloseButton: {
@@ -282,6 +291,7 @@ const stakeAmount = ref(0)
 const betType = ref('Single')
 const isPlacingBet = ref(false)
 const showBookingCodeModal = ref(false)
+const placedBet = ref(null)
 
 // ---- Load Code State (Empty State) ----
 const loadCodeInput = ref('')
@@ -322,7 +332,7 @@ const payout = computed(() => {
   return Math.round((potentialWin.value - tax.value) + stakeAmount.value)
 })
 
-const isStakeValid = computed(() => stakeAmount.value >= 100)
+const isStakeValid = computed(() => stakeAmount.value >= MINIMUM_STAKE)
 
 const hasEnoughBalance = computed(() => {
   if (!isLoggedIn.value) return false
@@ -336,56 +346,63 @@ const isLoadCodeValid = computed(() => {
 })
 
 // ---- Display Helpers ----
+const MARKET_TITLES = {
+  '1X2': '1X2 | Full Time',
+  'Double_Chance': 'Double Chance | Full Time',
+  'BTTS': 'Both Teams To Score | Full Time',
+  'Over_Under': 'Over/Under | Full Time',
+  'Over/Under': 'Over/Under | Full Time',
+  'Correct_Score': 'Correct Score | Full Time',
+  'Correct Score': 'Correct Score | Full Time',
+  'Handicap': 'Handicap | Full Time',
+  'HT_FT': 'Half Time/Full Time',
+  'BTTS_Win': 'BTTS & Match Result',
+  'Odd_Even': 'Total Goals (Odd/Even)',
+  'Total_Goals': 'Exact Total Goals',
+  'Both_Halves': 'Goals In Both Halves',
+  'First_Last_Goal': 'First/Last Goal',
+  'Highest_Scoring_Half': 'Highest Scoring Half',
+  'Clean_Sheet': 'Clean Sheet'
+}
+
 const getMarketDisplay = (bet) => {
-  const market = bet.market || bet.marketKey || '1X2'
-  
-  const marketMap = {
-    '1X2': '1X2 | Full Time',
-    'Double Chance': 'Double Chance | Full Time',
-    'Both Teams to Score': 'Both Teams to Score | Full Time',
-    'BTTS': 'Both Teams to Score | Full Time',
-    'Over/Under': 'Over/Under | Full Time',
-    'Correct Score': 'Correct Score | Full Time',
-    'Correct Score First Half': 'Correct Score | First Half',
-    'Correct Score Second Half': 'Correct Score | Second Half',
-    'CS_FT': 'Correct Score | Full Time',
-    'CS_FH': 'Correct Score | First Half',
-    'CS_SH': 'Correct Score | Second Half',
-    'OU': 'Over/Under | Full Time'
-  }
-  
-  return marketMap[market] || market
+  const key = bet.market_key || bet.marketKey || bet.market
+  const clean = typeof key === 'string' ? key.split('|')[0].trim() : ''
+  if (MARKET_TITLES[clean]) return MARKET_TITLES[clean]
+  // fallback kwenye title ya display ilipo
+  if (bet.market) return bet.market
+  return clean || '1X2 | Full Time'
+}
+
+const titleCaseWord = (w) => {
+  if (w === undefined || w === null || w === '') return ''
+  return String(w).charAt(0).toUpperCase() + String(w).slice(1).toLowerCase()
+}
+
+const formatOutcomeLabel = (outcomeKey) => {
+  if (outcomeKey === undefined || outcomeKey === null) return ''
+  const o = String(outcomeKey)
+
+  if (o === '1') return '1'
+  if (o === 'X') return 'Draw'
+  if (o === '2') return '2'
+
+  // Over/Under maalum: "OVER 2.5" / "OVER_2.5" => "Over 2.5"
+  if (/^OVER\b/i.test(o)) return 'Over ' + o.replace(/^OVER[_ ]*/i, '').trim()
+  if (/^UNDER\b/i.test(o)) return 'Under ' + o.replace(/^UNDER[_ ]*/i, '').trim()
+
+  const parts = o.split('_')
+  const joined = parts.map((p) => {
+    if (/^[+\-]?\d+(\.\d+)?$/.test(p) || /^[0-9.]+[+]?$/.test(p)) return p
+    return titleCaseWord(p)
+  }).join(' ')
+
+  return joined.trim()
 }
 
 const getSelectionDisplay = (bet) => {
-  let pick = bet.pick || bet.selection || ''
-  const market = bet.market || bet.marketKey || '1X2'
-  
-  if (market === '1X2' || market === '1X2 | Full Time') {
-    if (pick === '1' || pick === 'home') return '1'
-    if (pick === 'X' || pick === 'draw') return 'X'
-    if (pick === '2' || pick === 'away') return '2'
-    return pick
-  }
-  
-  if (market === 'Double Chance' || market === 'Double Chance | Full Time') {
-    if (pick === '1X' || pick === '1X') return '1X'
-    if (pick === 'X2' || pick === 'X2') return 'X2'
-    if (pick === '12' || pick === '12') return '12'
-    return pick
-  }
-  
-  if (pick.toLowerCase().includes('over')) {
-    return pick.toUpperCase()
-  }
-  if (pick.toLowerCase().includes('under')) {
-    return pick.toUpperCase()
-  }
-  
-  if (pick.toLowerCase() === 'yes') return 'Yes'
-  if (pick.toLowerCase() === 'no') return 'No'
-  
-  return pick
+  const outcome = bet.outcome_key != null ? bet.outcome_key : (bet.pick || '')
+  return formatOutcomeLabel(outcome)
 }
 
 // ---- Methods ----
@@ -429,9 +446,10 @@ const handlePlaceBet = async () => {
   try {
     betStore.updateStake(stakeAmount.value)
     
-    const result = await betStore.placeBetFromSlip()
+    const result = await betStore.placeBetWithBackend()
     
     if (result.success) {
+      placedBet.value = result.data
       toast.success('🎉 Bet placed successfully!')
     } else {
       toast.error(result.error || '❌ Failed to place bet')
@@ -442,6 +460,24 @@ const handlePlaceBet = async () => {
     isPlacingBet.value = false
   }
 }
+
+const handleViewBets = () => {
+  placedBet.value = null
+  emit('close')
+  router.push('/bets')
+}
+
+// ============ FIX: Show success modal on ANY successful placement ============
+// BetSlipDrawer / other entry points also place bets via betStore, so follow
+// currentBet reactively instead of relying only on the local result.
+watch(
+  () => betStore.currentBet,
+  (bet) => {
+    if (bet && !placedBet.value) {
+      placedBet.value = bet
+    }
+  }
+)
 
 const handleLoginRedirect = () => {
   emit('close')
@@ -549,7 +585,7 @@ watch(stakeAmount, (newVal) => {
 
 watch(() => currentTabItems.value.length, (newLength) => {
   if (newLength > 0 && stakeAmount.value === 0) {
-    stakeAmount.value = betStore.stake || 100
+    stakeAmount.value = betStore.stake || MINIMUM_STAKE
   }
 }, { immediate: true })
 
@@ -566,7 +602,7 @@ watch(loadCodeInput, () => {
   background: transparent;
 }
 .overflow-y-auto::-webkit-scrollbar-thumb {
-  background: #4a4a4a;
+  background: #d1d5db;
   border-radius: 10px;
 }
 .overflow-y-auto::-webkit-scrollbar-thumb:hover {

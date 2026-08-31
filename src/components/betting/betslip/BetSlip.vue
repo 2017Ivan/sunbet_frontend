@@ -1,7 +1,7 @@
 // BetSlip.vue 
 <template>
   <!-- Desktop: Sidebar mode -->
-  <div v-if="mode === 'desktop'" class="h-full flex flex-col bg-gray-700">
+  <div v-if="mode === 'desktop'" class="h-full flex flex-col bg-white">
     <BetSlipContent 
       @close="$emit('close')" 
       @place-bet="$emit('place-bet', $event)"
@@ -24,7 +24,7 @@
     <Transition name="slide-right">
       <div
         v-if="open"
-        class="fixed top-0 right-0 z-50 h-full w-full max-w-sm bg-[#0D0D0D] border-l border-[#2A2A2A] flex flex-col shadow-[−8px_0_40px_rgba(0,0,0,0.6)]"
+        class="fixed top-0 right-0 z-50 h-full w-full max-w-sm bg-white border-l border-gray-200 flex flex-col shadow-[−8px_0_40px_rgba(0,0,0,0.6)]"
       >
         <BetSlipContent 
           @close="$emit('close')" 

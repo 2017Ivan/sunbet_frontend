@@ -23,14 +23,14 @@
   })
   
   const variants = {
-    default:  'bg-[#2A2A2A] text-[#A0A0A0]',
+    default:  'bg-gray-100 text-gray-500',
     primary:  'bg-[#A32D2D]/20 text-[#C94040] border border-[#A32D2D]/30',
     success:  'bg-[#22C55E]/15 text-[#22C55E] border border-[#22C55E]/25',
     warning:  'bg-[#F59E0B]/15 text-[#F59E0B] border border-[#F59E0B]/25',
     danger:   'bg-[#EF4444]/15 text-[#EF4444] border border-[#EF4444]/25',
     live:     'bg-[#FF3B3B]/20 text-[#FF3B3B] border border-[#FF3B3B]/30 animate-pulse',
-    silver:   'bg-[#C0C0C0]/15 text-[#C0C0C0] border border-[#C0C0C0]/25',
-    ghost:    'bg-transparent text-[#A0A0A0] border border-[#2A2A2A]',
+    silver:   'bg-[#C0C0C0]/15 text-gray-500 border border-[#C0C0C0]/25',
+    ghost:    'bg-transparent text-gray-500 border border-gray-200',
   }
   
   const sizes = {

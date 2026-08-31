@@ -26,35 +26,35 @@
   }
 }
 
-/* Apply to all child elements with bg-gray-700 */
-.skeleton-wrapper :deep(.bg-gray-700) {
+/* Apply to all child elements with bg-gray-200 */
+.skeleton-wrapper :deep(.bg-gray-200) {
   animation: fadePulse 1.8s ease-in-out infinite;
   border-radius: 0.5rem;
 }
 
 /* Different delay for each element to create wave effect */
-.skeleton-wrapper :deep(.bg-gray-700:nth-child(1)) {
+.skeleton-wrapper :deep(.bg-gray-200:nth-child(1)) {
   animation-delay: 0s;
 }
-.skeleton-wrapper :deep(.bg-gray-700:nth-child(2)) {
+.skeleton-wrapper :deep(.bg-gray-200:nth-child(2)) {
   animation-delay: 0.2s;
 }
-.skeleton-wrapper :deep(.bg-gray-700:nth-child(3)) {
+.skeleton-wrapper :deep(.bg-gray-200:nth-child(3)) {
   animation-delay: 0.4s;
 }
-.skeleton-wrapper :deep(.bg-gray-700:nth-child(4)) {
+.skeleton-wrapper :deep(.bg-gray-200:nth-child(4)) {
   animation-delay: 0.6s;
 }
-.skeleton-wrapper :deep(.bg-gray-700:nth-child(5)) {
+.skeleton-wrapper :deep(.bg-gray-200:nth-child(5)) {
   animation-delay: 0.8s;
 }
-.skeleton-wrapper :deep(.bg-gray-700:nth-child(6)) {
+.skeleton-wrapper :deep(.bg-gray-200:nth-child(6)) {
   animation-delay: 1.0s;
 }
-.skeleton-wrapper :deep(.bg-gray-700:nth-child(7)) {
+.skeleton-wrapper :deep(.bg-gray-200:nth-child(7)) {
   animation-delay: 1.2s;
 }
-.skeleton-wrapper :deep(.bg-gray-700:nth-child(8)) {
+.skeleton-wrapper :deep(.bg-gray-200:nth-child(8)) {
   animation-delay: 1.4s;
 }
 

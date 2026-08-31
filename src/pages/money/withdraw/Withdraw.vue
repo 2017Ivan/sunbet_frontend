@@ -52,7 +52,7 @@
                 <button 
                   type="button"
                   @click="setMaxAmount"
-                  class="text-rose-400 text-xs hover:text-rose-300 transition-colors"
+                  class="text-rose-400 text-xs hover:text-rose-700 transition-colors"
                 >
                   Max: {{ formattedBalance }}
                 </button>
@@ -216,15 +216,16 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../../../stores/auth/authStore'
-import { useFinancialStore } from '../../../stores/financial/financialStore'
+import { useFinancialStore } from '../../../stores/financial.store'
 
 const router = useRouter()
 const authStore = useAuthStore()
 const financialStore = useFinancialStore()
 
 // ============ CONFIGURATION ============
-const MINIMUM_WITHDRAW = 500
-const MAXIMUM_WITHDRAW = 5000000
+// Change these numbers to update withdrawal limits everywhere
+const MINIMUM_WITHDRAW = 500      // Minimum withdrawal amount
+const MAXIMUM_WITHDRAW = 5000000   // Maximum withdrawal amount (5,000,000 TZS)
 
 // State
 const withdrawAmount = ref(0)
@@ -234,30 +235,17 @@ const showErrorModal = ref(false)
 const lastWithdrawAmount = ref(0)
 const errorMessage = ref('')
 
+// Quick amounts based on minimum and maximum withdrawal
+const quickWithdrawAmounts = [
+  Math.min(MINIMUM_WITHDRAW * 100, MAXIMUM_WITHDRAW),     // 100,000
+  Math.min(MINIMUM_WITHDRAW * 500, MAXIMUM_WITHDRAW),     // 500,000
+  Math.min(MINIMUM_WITHDRAW * 1000, MAXIMUM_WITHDRAW),    // 1,000,000
+  Math.min(MINIMUM_WITHDRAW * 2500, MAXIMUM_WITHDRAW)     // 2,500,000
+]
+
 // Computed
 const balance = computed(() => authStore.userBalance)
 const formattedBalance = computed(() => authStore.formattedBalance)
-
-// Check if user is admin - from authStore
-const isAdmin = computed(() => {
-  const user = authStore.user || {}
-  const role = user.role || user.user?.role || user.data?.role || ''
-  return role === 'admin' || role === 'ADMIN'
-})
-
-// Get phone number from user data
-const userPhone = computed(() => {
-  const user = authStore.user || {}
-  return user.phone || user.phone_number || user.mobile || ''
-})
-
-// Quick amounts
-const quickWithdrawAmounts = [
-  Math.min(MINIMUM_WITHDRAW * 100, MAXIMUM_WITHDRAW),
-  Math.min(MINIMUM_WITHDRAW * 500, MAXIMUM_WITHDRAW),
-  Math.min(MINIMUM_WITHDRAW * 1000, MAXIMUM_WITHDRAW),
-  Math.min(MINIMUM_WITHDRAW * 2500, MAXIMUM_WITHDRAW)
-]
 
 // Methods
 const setMaxAmount = () => {
@@ -294,28 +282,15 @@ const handleWithdraw = async () => {
   isProcessing.value = true
 
   try {
-    let result
-    
-    if (isAdmin.value) {
-      // Admin uses Snippe disbursement - phone number from user data
-      const phone = userPhone.value
-      if (!phone) {
-        errorMessage.value = 'Phone number not found in your profile. Please update your profile.'
-        showErrorModal.value = true
-        isProcessing.value = false
-        return
-      }
-      result = await financialStore.adminWithdraw(withdrawAmount.value, phone)
-    } else {
-      // Normal user uses regular withdrawal
-      result = await financialStore.withdraw(withdrawAmount.value)
-    }
+    // Call financialStore withdraw
+    const result = await financialStore.withdraw({ amount: withdrawAmount.value })
 
     if (result.success) {
       lastWithdrawAmount.value = withdrawAmount.value
       showSuccessModal.value = true
       withdrawAmount.value = 0
       
+      // Refresh balance
       await authStore.fetchUserBalance()
     } else {
       errorMessage.value = result.message || 'Withdrawal failed'

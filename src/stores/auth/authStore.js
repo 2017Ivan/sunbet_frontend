@@ -1,9 +1,8 @@
-// store/auth/authStore.js
+// store/authStore.js
+
 import { defineStore } from 'pinia'
 import authService from '../../services/auth/authService'
-import api from '../../services/api'
 
-// ── Helper: Decode JWT token ──────────────────────────────────────────────
 const decodeToken = (token) => {
   try {
     const base64Url = token.split('.')[1]
@@ -18,18 +17,6 @@ const decodeToken = (token) => {
   } catch (error) {
     console.error('Failed to decode token:', error)
     return null
-  }
-}
-
-// ── Helper: Check if token is expired ─────────────────────────────────────
-const isTokenExpired = (token) => {
-  if (!token) return true
-  try {
-    const decoded = decodeToken(token)
-    if (!decoded || !decoded.exp) return true
-    return Date.now() >= decoded.exp * 1000
-  } catch (error) {
-    return true
   }
 }
 
@@ -48,18 +35,22 @@ export const useAuthStore = defineStore('auth', {
     error: null,
     accessToken: null,
     refreshToken: null,
-    initialized: false,
-    lastAuthUpdate: null,
-    isAutoRefreshEnabled: true,
-    refreshInterval: 30000
+    dailyReward: {
+      status: null,
+      isLoading: false,
+      isClaiming: false
+    }
   }),
   
   getters: {
     userPhone: (state) => state.user.phone_number,
     userRole: (state) => state.user.role,
+    userId: (state) => state.user.id,
+    
     isAdmin: (state) => state.user.role === 'ADMIN',
     isAgent: (state) => state.user.role === 'AGENT',
     isUser: (state) => state.user.role === 'USER',
+    
     hasRole: (state) => (role) => {
       if (Array.isArray(role)) {
         return role.includes(state.user.role)
@@ -67,77 +58,31 @@ export const useAuthStore = defineStore('auth', {
       return state.user.role === role
     },
     
-    isTokenValid: (state) => {
-      if (!state.accessToken) return false
-      return !isTokenExpired(state.accessToken)
-    },
-    
     userBalance: (state) => {
-      const balance = state.user.balance
-      if (balance === null || balance === undefined) return 0
-      return typeof balance === 'string' ? parseFloat(balance) : balance
+      console.log('💰 userBalance getter called, balance:', state.user.balance)
+      return state.user.balance !== null && state.user.balance !== undefined 
+        ? state.user.balance 
+        : 0
     },
     
     hasSufficientBalance: (state) => (amount) => {
-      const balance = state.user.balance
-      const numBalance = typeof balance === 'string' ? parseFloat(balance) : balance
-      return numBalance >= amount
+      return (state.user.balance || 0) >= amount
     },
     
     formattedBalance: (state) => {
-      const balance = state.user.balance
-      if (balance === null || balance === undefined) return 'TZS 0.00'
-      
-      const numBalance = typeof balance === 'string' ? parseFloat(balance) : balance
-      
-      return `TZS ${numBalance.toLocaleString('en-US', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      })}`
+      const balance = state.user.balance || 0
+      return `TZS ${Number(balance).toLocaleString()}`
     }
   },
   
   actions: {
-    // ── HELPER: Normalize phone for backend ─────────────────────────────────
-    normalizePhoneForBackend(phone) {
-      if (!phone) return ''
-      
-      let cleaned = String(phone).replace(/\D/g, '')
-      
-      if (cleaned.length === 9) {
-        return '255' + cleaned
-      }
-      if (cleaned.startsWith('255') && cleaned.length === 12) {
-        return cleaned
-      }
-      if (cleaned.startsWith('0')) {
-        return '255' + cleaned.substring(1)
-      }
-      if (cleaned.length === 12 && cleaned.startsWith('255')) {
-        return cleaned
-      }
-      return cleaned
-    },
-
-    // ── INITIALIZE ──────────────────────────────────────────────────────────
+    // ============ INITIALIZE ============
     async initialize() {
       console.log('🔄 Initializing auth store...')
       
       const token = localStorage.getItem('access_token')
-      console.log('🔑 Token from localStorage:', token ? 'exists' : 'not found')
       
       if (token) {
-        if (isTokenExpired(token)) {
-          console.warn('⚠️ Token expired, trying to refresh...')
-          const refreshed = await this.refreshAccessToken()
-          if (!refreshed) {
-            console.warn('⚠️ Token refresh failed, clearing auth')
-            this.clearAuth()
-            return false
-          }
-          return this.initialize()
-        }
-
         try {
           const decoded = decodeToken(token)
           console.log('🔓 Decoded token:', decoded)
@@ -145,77 +90,33 @@ export const useAuthStore = defineStore('auth', {
           if (decoded) {
             this.user.id = decoded.id || decoded.userId || decoded.sub
             this.user.role = decoded.role || 'USER'
-            this.user.balance = 0
             this.isLoggedIn = true
             this.accessToken = token
-            this.initialized = true
-            this.lastAuthUpdate = Date.now()
             
-            console.log('✅ Store initialized. User:', {
-              id: this.user.id,
-              role: this.user.role,
-              isLoggedIn: this.isLoggedIn
-            })
+            console.log('✅ Role from token:', this.user.role)
             
+            // ============ FETCH PROFILE AFTER INIT ============
             await this.fetchUserProfile()
-            await this.fetchUserBalance()
-            
-            this.startAutoRefresh()
-            
-            console.log('✅ Final state after init:', this.$state)
-            return true
           } else {
-            console.warn('⚠️ Invalid token, clearing auth')
             this.clearAuth()
-            return false
           }
         } catch (error) {
           console.error('❌ Init error:', error)
           this.clearAuth()
-          return false
         }
       } else {
-        console.log('ℹ️ No token found, auth not initialized')
+        console.log('ℹ️ No token found, user not authenticated')
         this.clearAuth()
-        return false
       }
     },
     
-    // ── REFRESH ACCESS TOKEN ──────────────────────────────────────────────
-    async refreshAccessToken() {
-      try {
-        const refreshToken = localStorage.getItem('refresh_token')
-        if (!refreshToken) {
-          return false
-        }
-
-        const response = await api.post('/auth/refresh', { refreshToken })
-        
-        if (response.data && response.data.accessToken) {
-          const newToken = response.data.accessToken
-          localStorage.setItem('access_token', newToken)
-          this.accessToken = newToken
-          this.isLoggedIn = true
-          this.lastAuthUpdate = Date.now()
-          return true
-        }
-        return false
-      } catch (error) {
-        console.error('Token refresh failed:', error)
-        return false
-      }
-    },
-
-    // ── REGISTER ────────────────────────────────────────────────────────────
-    async register(phone_number, password) {
+    // ============ REGISTER ============
+    async register(phone_number, password, promo_code = null) {
       this.isLoading = true
       this.error = null
       
       try {
-        const normalizedPhone = this.normalizePhoneForBackend(phone_number)
-        console.log('📞 Register - Original:', phone_number, 'Normalized:', normalizedPhone)
-        
-        const result = await authService.register(normalizedPhone, password)
+        const result = await authService.register(phone_number, password, promo_code)
         
         if (result.success) {
           return await this.login(phone_number, password)
@@ -231,53 +132,49 @@ export const useAuthStore = defineStore('auth', {
       }
     },
     
-    // ── LOGIN ───────────────────────────────────────────────────────────────
+    // ============ LOGIN ============
     async login(phone_number, password) {
       this.isLoading = true
       this.error = null
       
       try {
-        const normalizedPhone = this.normalizePhoneForBackend(phone_number)
-        console.log('📞 Login - Original:', phone_number, 'Normalized:', normalizedPhone)
+        console.log('📨 Login called with:', { phone_number })
         
-        const result = await authService.login(normalizedPhone, password)
-        console.log('📨 Login response from service:', result)
+        const result = await authService.login(phone_number, password)
+        
+        console.log('📨 Login response in authStore:', result)
         
         if (result.success) {
-          const token = result.tokens?.accessToken || result.accessToken || result.token
+          const token = result.tokens?.access_token
+          console.log('🔑 Access token from response:', token)
           
           if (!token) {
+            console.error('❌ No token in response:', result)
             throw new Error('No token received from server')
           }
           
           this.accessToken = token
-          this.refreshToken = result.tokens?.refreshToken || null
+          this.refreshToken = result.tokens?.refresh_token || null
           
           const decoded = decodeToken(token)
           console.log('🔓 Decoded token on login:', decoded)
           
-          this.user.id = decoded.id || decoded.userId || decoded.sub || result.user?.id
-          this.user.phone_number = phone_number
-          this.user.role = decoded.role || 'USER'
-          this.user.balance = 0
+          this.user = {
+            id: result.user?.id || decoded?.id || decoded?.userId || decoded?.sub,
+            phone_number: result.user?.phone_number || phone_number,
+            role: decoded?.role || result.user?.role || 'USER',
+            balance: result.user?.balance || 0,
+            created_at: result.user?.created_at || result.user?.createdAt || null,
+            updated_at: result.user?.updated_at || result.user?.updatedAt || null
+          }
+          
           this.isLoggedIn = true
-          this.initialized = true
-          this.lastAuthUpdate = Date.now()
           
-          console.log('✅ Login successful. User state:', {
-            id: this.user.id,
-            phone: this.user.phone_number,
-            role: this.user.role,
-            isLoggedIn: this.isLoggedIn,
-            initialized: this.initialized
-          })
+          console.log('✅ Login successful. Role:', this.user.role)
+          console.log('💰 Initial balance:', this.user.balance)
           
-          this.startAutoRefresh()
-          
+          // ============ FETCH PROFILE AFTER LOGIN ============
           await this.fetchUserProfile()
-          await this.fetchUserBalance()
-          
-          console.log('✅ Final user state after login:', this.$state)
           
           return { 
             success: true, 
@@ -297,15 +194,14 @@ export const useAuthStore = defineStore('auth', {
       }
     },
     
-    // ── LOGOUT ──────────────────────────────────────────────────────────────
+    // ============ LOGOUT ============
     logout() {
-      this.stopAutoRefresh()
       authService.logout()
       this.clearAuth()
       return { success: true, message: 'Logged out successfully' }
     },
     
-    // ── CLEAR AUTH ──────────────────────────────────────────────────────────
+    // ============ CLEAR AUTH ============
     clearAuth() {
       this.user = {
         id: null,
@@ -319,51 +215,54 @@ export const useAuthStore = defineStore('auth', {
       this.accessToken = null
       this.refreshToken = null
       this.error = null
-      this.initialized = false
-      this.lastAuthUpdate = null
-      this.stopAutoRefresh()
     },
     
-    // ── FETCH USER PROFILE ──────────────────────────────────────────────────
+    // ============ FETCH USER PROFILE ============
     async fetchUserProfile() {
-      if (!authService.isAuthenticated()) {
+      if (!this.isLoggedIn && !authService.isAuthenticated()) {
+        console.log('⚠️ Not authenticated, skipping profile fetch')
         return { success: false, message: 'Not authenticated' }
       }
       
       this.isLoading = true
       
       try {
+        console.log('📡 Fetching user profile...')
         const result = await authService.getProfile()
         console.log('📨 Profile response:', result)
         
-        if (result.success) {
-          const currentRole = this.user.role
-          const currentId = this.user.id
+        if (result.success && result.user) {
+          // Update user data from profile
+          this.user.id = result.user.id || this.user.id
+          this.user.phone_number = result.user.phone_number || this.user.phone_number
           
-          this.user.phone_number = result.user.phone_number
-          this.user.created_at = result.user.created_at
-          this.user.updated_at = result.user.updated_at
-          
-          this.user.role = currentRole
-          this.user.id = currentId
-          
-          this.lastAuthUpdate = Date.now()
-          
-          console.log('✅ Profile fetched. Keeping role from token:', this.user.role)
-          
-          return { success: true, user: this.user }
-        } else {
-          if (result.message?.includes('token') || result.message?.includes('auth')) {
-            const refreshed = await this.refreshAccessToken()
-            if (refreshed) {
-              return this.fetchUserProfile()
-            } else {
-              this.clearAuth()
-            }
+          // ============ UPDATE BALANCE ============
+          if (result.user.balance !== undefined && result.user.balance !== null) {
+            this.user.balance = Number(result.user.balance)
+            console.log('💰 Balance updated to:', this.user.balance)
           }
-          return { success: false, message: result.message }
+          
+          this.user.created_at = result.user.created_at || result.user.createdAt || this.user.created_at
+          this.user.updated_at = result.user.updated_at || result.user.updatedAt || this.user.updated_at
+          
+          // USIBADILI ROLE - Inatoka kwenye token
+          // this.user.role = result.user.role // ONDOA HII!
+          
+          console.log('✅ Profile fetched successfully')
+          console.log('👤 User:', this.user)
+          console.log('💰 Balance:', this.user.balance)
+          
+          return { 
+            success: true, 
+            user: this.user,
+            balance: this.user.balance
+          }
+        } else {
+          console.error('❌ Profile fetch failed:', result.message)
+          return { success: false, message: result.message || 'Failed to fetch profile' }
         }
       } catch (error) {
+        console.error('❌ Profile fetch error:', error)
         this.error = error.message
         return { success: false, message: error.message }
       } finally {
@@ -371,273 +270,58 @@ export const useAuthStore = defineStore('auth', {
       }
     },
     
-    // ── FETCH USER BALANCE ──────────────────────────────────────────────────
+    // ============ FETCH USER BALANCE ============
     async fetchUserBalance() {
-      if (!authService.isAuthenticated()) {
-        return { success: false, message: 'Not authenticated' }
-      }
+      console.log('💰 Fetching user balance...')
       
       try {
-        const result = await authService.getBalance()
-        console.log('💰 Balance response:', result)
+        const result = await this.fetchUserProfile()
         
         if (result.success) {
-          const balance = result.balance || result.data?.balance || 0
-          this.user.balance = typeof balance === 'string' ? parseFloat(balance) : balance
-          this.lastAuthUpdate = Date.now()
-          console.log('💰 Balance saved as number:', this.user.balance)
-          return { success: true, balance: this.user.balance }
-        } else {
-          return { success: false, message: result.message }
+          console.log('💰 Balance fetched:', this.user.balance)
+          return {
+            success: true,
+            balance: this.user.balance,
+            formatted: this.formattedBalance
+          }
         }
+        
+        return { success: false, message: result.message }
       } catch (error) {
-        this.error = error.message
-        return { success: false, message: error.message }
-      }
-    },
-
-    // ── REFRESH USER DATA ──────────────────────────────────────────────────
-    async refreshUserData() {
-      if (!this.isLoggedIn) return { success: false, message: 'Not logged in' }
-      
-      try {
-        await Promise.all([
-          this.fetchUserProfile(),
-          this.fetchUserBalance()
-        ])
-        this.lastAuthUpdate = Date.now()
-        return { success: true }
-      } catch (error) {
-        console.error('Error refreshing user data:', error)
+        console.error('❌ Balance fetch error:', error)
         return { success: false, message: error.message }
       }
     },
     
-    // ── UPDATE BALANCE LOCALLY ─────────────────────────────────────────────
-    updateBalanceLocally(newBalance) {
-      this.user.balance = typeof newBalance === 'string' ? parseFloat(newBalance) : newBalance
-      this.lastAuthUpdate = Date.now()
+    // ============ UPDATE USER BALANCE ============
+    updateUserBalance(newBalance) {
+      console.log('💰 Updating balance to:', newBalance)
+      
+      const balance = Number(newBalance)
+      this.user.balance = balance
+      
+      // Update localStorage if user is stored there
+      const storedUser = localStorage.getItem('user')
+      if (storedUser) {
+        try {
+          const userData = JSON.parse(storedUser)
+          userData.balance = balance
+          localStorage.setItem('user', JSON.stringify(userData))
+        } catch (e) {
+          console.error('Failed to update user in localStorage:', e)
+        }
+      }
+      
+      console.log('✅ Balance updated to:', this.user.balance)
     },
     
-    // ════════════════════════════════════════════════════════════════════════
-    // ── NEW: DEPOSIT METHODS ──────────────────────────────────────────────
-    // ════════════════════════════════════════════════════════════════════════
-
-    // ── DEPOSIT (Pay by Link - hosted checkout page) ──────────────────────
-    async initiateDeposit(data) {
-      if (!authService.isAuthenticated()) {
-        return { success: false, message: 'Please login first' }
-      }
-      
-      this.isLoading = true
-      this.error = null
-      
-      try {
-        const response = await api.post('/deposit', {
-          amount: data.amount,
-          phone_number: data.phoneNumber || data.phone_number
-        })
-        
-        console.log('📨 Deposit response:', response.data)
-        
-        if (response.data && response.data.success) {
-          // For pay by link, return the payment URL
-          if (response.data.data?.payment_url) {
-            return { 
-              success: true, 
-              payment_url: response.data.data.payment_url,
-              order_id: response.data.data.order_id,
-              data: response.data.data,
-              message: response.data.message
-            }
-          }
-          return { 
-            success: true, 
-            data: response.data.data,
-            message: response.data.message
-          }
-        } else {
-          return { 
-            success: false, 
-            message: response.data?.message || 'Deposit initiation failed' 
-          }
-        }
-      } catch (error) {
-        console.error('❌ Deposit error:', error)
-        this.error = error.response?.data?.message || 'Deposit failed'
-        return { success: false, message: this.error }
-      } finally {
-        this.isLoading = false
-      }
-    },
-
-    // ── DEPOSIT MOBILE (USSD Push - direct to phone) ──────────────────────
-    async initiateMobileDeposit(data) {
-      if (!authService.isAuthenticated()) {
-        return { success: false, message: 'Please login first' }
-      }
-      
-      this.isLoading = true
-      this.error = null
-      
-      try {
-        const response = await api.post('/deposit/mobile', {
-          amount: data.amount,
-          phone_number: data.phoneNumber || data.phone_number
-        })
-        
-        console.log('📨 Mobile deposit response:', response.data)
-        
-        if (response.data && response.data.success) {
-          return { 
-            success: true, 
-            message: response.data.message,
-            data: response.data.data,
-            order_id: response.data.data?.order_id || response.data.data?.transaction_id
-          }
-        } else {
-          return { 
-            success: false, 
-            message: response.data?.message || 'Mobile deposit initiation failed' 
-          }
-        }
-      } catch (error) {
-        console.error('❌ Mobile deposit error:', error)
-        this.error = error.response?.data?.message || 'Mobile deposit failed'
-        return { success: false, message: this.error }
-      } finally {
-        this.isLoading = false
-      }
-    },
-
-    // ── CHECK PAYMENT STATUS ──────────────────────────────────────────────
-    async checkPaymentStatus(reference) {
-      try {
-        const response = await api.get(`/payment/${reference}`)
-        console.log('📨 Payment status response:', response.data)
-        return response.data
-      } catch (error) {
-        console.error('❌ Check payment status error:', error)
-        return { 
-          success: false, 
-          status: 'error', 
-          message: error.response?.data?.message || 'Failed to check payment status' 
-        }
-      }
-    },
-
-    // ── CHECK PENDING PAYMENTS ─────────────────────────────────────────────
-    async checkPendingPayments() {
-      if (!authService.isAuthenticated()) {
-        return { success: false, message: 'Please login first' }
-      }
-      
-      try {
-        const response = await api.get('/payments/pending')
-        console.log('📨 Pending payments response:', response.data)
-        return response.data
-      } catch (error) {
-        console.error('❌ Check pending payments error:', error)
-        return { 
-          success: false, 
-          message: error.response?.data?.message || 'Failed to check pending payments' 
-        }
-      }
-    },
-
-    // ── MANUAL CONFIRM DEPOSIT ─────────────────────────────────────────────
-    async manualConfirmDeposit(orderId) {
-      if (!authService.isAuthenticated()) {
-        return { success: false, message: 'Please login first' }
-      }
-      
-      try {
-        const response = await api.post('/payment/manual-confirm', { order_id: orderId })
-        console.log('📨 Manual confirm response:', response.data)
-        
-        if (response.data && response.data.success) {
-          // Update balance after manual confirm
-          await this.fetchUserBalance()
-          return response.data
-        } else {
-          return { 
-            success: false, 
-            message: response.data?.message || 'Manual confirmation failed' 
-          }
-        }
-      } catch (error) {
-        console.error('❌ Manual confirm error:', error)
-        return { 
-          success: false, 
-          message: error.response?.data?.message || 'Manual confirmation failed' 
-        }
-      }
-    },
-
-    // ════════════════════════════════════════════════════════════════════════
-    // ── WITHDRAW ────────────────────────────────────────────────────────────
-    // ════════════════════════════════════════════════════════════════════════
-
-    async withdraw(amount) {
-      if (!authService.isAuthenticated()) {
-        return { success: false, message: 'Please login first' }
-      }
-      
-      if (this.user.balance < amount) {
-        return { 
-          success: false, 
-          message: `Insufficient balance. Your balance is TZS ${this.user.balance.toLocaleString()}` 
-        }
-      }
-      
-      this.isLoading = true
-      this.error = null
-      
-      try {
-        const response = await api.post('/withdraw', { amount })
-        
-        console.log('📨 Withdraw response:', response.data)
-        
-        if (response.data && response.data.success) {
-          if (response.data.data && response.data.data.new_balance) {
-            this.user.balance = typeof response.data.data.new_balance === 'string' 
-              ? parseFloat(response.data.data.new_balance) 
-              : response.data.data.new_balance
-          } else {
-            await this.fetchUserBalance()
-          }
-          
-          this.lastAuthUpdate = Date.now()
-          
-          return { 
-            success: true, 
-            message: response.data.message,
-            newBalance: this.user.balance,
-            data: response.data.data
-          }
-        } else {
-          return { 
-            success: false, 
-            message: response.data?.message || 'Withdrawal failed' 
-          }
-        }
-      } catch (error) {
-        console.error('❌ Withdraw error:', error)
-        this.error = error.response?.data?.message || 'Withdrawal failed'
-        return { success: false, message: this.error }
-      } finally {
-        this.isLoading = false
-      }
-    },
-    
-    // ── FORGOT PASSWORD ─────────────────────────────────────────────────────
+    // ============ FORGOT PASSWORD ============
     async forgotPassword(phone_number) {
       this.isLoading = true
       this.error = null
       
       try {
-        const normalizedPhone = this.normalizePhoneForBackend(phone_number)
-        const result = await authService.forgotPassword(normalizedPhone)
+        const result = await authService.forgotPassword(phone_number)
         return result
       } catch (error) {
         this.error = error.message
@@ -647,7 +331,7 @@ export const useAuthStore = defineStore('auth', {
       }
     },
     
-    // ── RESET PASSWORD ──────────────────────────────────────────────────────
+    // ============ RESET PASSWORD ============
     async resetPassword(userId, newPassword, confirmPassword) {
       this.isLoading = true
       this.error = null
@@ -662,44 +346,57 @@ export const useAuthStore = defineStore('auth', {
         this.isLoading = false
       }
     },
-
-    // ── AUTO-REFRESH METHODS ──────────────────────────────────────────────
-    startAutoRefresh() {
-      if (this._autoRefreshTimer) {
-        clearInterval(this._autoRefreshTimer)
-      }
+    
+    // ============ CHANGE PASSWORD ============
+    async changePassword(phone_number, newPassword, confirmPassword) {
+      this.isLoading = true
+      this.error = null
       
-      if (this.isAutoRefreshEnabled && this.isLoggedIn) {
-        this._autoRefreshTimer = setInterval(async () => {
-          if (this.isLoggedIn && !this.isLoading) {
-            console.log('🔄 Auto-refreshing user data...')
-            await this.refreshUserData()
+      try {
+        const result = await authService.changePassword(phone_number, newPassword, confirmPassword)
+        return result
+      } catch (error) {
+        this.error = error.message
+        return { success: false, message: error.message }
+      } finally {
+        this.isLoading = false
+      }
+    },
+
+    // ============ DAILY LOGIN REWARD ============
+    async fetchDailyRewardStatus(force = false) {
+      if (!this.isLoggedIn) return null
+      if (this.dailyReward.status && !force) return this.dailyReward.status
+
+      this.dailyReward.isLoading = true
+      try {
+        const result = await authService.getDailyRewardStatus()
+        if (result.success) {
+          this.dailyReward.status = result.data
+        }
+        return result.data || null
+      } finally {
+        this.dailyReward.isLoading = false
+      }
+    },
+
+    async claimDailyReward() {
+      this.dailyReward.isClaiming = true
+      try {
+        const result = await authService.claimDailyReward()
+        if (result.success) {
+          this.dailyReward.status = null
+          await this.fetchDailyRewardStatus(true)
+          if (result.data && typeof result.data.balance === 'number') {
+            this.user.balance = result.data.balance
+            localStorage.setItem('user_balance', result.data.balance)
           }
-        }, this.refreshInterval)
-      }
-    },
-
-    stopAutoRefresh() {
-      if (this._autoRefreshTimer) {
-        clearInterval(this._autoRefreshTimer)
-        this._autoRefreshTimer = null
-      }
-    },
-
-    toggleAutoRefresh(enabled) {
-      this.isAutoRefreshEnabled = enabled
-      if (enabled) {
-        this.startAutoRefresh()
-      } else {
-        this.stopAutoRefresh()
+          return { success: true, data: result.data }
+        }
+        return { success: false, message: result.message }
+      } finally {
+        this.dailyReward.isClaiming = false
       }
     }
-  },
-  
-  // ── PERSIST ──────────────────────────────────────────────────────────────
-  persist: {
-    key: 'auth-store',
-    storage: localStorage,
-    paths: ['user', 'isLoggedIn', 'accessToken', 'refreshToken', 'initialized', 'lastAuthUpdate']
   }
 })

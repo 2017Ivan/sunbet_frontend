@@ -12,7 +12,7 @@
           Back to Profile
         </RouterLink>
         <h1 class="text-lg font-bold text-gray-300">Deposit Funds</h1>
-        <p class="text-gray-400 text-sm mt-1">Add funds to your account via mobile money</p>
+        <p class="text-gray-400 text-sm mt-1">Add funds to your account securely</p>
       </div>
 
       <!-- Balance Card -->
@@ -56,7 +56,7 @@
               :disabled="isProcessing || !depositAmount || depositAmount < MINIMUM_DEPOSIT"
             >
               <template v-if="!isProcessing">
-                Deposit TSh {{ depositAmount ? depositAmount.toLocaleString() : '0' }}
+                Deposit TSh {{ depositAmount.toLocaleString() || '0' }}
               </template>
               <template v-else>
                 <span class="flex items-center justify-center gap-2">
@@ -77,17 +77,9 @@
                   <polyline points="22 4 12 14.01 9 11.01"/>
                 </svg>
                 <p class="text-gray-400 text-xs">
-                  You will receive a USSD push notification on your registered phone number. 
-                  Enter your PIN to authorize the payment. Payment expires after 4 hours.
+                  You will receive a mobile money prompt on your phone to enter your PIN (M-Pesa). Once confirmed, funds are added to your account. Minimum deposit: TSh {{ MINIMUM_DEPOSIT.toLocaleString() }}.00
                 </p>
               </div>
-            </div>
-
-            <!-- Supported Networks -->
-            <div class="p-3 bg-gray-900/50 rounded-xl">
-              <p class="text-gray-400 text-xs">
-                <span class="font-semibold">Supported Networks:</span> Airtel Money, M-Pesa, Mixx by Yas, Halotel
-              </p>
             </div>
           </form>
         </div>
@@ -127,7 +119,7 @@
 
       <!-- Pending Modal -->
       <div v-if="showPendingModal" class="fixed inset-0 z-50 flex items-center justify-center px-4">
-        <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" @click="closePendingModal"></div>
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-sm"></div>
         <div class="relative bg-gray-800 border border-yellow-500/20 rounded-2xl p-8 w-full max-w-md shadow-2xl shadow-yellow-500/5 animate-fadeIn">
           <div class="text-center">
             <div class="w-20 h-20 bg-yellow-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -138,19 +130,13 @@
             </div>
             <h3 class="text-2xl font-bold text-gray-100 mb-2">Awaiting Payment</h3>
             <p class="text-gray-400 text-sm mb-4">
-              Please check your phone for the USSD push notification
+              Please check your phone for the mobile money prompt and enter your PIN
             </p>
             <p class="text-gray-500 text-xs mb-4">
               Amount: TSh {{ lastDepositAmount.toLocaleString() }}
             </p>
-            <div class="bg-gray-900 border border-gray-700 rounded-xl p-4 mb-4">
-              <p class="text-gray-400 text-xs">Transaction ID</p>
-              <p class="text-gray-100 font-mono text-sm break-all">{{ transactionId }}</p>
-            </div>
-            <p v-if="financialStore.status === 'pending'" class="text-yellow-400 text-xs mb-2">⏳ Waiting for confirmation...</p>
-            <p v-else-if="financialStore.status === 'timeout'" class="text-red-400 text-xs mb-2">⚠️ Payment confirmation timed out.</p>
-            <p class="text-gray-500 text-xs mb-4">Payment expires after 4 hours</p>
-            
+            <p v-if="pendingStatusNote" class="text-gray-500 text-xs mb-4">{{ pendingStatusNote }}</p>
+
             <button
               @click="closePendingModal"
               class="w-full py-3 bg-gray-700 hover:bg-gray-600 text-white font-semibold rounded-xl transition-all duration-200"
@@ -190,14 +176,13 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../../../stores/auth/authStore'
-import { useFinancialStore } from '../../../stores/financial/financialStore'
+import DepositService from '../../../services/deposit/deposit.service'
 
 const router = useRouter()
 const authStore = useAuthStore()
-const financialStore = useFinancialStore()
 
 // CONFIG
 const MINIMUM_DEPOSIT = 125000
@@ -210,7 +195,7 @@ const showErrorModal = ref(false)
 const showPendingModal = ref(false)
 const lastDepositAmount = ref(0)
 const errorMessage = ref('')
-const transactionId = ref('')
+const pendingStatusNote = ref('')
 
 // Computed
 const balance = computed(() => authStore.userBalance)
@@ -220,27 +205,6 @@ const formattedBalance = computed(() => {
     maximumFractionDigits: 2 
   }).format(balance.value || 0)
 })
-
-// Watch Status kutoka Store
-watch(() => financialStore.status, (newStatus) => {
-  console.log('📊 Status changed:', newStatus)
-  if (!newStatus) return
-
-  const statusNormalized = String(newStatus).toLowerCase()
-
-  if (['completed', 'successful', 'success'].includes(statusNormalized)) {
-    showPendingModal.value = false
-    showSuccessModal.value = true
-    isProcessing.value = false
-  } else if (['failed', 'expired', 'cancelled'].includes(statusNormalized)) {
-    showPendingModal.value = false
-    errorMessage.value = statusNormalized === 'expired' 
-      ? 'Payment expired after 4 hours. Please try again.' 
-      : 'Payment was cancelled or failed.'
-    showErrorModal.value = true
-    isProcessing.value = false
-  }
-}, { immediate: true })
 
 // Methods
 const handleDeposit = async () => {
@@ -254,30 +218,23 @@ const handleDeposit = async () => {
     return
   }
   
-  const phoneNumber = authStore.user?.phone_number || authStore.user?.phone || ''
-  
-  if (!phoneNumber) {
-    errorMessage.value = 'Phone number not found. Please update your profile.'
-    showErrorModal.value = true
-    return
-  }
-  
   isProcessing.value = true
   
   try {
     lastDepositAmount.value = depositAmount.value
     
-    const result = await financialStore.deposit(
-      depositAmount.value,
-      phoneNumber
-    )
+    const result = await DepositService.requestDeposit({
+      amount: depositAmount.value
+      // payer_phone inatumia namba ya mteja kutoka DB (backend default)
+    })
     
     if (result.success) {
-      transactionId.value = result.data?.transaction_id
+      trackedRequestId = result.data?.deposit_request?.id || ''
       showPendingModal.value = true
+      pendingStatusNote.value = '⏳ Checking payment status...'
       depositAmount.value = 0
+      startStatusPolling()
     } else {
-      isProcessing.value = false
       throw new Error(result.message || 'Deposit failed')
     }
     
@@ -285,28 +242,70 @@ const handleDeposit = async () => {
     console.error('Deposit failed:', error)
     errorMessage.value = error.message || 'Deposit failed. Please try again.'
     showErrorModal.value = true
+  } finally {
     isProcessing.value = false
+  }
+}
+
+let statusTimer = null
+let trackedRequestId = ''
+
+const startStatusPolling = () => {
+  stopStatusPolling()
+  checkDepositStatus()
+  statusTimer = setInterval(checkDepositStatus, 5000)
+}
+
+const stopStatusPolling = () => {
+  if (statusTimer) {
+    clearInterval(statusTimer)
+    statusTimer = null
+  }
+}
+
+const checkDepositStatus = async () => {
+  if (!trackedRequestId) return
+  try {
+    const result = await DepositService.getMyDeposits()
+    const requests = result.data?.deposit_requests || []
+    const current = requests.find(r => r.id === trackedRequestId)
+    if (!current) return
+
+    if (current.status === 'CONFIRMED') {
+      pendingStatusNote.value = '✅ Payment successful!'
+      showPendingModal.value = false
+      showSuccessModal.value = true
+      authStore.fetchUserBalance()
+      stopStatusPolling()
+    } else if (current.status === 'CANCELLED') {
+      stopStatusPolling()
+      showPendingModal.value = false
+      errorMessage.value = 'Payment failed. Please try again.'
+      showErrorModal.value = true
+      trackedRequestId = ''
+    } else {
+      pendingStatusNote.value = '⏳ Please confirm payment with PIN...'
+    }
+  } catch (error) {
+    // keep waiting silently
   }
 }
 
 const closeSuccessModal = () => {
   showSuccessModal.value = false
-  financialStore.clearTransaction()
+  trackedRequestId = ''
   authStore.fetchUserBalance()
-  isProcessing.value = false
 }
 
 const closeErrorModal = () => {
   showErrorModal.value = false
   errorMessage.value = ''
-  financialStore.clearTransaction()
-  isProcessing.value = false
+  trackedRequestId = ''
 }
 
 const closePendingModal = () => {
   showPendingModal.value = false
-  financialStore.stopPolling()
-  isProcessing.value = false
+  stopStatusPolling()
 }
 
 // Lifecycle
@@ -317,7 +316,7 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
-  financialStore.stopPolling()
+  stopStatusPolling()
 })
 </script>
 

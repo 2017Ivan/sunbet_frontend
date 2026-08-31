@@ -13,16 +13,16 @@
   <Transition name="slide-right">
     <div
       v-if="open"
-      class="fixed top-0 right-0 z-50 h-full w-full max-w-sm bg-[#0D0D0D] border-l border-[#2A2A2A] flex flex-col shadow-[−8px_0_40px_rgba(0,0,0,0.6)]"
+      class="fixed top-0 right-0 z-50 h-full w-full max-w-sm bg-white border-l border-gray-200 flex flex-col shadow-[−8px_0_40px_rgba(0,0,0,0.6)]"
     >
       <!-- Header -->
-      <div class="flex items-center justify-between px-5 h-16 border-b border-[#2A2A2A] flex-shrink-0">
+      <div class="flex items-center justify-between px-5 h-16 border-b border-gray-200 flex-shrink-0">
         <div class="flex items-center gap-2">
           <svg class="w-5 h-5 text-[#A32D2D]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
             <rect x="9" y="3" width="6" height="4" rx="2"/>
           </svg>
-          <h2 class="text-base font-semibold text-white">Bet Slip</h2>
+          <h2 class="text-base font-semibold text-gray-900">Bet Slip</h2>
           <span
             v-if="currentTabItems.length"
             class="px-2 py-0.5 rounded-full bg-[#A32D2D] text-white text-xs font-bold"
@@ -33,13 +33,13 @@
         <div class="flex items-center gap-2">
           <button
             v-if="currentTabItems.length"
-            class="text-xs text-[#606060] hover:text-[#EF4444] transition-colors"
+            class="text-xs text-gray-500 hover:text-[#EF4444] transition-colors"
             @click="handleClearCurrentTab"
           >
             Clear {{ activeTab }}
           </button>
           <button
-            class="w-8 h-8 rounded-full bg-[#1E1E1E] flex items-center justify-center text-[#606060] hover:text-white transition-colors"
+            class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:text-gray-900 transition-colors"
             @click="$emit('close')"
           >
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -50,18 +50,18 @@
       </div>
 
       <!-- Sports / Virtuals Tabs -->
-      <div class="flex border-b border-[#2A2A2A] bg-[#111] flex-shrink-0">
+      <div class="flex border-b border-gray-200 bg-gray-50 flex-shrink-0">
         <button
           v-for="tab in ['Sports', 'Virtuals']"
           :key="tab"
           @click="activeTab = tab"
           class="flex-1 py-3 text-xs font-semibold uppercase tracking-wider transition-all relative flex items-center justify-center gap-1.5"
-          :class="activeTab === tab ? 'text-white' : 'text-[#606060] hover:text-[#A0A0A0]'"
+          :class="activeTab === tab ? 'text-gray-900' : 'text-gray-500 hover:text-gray-700'"
         >
           <span>{{ tab }}</span>
           <span
             class="px-1.5 py-0.5 text-[10px] rounded-full font-bold transition-colors"
-            :class="activeTab === tab ? 'bg-[#A32D2D] text-white' : 'bg-[#1E1E1E] text-[#606060]'"
+            :class="activeTab === tab ? 'bg-[#A32D2D] text-white' : 'bg-gray-100 text-gray-500'"
           >
             {{ tab === 'Sports' ? sportsItems.length : virtualsItems.length }}
           </span>
@@ -71,15 +71,15 @@
 
       <!-- Empty state -->
       <div v-if="!currentTabItems.length" class="flex-1 flex flex-col items-center justify-center gap-4 px-6">
-        <div class="w-20 h-20 rounded-full bg-[#1E1E1E] flex items-center justify-center">
-          <svg class="w-10 h-10 text-[#333]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <div class="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center">
+          <svg class="w-10 h-10 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
             <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
             <rect x="9" y="3" width="6" height="4" rx="2"/>
           </svg>
         </div>
         <div class="text-center">
-          <p class="text-sm font-medium text-[#A0A0A0]">{{ activeTab }} bet slip is empty</p>
-          <p class="text-xs text-[#606060] mt-1">Click on odds to add selections</p>
+          <p class="text-sm font-medium text-gray-500">{{ activeTab }} bet slip is empty</p>
+          <p class="text-xs text-gray-500 mt-1">Click on odds to add selections</p>
         </div>
         <AppButton variant="outline" size="sm" @click="handleBrowseSports">
           Browse {{ activeTab }}
@@ -91,20 +91,20 @@
         <div
           v-for="(bet, index) in currentTabItems"
           :key="bet.matchId || index"
-          class="bg-[#1E1E1E] border border-[#2A2A2A] rounded-[12px] p-3"
+          class="bg-gray-100 border border-gray-200 rounded-[12px] p-3"
         >
           <div class="flex items-start justify-between gap-2">
             <div class="flex-1 min-w-0">
-              <p class="text-xs text-[#606060] truncate">{{ bet.matchName || bet.match || 'Match' }}</p>
-              <p class="text-sm font-semibold text-white mt-0.5 truncate">{{ bet.pick || bet.selection || 'Selection' }}</p>
+              <p class="text-xs text-gray-500 truncate">{{ bet.matchName || bet.match || 'Match' }}</p>
+              <p class="text-sm font-semibold text-gray-900 mt-0.5 truncate">{{ bet.pick || bet.selection || 'Selection' }}</p>
               <div class="flex items-center gap-2 mt-0.5">
-                <p class="text-xs text-[#A0A0A0]">{{ bet.market || bet.marketKey || '1X2' }}</p>
+                <p class="text-xs text-gray-500">{{ bet.market || bet.marketKey || '1X2' }}</p>
                 <span v-if="bet.type === 'virtuals'" class="text-[9px] bg-[#A32D2D]/10 text-[#A32D2D] px-1 rounded font-medium">Virtual</span>
               </div>
             </div>
             <div class="flex flex-col items-end gap-2">
               <button
-                class="text-[#606060] hover:text-[#EF4444] transition-colors"
+                class="text-gray-500 hover:text-[#EF4444] transition-colors"
                 @click="handleRemoveBet(bet)"
               >
                 <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -118,7 +118,7 @@
       </div>
 
       <!-- Footer: Summary + Place bet -->
-      <div v-if="currentTabItems.length" class="border-t border-[#2A2A2A] p-4 space-y-3 flex-shrink-0">
+      <div v-if="currentTabItems.length" class="border-t border-gray-200 p-4 space-y-3 flex-shrink-0">
         <!-- Login required warning -->
         <div v-if="!isLoggedIn" class="bg-[#A32D2D]/10 border border-[#A32D2D]/20 rounded-[10px] p-3">
           <p class="text-xs text-[#A32D2D] text-center">Please login to place bets</p>
@@ -132,14 +132,14 @@
         </div>
 
         <!-- Bet type tabs -->
-        <div class="flex gap-1 p-1 bg-[#1E1E1E] rounded-[10px]">
+        <div class="flex gap-1 p-1 bg-gray-100 rounded-[10px]">
           <button
             v-for="type in ['Single', 'Accumulator']"
             :key="type"
             class="flex-1 py-1.5 text-xs font-semibold rounded-[8px] transition-all"
             :class="betType === type
               ? 'bg-[#A32D2D] text-white'
-              : 'text-[#606060] hover:text-white'"
+              : 'text-gray-500 hover:text-gray-900'"
             @click="betType = type"
           >
             {{ type }}
@@ -148,7 +148,7 @@
 
         <!-- Stake input -->
         <div>
-          <label class="text-xs text-[#606060] mb-1.5 block">Stake (TZS)</label>
+          <label class="text-xs text-gray-500 mb-1.5 block">Stake (TZS)</label>
           <div class="flex gap-2">
             <input
               v-model.number="stakeAmount"
@@ -156,13 +156,13 @@
               min="100"
               placeholder="Enter stake"
               :disabled="!isLoggedIn"
-              class="flex-1 h-10 px-3 rounded-[10px] bg-[#1E1E1E] border border-[#2A2A2A] focus:border-[#A32D2D] text-white text-sm focus:outline-none focus:ring-1 focus:ring-[#A32D2D]/30 disabled:opacity-50 disabled:cursor-not-allowed"
+              class="flex-1 h-10 px-3 rounded-[10px] bg-white border border-gray-300 focus:border-[#A32D2D] text-gray-900 text-sm focus:outline-none focus:ring-1 focus:ring-[#A32D2D]/30 disabled:opacity-50 disabled:cursor-not-allowed"
             />
             <div class="flex gap-1">
               <button
                 v-for="quick in [500, 1000, 5000]"
                 :key="quick"
-                class="px-2 py-1 rounded-[8px] bg-[#2A2A2A] text-[#A0A0A0] hover:text-white text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                class="px-2 py-1 rounded-[8px] bg-gray-100 text-gray-500 hover:text-gray-900 text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 :disabled="!isLoggedIn"
                 @click="stakeAmount = quick"
               >
@@ -174,19 +174,19 @@
         </div>
 
         <!-- Balance display -->
-        <div v-if="isLoggedIn" class="bg-[#1E1E1E] rounded-[10px] px-3 py-2 flex justify-between items-center">
-          <span class="text-[#606060] text-xs">Your Balance</span>
+        <div v-if="isLoggedIn" class="bg-gray-100 rounded-[10px] px-3 py-2 flex justify-between items-center">
+          <span class="text-gray-500 text-xs">Your Balance</span>
           <span class="text-[#A32D2D] font-bold text-sm">TZS {{ formatMoney(userBalance) }}</span>
         </div>
 
         <!-- Summary -->
-        <div class="space-y-1.5 bg-[#1E1E1E] rounded-[10px] px-3 py-2.5">
+        <div class="space-y-1.5 bg-gray-100 rounded-[10px] px-3 py-2.5">
           <div class="flex justify-between text-xs">
-            <span class="text-[#606060]">Total Odds</span>
-            <span class="text-white font-semibold">{{ totalOdds.toFixed(2) }}</span>
+            <span class="text-gray-500">Total Odds</span>
+            <span class="text-gray-900 font-semibold">{{ totalOdds.toFixed(2) }}</span>
           </div>
           <div class="flex justify-between text-xs">
-            <span class="text-[#606060]">Potential Win</span>
+            <span class="text-gray-500">Potential Win</span>
             <span class="text-[#22C55E] font-semibold">TZS {{ potentialWin.toLocaleString() }}</span>
           </div>
         </div>
@@ -215,7 +215,7 @@
           Login to Bet
         </AppButton>
 
-        <p class="text-[10px] text-[#606060] text-center">20% Excise Duty · Must be 18+</p>
+        <p class="text-[10px] text-gray-500 text-center">20% Excise Duty · Must be 18+</p>
       </div>
     </div>
   </Transition>
@@ -387,7 +387,7 @@ watch(stakeAmount, (newVal) => {
   background: transparent;
 }
 .overflow-y-auto::-webkit-scrollbar-thumb {
-  background: #2A2A2A;
+  background: #d1d5db;
   border-radius: 10px;
 }
 .overflow-y-auto::-webkit-scrollbar-thumb:hover {

@@ -1,9 +1,8 @@
-// store/auth/authStore.js
+// store/authStore.js
+
 import { defineStore } from 'pinia'
 import authService from '../../services/auth/authService'
-import api from '../../services/api'
 
-// ── Helper: Decode JWT token ──────────────────────────────────────────────
 const decodeToken = (token) => {
   try {
     const base64Url = token.split('.')[1]
@@ -41,27 +40,38 @@ export const useAuthStore = defineStore('auth', {
   getters: {
     userPhone: (state) => state.user.phone_number,
     userRole: (state) => state.user.role,
+    userId: (state) => state.user.id,
+    
     isAdmin: (state) => state.user.role === 'ADMIN',
     isAgent: (state) => state.user.role === 'AGENT',
     isUser: (state) => state.user.role === 'USER',
+    
     hasRole: (state) => (role) => {
       if (Array.isArray(role)) {
         return role.includes(state.user.role)
       }
       return state.user.role === role
     },
-    userBalance: (state) => state.user.balance,
-    hasSufficientBalance: (state) => (amount) => {
-      return state.user.balance >= amount
+    
+    userBalance: (state) => {
+      console.log('💰 userBalance getter called, balance:', state.user.balance)
+      return state.user.balance !== null && state.user.balance !== undefined 
+        ? state.user.balance 
+        : 0
     },
+    
+    hasSufficientBalance: (state) => (amount) => {
+      return (state.user.balance || 0) >= amount
+    },
+    
     formattedBalance: (state) => {
-      if (state.user.balance === null) return 'TZS 0'
-      return `TZS ${state.user.balance.toLocaleString()}`
+      const balance = state.user.balance || 0
+      return `TZS ${Number(balance).toLocaleString()}`
     }
   },
   
   actions: {
-    // ── INITIALIZE ──────────────────────────────────────────────────────────
+    // ============ INITIALIZE ============
     async initialize() {
       console.log('🔄 Initializing auth store...')
       
@@ -69,12 +79,10 @@ export const useAuthStore = defineStore('auth', {
       
       if (token) {
         try {
-          // 👇 DECODE TOKEN FIRST to get role
           const decoded = decodeToken(token)
           console.log('🔓 Decoded token:', decoded)
           
           if (decoded) {
-            // 👇 SET ROLE FROM TOKEN
             this.user.id = decoded.id || decoded.userId || decoded.sub
             this.user.role = decoded.role || 'USER'
             this.isLoggedIn = true
@@ -82,11 +90,8 @@ export const useAuthStore = defineStore('auth', {
             
             console.log('✅ Role from token:', this.user.role)
             
-            // 👇 FETCH PROFILE - BUT DON'T OVERWRITE ROLE
+            // ============ FETCH PROFILE AFTER INIT ============
             await this.fetchUserProfile()
-            
-            // Fetch balance
-            await this.fetchUserBalance()
           } else {
             this.clearAuth()
           }
@@ -95,11 +100,12 @@ export const useAuthStore = defineStore('auth', {
           this.clearAuth()
         }
       } else {
+        console.log('ℹ️ No token found, user not authenticated')
         this.clearAuth()
       }
     },
     
-    // ── REGISTER ────────────────────────────────────────────────────────────
+    // ============ REGISTER ============
     async register(phone_number, password) {
       this.isLoading = true
       this.error = null
@@ -121,42 +127,49 @@ export const useAuthStore = defineStore('auth', {
       }
     },
     
-    // ── LOGIN ───────────────────────────────────────────────────────────────
+    // ============ LOGIN ============
     async login(phone_number, password) {
       this.isLoading = true
       this.error = null
       
       try {
+        console.log('📨 Login called with:', { phone_number })
+        
         const result = await authService.login(phone_number, password)
-        console.log('📨 Login response:', result)
+        
+        console.log('📨 Login response in authStore:', result)
         
         if (result.success) {
-          const token = result.tokens?.accessToken || result.accessToken || result.token
+          const token = result.tokens?.access_token
+          console.log('🔑 Access token from response:', token)
           
           if (!token) {
+            console.error('❌ No token in response:', result)
             throw new Error('No token received from server')
           }
           
           this.accessToken = token
-          this.refreshToken = result.tokens?.refreshToken || null
+          this.refreshToken = result.tokens?.refresh_token || null
           
-          // ── DECODE TOKEN to get role ──────────────────────────────────
           const decoded = decodeToken(token)
           console.log('🔓 Decoded token on login:', decoded)
           
-          // 👇 SET USER FROM TOKEN (ROLE INAPOTOKA TOKEN)
-          this.user.id = decoded.id || decoded.userId || decoded.sub
-          this.user.phone_number = phone_number
-          this.user.role = decoded.role || 'USER'
+          this.user = {
+            id: result.user?.id || decoded?.id || decoded?.userId || decoded?.sub,
+            phone_number: result.user?.phone_number || phone_number,
+            role: decoded?.role || result.user?.role || 'USER',
+            balance: result.user?.balance || 0,
+            created_at: result.user?.created_at || result.user?.createdAt || null,
+            updated_at: result.user?.updated_at || result.user?.updatedAt || null
+          }
+          
           this.isLoggedIn = true
           
-          console.log('✅ Login successful. Role from token:', this.user.role)
+          console.log('✅ Login successful. Role:', this.user.role)
+          console.log('💰 Initial balance:', this.user.balance)
           
-          // 👇 FETCH PROFILE - BUT DON'T OVERWRITE ROLE
+          // ============ FETCH PROFILE AFTER LOGIN ============
           await this.fetchUserProfile()
-          
-          // Fetch balance
-          await this.fetchUserBalance()
           
           return { 
             success: true, 
@@ -176,14 +189,14 @@ export const useAuthStore = defineStore('auth', {
       }
     },
     
-    // ── LOGOUT ──────────────────────────────────────────────────────────────
+    // ============ LOGOUT ============
     logout() {
       authService.logout()
       this.clearAuth()
       return { success: true, message: 'Logged out successfully' }
     },
     
-    // ── CLEAR AUTH ──────────────────────────────────────────────────────────
+    // ============ CLEAR AUTH ============
     clearAuth() {
       this.user = {
         id: null,
@@ -199,138 +212,105 @@ export const useAuthStore = defineStore('auth', {
       this.error = null
     },
     
-    // ── FETCH USER PROFILE (USI-OVERWRITE ROLE) ──────────────────────────
+    // ============ FETCH USER PROFILE ============
     async fetchUserProfile() {
-      if (!authService.isAuthenticated()) {
+      if (!this.isLoggedIn && !authService.isAuthenticated()) {
+        console.log('⚠️ Not authenticated, skipping profile fetch')
         return { success: false, message: 'Not authenticated' }
       }
       
       this.isLoading = true
       
       try {
+        console.log('📡 Fetching user profile...')
         const result = await authService.getProfile()
         console.log('📨 Profile response:', result)
         
-        if (result.success) {
-          // 👇 UPDATE OTHER FIELDS BUT KEEP ROLE FROM TOKEN
-          this.user.phone_number = result.user.phone_number
-          this.user.created_at = result.user.created_at
-          this.user.updated_at = result.user.updated_at
+        if (result.success && result.user) {
+          // Update user data from profile
+          this.user.id = result.user.id || this.user.id
+          this.user.phone_number = result.user.phone_number || this.user.phone_number
           
-          // 👇 USIBADILI ROLE - TAYARI IPO KUTOKA TOKEN
-          // this.user.role = result.user.role || 'USER' // ONDOA HII!
-          
-          console.log('✅ Profile fetched. Keeping role from token:', this.user.role)
-          
-          return { success: true, user: this.user }
-        } else {
-          this.clearAuth()
-          return { success: false, message: result.message }
-        }
-      } catch (error) {
-        this.error = error.message
-        return { success: false, message: error.message }
-      } finally {
-        this.isLoading = false
-      }
-    },
-    
-    // ── FETCH USER BALANCE ──────────────────────────────────────────────────
-    async fetchUserBalance() {
-      if (!authService.isAuthenticated()) {
-        return { success: false, message: 'Not authenticated' }
-      }
-      
-      try {
-        const result = await authService.getBalance()
-        console.log('💰 Balance response:', result)
-        
-        if (result.success) {
-          this.user.balance = result.balance || result.data?.balance || 0
-          return { success: true, balance: this.user.balance }
-        } else {
-          return { success: false, message: result.message }
-        }
-      } catch (error) {
-        this.error = error.message
-        return { success: false, message: error.message }
-      }
-    },
-    
-    // ── UPDATE BALANCE LOCALLY ─────────────────────────────────────────────
-    updateBalanceLocally(newBalance) {
-      this.user.balance = newBalance
-    },
-    
-    // ── DEPOSIT ─────────────────────────────────────────────────────────────
-    async initiateDeposit(amount) {
-      if (!authService.isAuthenticated()) {
-        return { success: false, message: 'Please login first' }
-      }
-      
-      this.isLoading = true
-      this.error = null
-      
-      try {
-        const response = await api.post('/auth/deposit', { amount })
-        
-        if (response.data && response.data.data && response.data.data.paymentUrl) {
-          window.location.href = response.data.data.paymentUrl
-          return { success: true, paymentUrl: response.data.data.paymentUrl }
-        } else {
-          return { success: false, message: 'Failed to initiate deposit' }
-        }
-      } catch (error) {
-        this.error = error.response?.data?.message || 'Deposit failed'
-        return { success: false, message: this.error }
-      } finally {
-        this.isLoading = false
-      }
-    },
-    
-    // ── WITHDRAW ────────────────────────────────────────────────────────────
-    async withdraw(amount) {
-      if (!authService.isAuthenticated()) {
-        return { success: false, message: 'Please login first' }
-      }
-      
-      if (this.user.balance < amount) {
-        return { 
-          success: false, 
-          message: `Insufficient balance. Your balance is TZS ${this.user.balance.toLocaleString()}` 
-        }
-      }
-      
-      this.isLoading = true
-      this.error = null
-      
-      try {
-        const response = await api.post('/auth/withdraw', { amount })
-        
-        if (response.data) {
-          if (response.data.data && response.data.data.new_balance) {
-            this.user.balance = response.data.data.new_balance
-          } else {
-            await this.fetchUserBalance()
+          // ============ UPDATE BALANCE ============
+          if (result.user.balance !== undefined && result.user.balance !== null) {
+            this.user.balance = Number(result.user.balance)
+            console.log('💰 Balance updated to:', this.user.balance)
           }
+          
+          this.user.created_at = result.user.created_at || result.user.createdAt || this.user.created_at
+          this.user.updated_at = result.user.updated_at || result.user.updatedAt || this.user.updated_at
+          
+          // USIBADILI ROLE - Inatoka kwenye token
+          // this.user.role = result.user.role // ONDOA HII!
+          
+          console.log('✅ Profile fetched successfully')
+          console.log('👤 User:', this.user)
+          console.log('💰 Balance:', this.user.balance)
           
           return { 
             success: true, 
-            message: response.data.message,
-            newBalance: this.user.balance
+            user: this.user,
+            balance: this.user.balance
           }
         } else {
-          return { success: false, message: 'Withdrawal failed' }
+          console.error('❌ Profile fetch failed:', result.message)
+          return { success: false, message: result.message || 'Failed to fetch profile' }
         }
       } catch (error) {
-        this.error = error.response?.data?.message || 'Withdrawal failed'
-        return { success: false, message: this.error }
+        console.error('❌ Profile fetch error:', error)
+        this.error = error.message
+        return { success: false, message: error.message }
       } finally {
         this.isLoading = false
       }
     },
     
-    // ── FORGOT PASSWORD ─────────────────────────────────────────────────────
+    // ============ FETCH USER BALANCE ============
+    async fetchUserBalance() {
+      console.log('💰 Fetching user balance...')
+      
+      try {
+        const result = await this.fetchUserProfile()
+        
+        if (result.success) {
+          console.log('💰 Balance fetched:', this.user.balance)
+          return {
+            success: true,
+            balance: this.user.balance,
+            formatted: this.formattedBalance
+          }
+        }
+        
+        return { success: false, message: result.message }
+      } catch (error) {
+        console.error('❌ Balance fetch error:', error)
+        return { success: false, message: error.message }
+      }
+    },
+    
+    // ============ UPDATE USER BALANCE ============
+    updateUserBalance(newBalance) {
+      console.log('💰 Updating balance to:', newBalance)
+      
+      const balance = Number(newBalance)
+      this.user.balance = balance
+      
+      // Update localStorage if user is stored there
+      const storedUser = localStorage.getItem('user')
+      if (storedUser) {
+        try {
+          const userData = JSON.parse(storedUser)
+          userData.balance = balance
+          localStorage.setItem('user', JSON.stringify(userData))
+        } catch (e) {
+          console.error('Failed to update user in localStorage:', e)
+        }
+      }
+      
+      console.log('✅ Balance updated to:', this.user.balance)
+    },
+    
+    // ============ FORGOT PASSWORD ============
     async forgotPassword(phone_number) {
       this.isLoading = true
       this.error = null
@@ -346,13 +326,29 @@ export const useAuthStore = defineStore('auth', {
       }
     },
     
-    // ── RESET PASSWORD ──────────────────────────────────────────────────────
+    // ============ RESET PASSWORD ============
     async resetPassword(userId, newPassword, confirmPassword) {
       this.isLoading = true
       this.error = null
       
       try {
         const result = await authService.resetPassword(userId, newPassword, confirmPassword)
+        return result
+      } catch (error) {
+        this.error = error.message
+        return { success: false, message: error.message }
+      } finally {
+        this.isLoading = false
+      }
+    },
+    
+    // ============ CHANGE PASSWORD ============
+    async changePassword(phone_number, newPassword, confirmPassword) {
+      this.isLoading = true
+      this.error = null
+      
+      try {
+        const result = await authService.changePassword(phone_number, newPassword, confirmPassword)
         return result
       } catch (error) {
         this.error = error.message

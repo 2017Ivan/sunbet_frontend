@@ -1,8 +1,8 @@
 <template>
-    <div class="flex-1 bg-[#161616] border border-[#2A2A2A] rounded-[18px] overflow-hidden flex flex-col">
+    <div class="flex-1 bg-white border border-gray-200 rounded-[18px] overflow-hidden flex flex-col">
   
       <!-- ===== MATCH HEADER ===== -->
-      <div class="relative bg-gradient-to-br from-[#1a0505] to-[#161616] p-5 border-b border-[#2A2A2A]">
+      <div class="relative bg-gradient-to-br from-[#1a0505] to-[#161616] p-5 border-b border-gray-200">
         <div class="absolute inset-0 opacity-5 bg-[url('data:image/svg+xml,%3Csvg width=%2260%22 height=%2260%22 viewBox=%220 0 60 60%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cg fill=%22%23A32D2D%22 fill-opacity=%221%22%3E%3Cpath d=%22M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4z%22/%3E%3C/g%3E%3C/svg%3E')]" />
   
         <div class="relative z-10">
@@ -10,7 +10,7 @@
           <div class="flex items-center justify-between mb-4">
             <div class="flex items-center gap-2">
               <span class="text-lg">{{ match.leagueFlag }}</span>
-              <span class="text-sm font-semibold text-[#A0A0A0]">{{ match.league }}</span>
+              <span class="text-sm font-semibold text-gray-500">{{ match.league }}</span>
             </div>
             <div class="flex items-center gap-2">
               <span class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FF3B3B]/15 text-[#FF3B3B] text-xs font-bold border border-[#FF3B3B]/25">
@@ -19,7 +19,7 @@
               </span>
               <button
                 v-if="$emit"
-                class="lg:hidden w-7 h-7 rounded-full bg-[#2A2A2A] flex items-center justify-center text-[#606060] hover:text-white"
+                class="lg:hidden w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:text-gray-900"
                 @click="$emit('close')"
               >
                 <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -32,41 +32,41 @@
           <!-- Teams + Score -->
           <div class="grid grid-cols-3 gap-4 items-center">
             <div class="text-center">
-              <div class="w-16 h-16 rounded-full bg-[#1E1E1E] border-2 border-[#2A2A2A] mx-auto flex items-center justify-center text-3xl mb-2">
+              <div class="w-16 h-16 rounded-full bg-gray-100 border-2 border-gray-200 mx-auto flex items-center justify-center text-3xl mb-2">
                 {{ match.homeFlag }}
               </div>
               <p class="text-sm font-bold text-white">{{ match.home }}</p>
-              <p class="text-xs text-[#606060]">Home</p>
+              <p class="text-xs text-gray-500">Home</p>
             </div>
   
             <div class="text-center">
               <div class="text-4xl font-black text-white tabular-nums mb-1">
                 {{ match.score.home }}<span class="text-[#A32D2D]">:</span>{{ match.score.away }}
               </div>
-              <p class="text-xs text-[#606060]">HT {{ match.ht.home }}-{{ match.ht.away }}</p>
+              <p class="text-xs text-gray-500">HT {{ match.ht.home }}-{{ match.ht.away }}</p>
               <p class="text-[10px] text-[#A32D2D] font-semibold mt-1">{{ match.period }}</p>
             </div>
   
             <div class="text-center">
-              <div class="w-16 h-16 rounded-full bg-[#1E1E1E] border-2 border-[#2A2A2A] mx-auto flex items-center justify-center text-3xl mb-2">
+              <div class="w-16 h-16 rounded-full bg-gray-100 border-2 border-gray-200 mx-auto flex items-center justify-center text-3xl mb-2">
                 {{ match.awayFlag }}
               </div>
               <p class="text-sm font-bold text-white">{{ match.away }}</p>
-              <p class="text-xs text-[#606060]">Away</p>
+              <p class="text-xs text-gray-500">Away</p>
             </div>
           </div>
         </div>
       </div>
   
       <!-- ===== TABS ===== -->
-      <div class="flex border-b border-[#2A2A2A] overflow-x-auto scrollbar-hide">
+      <div class="flex border-b border-gray-200 overflow-x-auto scrollbar-hide">
         <button
           v-for="tab in tabs"
           :key="tab.id"
           class="flex-shrink-0 px-5 py-3 text-xs font-semibold border-b-2 transition-all"
           :class="activeTab === tab.id
             ? 'border-[#A32D2D] text-[#A32D2D]'
-            : 'border-transparent text-[#606060] hover:text-[#A0A0A0]'"
+            : 'border-transparent text-gray-500 hover:text-gray-500'"
           @click="activeTab = tab.id"
         >
           {{ tab.label }}
@@ -81,16 +81,16 @@
           <div
             v-for="market in match.markets"
             :key="market.name"
-            class="bg-[#0D0D0D] border border-[#2A2A2A] rounded-[12px] overflow-hidden"
+            class="bg-white border border-gray-200 rounded-[12px] overflow-hidden"
           >
             <!-- Market header -->
             <button
-              class="w-full flex items-center justify-between px-4 py-3 hover:bg-[#161616] transition-colors"
+              class="w-full flex items-center justify-between px-4 py-3 hover:bg-white transition-colors"
               @click="toggleMarket(market.name)"
             >
-              <span class="text-sm font-semibold text-[#A0A0A0]">{{ market.name }}</span>
+              <span class="text-sm font-semibold text-gray-500">{{ market.name }}</span>
               <svg
-                class="w-4 h-4 text-[#606060] transition-transform duration-200"
+                class="w-4 h-4 text-gray-500 transition-transform duration-200"
                 :class="collapsedMarkets.includes(market.name) ? 'rotate-180' : ''"
                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
               >
@@ -113,12 +113,12 @@
                   class="flex flex-col items-center gap-1 py-3 px-2 rounded-[10px] border transition-all duration-150 group"
                   :class="isBetSelected(odd.label)
                     ? 'bg-[#A32D2D] border-[#A32D2D]'
-                    : 'bg-[#161616] border-[#2A2A2A] hover:border-[#A32D2D]/50 hover:bg-[#A32D2D]/8'"
+                    : 'bg-white border-gray-200 hover:border-[#A32D2D]/50 hover:bg-[#A32D2D]/8'"
                   @click="$emit('bet', match, odd)"
                 >
                   <span
                     class="text-[10px] font-medium text-center leading-tight"
-                    :class="isBetSelected(odd.label) ? 'text-white/70' : 'text-[#606060]'"
+                    :class="isBetSelected(odd.label) ? 'text-white/70' : 'text-gray-500'"
                   >
                     {{ odd.label }}
                   </span>
@@ -147,7 +147,7 @@
         <!-- Stats tab -->
         <div v-else-if="activeTab === 'stats'" class="p-4 space-y-3">
   
-          <div class="bg-[#0D0D0D] border border-[#2A2A2A] rounded-[12px] p-4 space-y-4">
+          <div class="bg-white border border-gray-200 rounded-[12px] p-4 space-y-4">
   
             <!-- Stat row component -->
             <div
@@ -156,9 +156,9 @@
               class="space-y-1.5"
             >
               <div class="flex items-center justify-between text-xs">
-                <span class="font-bold text-white w-8 text-left">{{ stat.home }}</span>
-                <span class="text-[#606060] flex-1 text-center">{{ stat.label }}</span>
-                <span class="font-bold text-white w-8 text-right">{{ stat.away }}</span>
+                <span class="font-bold text-gray-900 w-8 text-left">{{ stat.home }}</span>
+                <span class="text-gray-500 flex-1 text-center">{{ stat.label }}</span>
+                <span class="font-bold text-gray-900 w-8 text-right">{{ stat.away }}</span>
               </div>
               <div class="flex gap-1 h-1.5 rounded-full overflow-hidden">
                 <div
@@ -170,7 +170,7 @@
                   :style="{ width: (stat.away / (stat.home + stat.away) * 100) + '%' }"
                 />
               </div>
-              <div class="flex justify-between text-[10px] text-[#606060]">
+              <div class="flex justify-between text-[10px] text-gray-500">
                 <span>{{ match.home }}</span>
                 <span>{{ match.away }}</span>
               </div>
@@ -183,7 +183,7 @@
         <div v-else-if="activeTab === 'timeline'" class="p-4">
           <div class="relative">
             <!-- Centre line -->
-            <div class="absolute left-1/2 top-0 bottom-0 w-px bg-[#2A2A2A] -translate-x-1/2" />
+            <div class="absolute left-1/2 top-0 bottom-0 w-px bg-gray-100 -translate-x-1/2" />
   
             <div class="space-y-3">
               <div
@@ -198,19 +198,19 @@
                   :class="event.team === 'home' ? 'text-right' : 'text-left'"
                 >
                   <div
-                    class="inline-block bg-[#1E1E1E] border border-[#2A2A2A] rounded-[10px] px-3 py-2"
+                    class="inline-block bg-gray-100 border border-gray-200 rounded-[10px] px-3 py-2"
                   >
-                    <p class="text-xs font-semibold text-white">{{ event.player }}</p>
-                    <p class="text-[10px] text-[#606060] mt-0.5 capitalize">{{ event.type.replace('_', ' ') }}</p>
+                    <p class="text-xs font-semibold text-gray-900">{{ event.player }}</p>
+                    <p class="text-[10px] text-gray-500 mt-0.5 capitalize">{{ event.type.replace('_', ' ') }}</p>
                   </div>
                 </div>
   
                 <!-- Centre: Minute + Icon -->
                 <div class="flex flex-col items-center flex-shrink-0 z-10">
-                  <div class="w-9 h-9 rounded-full bg-[#161616] border-2 border-[#2A2A2A] flex items-center justify-center text-base">
+                  <div class="w-9 h-9 rounded-full bg-white border-2 border-gray-200 flex items-center justify-center text-base">
                     {{ event.icon }}
                   </div>
-                  <span class="text-[9px] text-[#606060] mt-1">{{ event.minute }}'</span>
+                  <span class="text-[9px] text-gray-500 mt-1">{{ event.minute }}'</span>
                 </div>
   
                 <!-- Spacer -->
@@ -224,7 +224,7 @@
                   <div class="w-9 h-9 rounded-full bg-[#A32D2D]/15 border-2 border-[#A32D2D]/30 flex items-center justify-center text-[10px] font-bold text-[#A32D2D]">
                     KO
                   </div>
-                  <span class="text-[9px] text-[#606060] mt-1">0'</span>
+                  <span class="text-[9px] text-gray-500 mt-1">0'</span>
                 </div>
                 <div class="flex-1" />
               </div>

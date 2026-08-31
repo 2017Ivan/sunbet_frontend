@@ -1,4 +1,3 @@
-<!-- HomePage.vue -->
 <template>
   <div class="mx-auto">
     <!-- Loading State -->
@@ -6,37 +5,45 @@
     
     <!-- Actual Content -->
     <template v-else>
-      <div class="bg-white">
+      <div class="bg-gray-100">
         <HeroSection />
         <GamesTabs :games="displayGames" />
 
+        <!-- No Matches Found -->
+        <div v-if="displayGames.length === 0" class="py-12 text-center bg-white">
+          <div class="flex flex-col items-center justify-center gap-4">
+            <svg class="w-20 h-20 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+
+            <h3 class="text-xl font-bold text-gray-600">No Matches Found</h3>
+            <p class="text-sm text-gray-500 max-w-sm">
+              There are currently no upcoming matches available. Please check back later.
+            </p>
+            <button 
+              @click="refreshMatches" 
+              class="px-6 py-2 mt-2 text-sm font-semibold text-white transition-colors bg-rose-600 rounded-lg hover:bg-rose-700"
+            >
+              Refresh
+            </button>
+          </div>
+        </div>
+
         <!-- League Groups -->
         <div 
+          v-else
           v-for="(matches, leagueName) in groupedGames" 
           :key="leagueName"
-          class=""
         >
           <!-- League Header -->
-          <div class="sticky top-0 z-10 py-2 pl-1 bg-gradient-to-b from-gray-400 via-gray-700/0 to-gray-400 backdrop-blur-sm">
+          <div class="sticky top-0 z-10 py-2 pl-1 bg-gradient-to-b from-emerald-600 via-green-400 to-emerald-600 backdrop-blur-sm">
             <div class="flex items-center justify-between">
-              <span class="text-xs font-bold text-gray-800 truncate">{{ leagueName }}</span>
+              <span class="text-xs font-bold text-gray-50 truncate">{{ leagueName }}</span>
 
               <div class="flex gap-1 flex-shrink-0">
-                <span 
-                  class="w-12  text-center text-xs sm:text-sm font-bold text-gray-600 hover:text-white rounded transition-colors duration-200"
-                >
-                  1
-                </span>
-                <span 
-                  class="w-12  text-center text-xs sm:text-sm font-bold text-gray-600 hover:text-white rounded transition-colors duration-200"
-                >
-                  x
-                </span>
-                <span 
-                  class="w-12  text-center text-xs sm:text-sm font-bold text-gray-600 hover:text-white rounded transition-colors duration-200"
-                >
-                  2
-                </span>
+                <span class="w-12 text-center text-xs sm:text-sm font-bold text-gray-50 hover:text-gray-900 rounded transition-colors duration-200">1</span>
+                <span class="w-12 text-center text-xs sm:text-sm font-bold text-gray-50 hover:text-gray-900 rounded transition-colors duration-200">X</span>
+                <span class="w-12 text-center text-xs sm:text-sm font-bold text-gray-50 hover:text-gray-900 rounded transition-colors duration-200">2</span>
               </div>
             </div>
           </div>
@@ -52,14 +59,37 @@
           </div>
         </div>
 
-        <!-- View All Button -->
-        <div class="text-center py-1.5 bg-gradient-to-b from-gray-300 via-gray-100 to-gray-300 backdrop-blur-sm">
+        <!-- View All Football -->
+        <div v-if="displayGames.length > 0" class="text-center py-1.5 bg-gradient-to-b from-emerald-600 via-green-400 to-emerald-600 backdrop-blur-sm">
           <button 
             @click="navigateToSports" 
-            class="text-gray-500 hover:text-rose-600 font-semibold text-sm transition-colors"
+            class="text-gray-600 hover:text-rose-600 font-semibold text-sm transition-colors"
           >
-            View All ({{ totalGamesCount }}) Sports 
+            View All Football ({{ totalGamesCount }}) 
           </button>
+        </div>
+
+        <!-- ══ LIVE MATCHES SECTION ══ -->
+        <div v-if="liveDisplayGames.length > 0" class="mt-3">
+          
+
+          <div class="bg-white overflow-hidden">
+            <MatchCard 
+              v-for="game in liveDisplayGames" 
+              :key="'live-' + game.id"
+              :game="game"
+              @click="navigateToMatch(game.id)"
+            />
+          </div>
+
+          <div class="text-center py-1.5 bg-gradient-to-b from-emerald-600 via-green-400 to-emerald-600 backdrop-blur-sm">
+            <button 
+              @click="navigateToLive" 
+              class="text-gray-600 hover:text-rose-600 font-semibold text-sm transition-colors"
+            >
+              View All Live ({{ liveTotalCount }}) 
+            </button>
+          </div>
         </div>
         
         <RecentWinners :winners="recentWinners" :scroll-speed="1.5" />
@@ -69,166 +99,208 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed, onMounted, watch, onUnmounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { storeToRefs } from 'pinia'
+import { useToast } from 'vue-toastification'
 import MatchCard from '../../components/betting/match Card/MatchCard.vue'
 import HeroSection from '../../components/ui/HeroSection/HeroCarousel.vue'
 import RecentWinners from '../../components/main components/RecentWinners/RecentWinners.vue'
 import GamesTabs from '../../components/ui/games/ GamesTabs.vue'
-import { useBetStore } from '../../stores/bets/betStore.js'
-import gamesData from '../../assets/DataManager/MatchePaser.js'
+import { useMatchStore } from '../../stores/match/useMatchStore.js'
+import { useBookingCodeStore } from '../../stores/bookingCode/useBookingCodeStore.js'
+import { useBetStore } from '../../stores/bet/betStore.js'
 import HomePageSkeleton from '../../components/skeletons/home/HomePageSkeleton.vue'
 
-// ---- Initialize Router ----
 const router = useRouter()
-
-// ---- State ----
-const isLoading = ref(true)
-
-// ---- Navigation Functions ----
-const navigateToSports = () => {
-  router.push({ name: 'sports' })
-}
-
-const navigateToMatch = (matchId) => {
-  router.push({
-    name: 'sport-detail',
-    params: { id: matchId }
-  })
-}
-
-// ---- Initialize Bet Store ----
+const route = useRoute()
+const toast = useToast()
+const bookingCodeStore = useBookingCodeStore()
 const betStore = useBetStore()
+const matchStore = useMatchStore()
+const { upcomingMatches, liveMatches, loading } = storeToRefs(matchStore)
 
-// ---- All games from parser ----
+const isLoading = ref(true)
 const allGames = ref([])
-
-// ---- Display only 7 games ----
 const displayGames = ref([])
+const allLiveGames = ref([])
+const liveDisplayGames = ref([])
 
-// ---- Detect sport from league name ----
+const navigateToSports = () => router.push({ name: 'sports' })
+const navigateToLive = () => router.push({ name: 'live' })
+const navigateToMatch = (matchId) => router.push({ name: 'sport-detail', params: { id: matchId } })
+const refreshMatches = async () => await loadGames()
+
+// ============================================
+// 🔄 TRANSFORM MATCH (UPCOMING ONLY)
+// ============================================
+const transformMatch = (dbMatch) => {
+  const odds1X2 = dbMatch.odds?.['1X2'] || dbMatch.odds || {}
+
+  return {
+    id: dbMatch.id || dbMatch.match_id,
+    league: dbMatch.league || 'Unknown League',
+    time: dbMatch.time || dbMatch.match_time || '',
+    date: dbMatch.date || dbMatch.match_date || '',
+    elapsed_minute: null,
+    status: dbMatch.status || 'UPCOMING',
+    live: false,
+    sport: detectSport(dbMatch.league),
+    homeTeam: dbMatch.home_team || dbMatch.homeTeam || 'Unknown',
+    awayTeam: dbMatch.away_team || dbMatch.awayTeam || 'Unknown',
+    currentScore: { home: 0, away: 0 },
+    predetermined_script: dbMatch.predetermined_script,
+    odds: {
+      home: parseFloat(odds1X2['1'] || odds1X2.home) || null,
+      draw: parseFloat(odds1X2['X'] || odds1X2.draw) || null,
+      away: parseFloat(odds1X2['2'] || odds1X2.away) || null
+    },
+    _raw: dbMatch
+  }
+}
+
+const transformLiveMatch = (dbMatch) => {
+  const odds1X2 = dbMatch.odds?.['1X2'] || dbMatch.odds || {}
+
+  return {
+    id: dbMatch.id || dbMatch.match_id,
+    league: dbMatch.league || 'Unknown League',
+    time: dbMatch.time || dbMatch.match_time || '',
+    date: dbMatch.date || dbMatch.match_date || '',
+    elapsed_minute: dbMatch.elapsed_minute ?? dbMatch.current_minute,
+    status: dbMatch.status || 'LIVE',
+    live: true,
+    sport: detectSport(dbMatch.league),
+    homeTeam: dbMatch.home_team || dbMatch.homeTeam || 'Unknown',
+    awayTeam: dbMatch.away_team || dbMatch.awayTeam || 'Unknown',
+    currentScore: dbMatch.current_score || dbMatch.score || { home: 0, away: 0 },
+    predetermined_script: dbMatch.predetermined_script,
+    odds: {
+      home: parseFloat(odds1X2['1'] || odds1X2.home) || null,
+      draw: parseFloat(odds1X2['X'] || odds1X2.draw) || null,
+      away: parseFloat(odds1X2['2'] || odds1X2.away) || null
+    },
+    _raw: dbMatch
+  }
+}
+
 const detectSport = (league) => {
-  const leagueLower = league.toLowerCase()
-  if (leagueLower.includes('basketball') || leagueLower.includes('nba')) return 'basketball'
-  if (leagueLower.includes('tennis') || leagueLower.includes('wimbledon')) return 'tennis'
-  if (leagueLower.includes('cricket') || leagueLower.includes('icc')) return 'cricket'
-  if (leagueLower.includes('rugby')) return 'rugby'
+  const l = (league || '').toLowerCase()
+  if (l.includes('basketball') || l.includes('nba')) return 'basketball'
+  if (l.includes('tennis')) return 'tennis'
   return 'football'
 }
 
-// ---- Load games from parser ----
-const loadGames = () => {
+const loadGames = async () => {
   isLoading.value = true
-  
-  // Simulate API delay
-  setTimeout(() => {
-    try {
-      // Map the parsed data to match the expected format
-      const mappedGames = gamesData.map((item, index) => ({
-        id: item.id || index + 1,
-        league: item.league || 'Unknown League',
-        time: item.time || '00:00',
-        date: item.date || new Date().toLocaleDateString(),
-        status: 'Upcoming',
-        sport: detectSport(item.league),
-        homeTeam: item.homeTeam || 'Unknown',
-        awayTeam: item.awayTeam || 'Unknown',
-        odds: {
-          home: parseFloat(item.homeOdds) || 1.00,
-          draw: parseFloat(item.drawOdds) || 1.00,
-          away: parseFloat(item.awayOdds) || 1.00
-        },
-        totalBets: item.market || Math.floor(Math.random() * 50) + 10
-      }))
+  try {
+    await matchStore.fetchAllMatches()
 
-      allGames.value = mappedGames
-      
-      // Take only first 7 games for display
-      displayGames.value = mappedGames.slice(0, 7)
-      
-    } catch (error) {
-      console.error('Error loading games data:', error)
-      allGames.value = []
-      displayGames.value = []
-    } finally {
-      isLoading.value = false
-    }
-  }, 800) // Simulate loading delay
+    // 📊 LOG RAW DATABASE MATCHES
+    console.groupCollapsed('📊 UPCOMING MATCHES FROM DATABASE')
+    console.log('Total Upcoming Matches:', upcomingMatches.value.length)
+    console.table(upcomingMatches.value.map((m) => ({
+      id: m.id,
+      home_team: m.home_team,
+      away_team: m.away_team,
+      league: m.league,
+      date: m.date,
+      time: m.time,
+      status: m.status,
+    })))
+    console.log('Full Raw Data:', upcomingMatches.value)
+    console.groupEnd()
+
+    const mapped = upcomingMatches.value.map(transformMatch)
+    allGames.value = mapped
+    displayGames.value = mapped.slice(0, 6)
+
+    const mappedLive = liveMatches.value.map(transformLiveMatch)
+    allLiveGames.value = mappedLive
+    liveDisplayGames.value = mappedLive.slice(0, 3)
+  } catch (error) {
+    console.error('Error loading games:', error)
+  } finally {
+    isLoading.value = false
+  }
 }
 
-// ---- Group games by league (for display) ----
 const groupedGames = computed(() => {
   const groups = {}
   displayGames.value.forEach(game => {
-    if (!groups[game.league]) {
-      groups[game.league] = []
-    }
+    if (!groups[game.league]) groups[game.league] = []
     groups[game.league].push(game)
   })
   return groups
 })
 
-// ---- Total games count (from all games, not just display) ----
-const totalGamesCount = computed(() => {
-  return allGames.value.length
-})
+const totalGamesCount = computed(() => allGames.value.length)
+const liveTotalCount = computed(() => allLiveGames.value.length)
 
-// ---- Recent winners ----
+watch(upcomingMatches, (newMatches) => {
+  if (!loading.value) {
+    const mapped = newMatches.map(transformMatch)
+    allGames.value = mapped
+    displayGames.value = mapped.slice(0, 6)
+  }
+}, { deep: true })
+
+watch(liveMatches, (newLiveMatches) => {
+  if (!loading.value) {
+    const mapped = newLiveMatches.map(transformLiveMatch)
+    allLiveGames.value = mapped
+    liveDisplayGames.value = mapped.slice(0, 3)
+  }
+}, { deep: true })
+
 const recentWinners = [
-  { 
-    initials: 'JM', 
-    phone: '+255677453123',
-    name: 'James M.', 
-    bet: 'Accumulator x8', 
-    sport: 'Football', 
-    amount: 'TZS 4,200,000', 
-    time: '5 min ago', 
-    avatarColor: '#A32D2D' 
-  },
-  { 
-    initials: 'AK', 
-    phone: '+255712345678',
-    name: 'Amina K.', 
-    bet: 'Single bet', 
-    sport: 'Tennis', 
-    amount: 'TZS 850,000', 
-    time: '12 min ago', 
-    avatarColor: '#7A1F1F' 
-  },
-  { 
-    initials: 'SM', 
-    phone: '+255756789012',
-    name: 'Said M.', 
-    bet: 'Double bet', 
-    sport: 'Basketball', 
-    amount: 'TZS 1,350,000', 
-    time: '28 min ago', 
-    avatarColor: '#C94040' 
-  },
-  { 
-    initials: 'FH', 
-    phone: '+255698765432',
-    name: 'Fatuma H.', 
-    bet: 'Accumulator x5', 
-    sport: 'Football', 
-    amount: 'TZS 2,780,000', 
-    time: '1 hr ago', 
-    avatarColor: '#6B1A1A' 
-  },
-  { 
-    initials: 'DM', 
-    phone: '+255623456789',
-    name: 'David M.', 
-    bet: 'Single bet', 
-    sport: 'Cricket', 
-    amount: 'TZS 420,000', 
-    time: '2 hrs ago', 
-    avatarColor: '#8B2020' 
-  },
+  { initials: 'JM', phone: '+255677***123', name: 'James M.', bet: 'Accumulator x8', sport: 'Football', amount: 'TZS 4,200,000', time: '5 min ago', avatarColor: '#A32D2D' },
+  { initials: 'AK', phone: '+255712***678', name: 'Amina K.', bet: 'Single bet', sport: 'Tennis', amount: 'TZS 850,000', time: '12 min ago', avatarColor: '#7A1F1F' }
 ]
 
-// ---- Load data on mount ----
+// ---- Auto-load booking code from a shared link (?booking=CODE) ----
+const loadBookingFromQuery = async () => {
+  const code = route.query.booking
+  if (!code) return
+
+  let result
+  try {
+    result = await bookingCodeStore.loadBookingCode(code)
+  } catch (e) {
+    result = { success: false, message: 'Unable to load this booking code.' }
+  }
+
+  if (!result || !result.success) {
+    toast.error(result?.message || 'Invalid or expired booking code', { position: 'bottom-right', timeout: 4000 })
+    return
+  }
+
+  const selections = bookingCodeStore.loadedSelections
+  if (selections.length === 0) {
+    toast.error('No selections found in this code', { position: 'bottom-right', timeout: 4000 })
+    return
+  }
+
+  betStore.clearSlip()
+  selections.forEach((sel) => betStore.addToSlip(sel))
+  toast.success(`💰 ${selections.length} selection(s) loaded to your bet slip!`, { position: 'bottom-right', timeout: 4000 })
+}
+
 onMounted(() => {
   loadGames()
+  matchStore.initMatchSocket()
+  loadBookingFromQuery()
+})
+
+// Ikifika code mpya huku tu tayari tuko kwenye home page
+watch(
+  () => route.query.booking,
+  (code) => {
+    if (code) loadBookingFromQuery()
+  }
+)
+
+onUnmounted(() => {
+  matchStore.disconnectSocket()
 })
 </script>

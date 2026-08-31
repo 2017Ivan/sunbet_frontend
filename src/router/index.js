@@ -11,7 +11,7 @@ const HomePage = () => import("../pages/home/HomePage.vue");
 const DashboardPage = () => import("../pages/Dashboard/DashboardPage.vue");
 const SportsPage = () => import("../pages/sport/SportsPage.vue");
 const SportDetailPage = () => import("../pages/sport/view/SportDetailPage.vue"); 
-const LivePage = () => import("../pages/live/LivePage.vue");
+const LivePage = () => import("../pages/sport/live/LivePage.vue");
 const CasinoPage = () => import("../pages/casino/CasinoPage.vue");
 const AviatorPage = () => import("../pages/aviator/AviatorPage.vue");
 const VirtualsPage = () => import("../pages/virtual/VirtualsPage.vue");
@@ -24,6 +24,7 @@ const NotFoundPage = () => import("../pages/notfound/NotFoundPage.vue");
 const ProfilePage = () => import("../pages/profile/ProfilePage.vue");
 const DepositePage = () => import("../pages/money/deposite/Deposit.vue");
 const WithdrawPage = () => import("../pages/money/withdraw/Withdraw.vue");
+const LeaderBoard = () => import("../pages/leaderBoard/LeaderboardPage.vue")
 
 // ── Routes ────────────────────────────────────────────────────────────────────
 const routes = [
@@ -75,6 +76,7 @@ const routes = [
         component: SportsPage,
         meta: { title: "Sports" },
       },
+       
       {
         path: "sport-detail/:id",
         name: "sport-detail",
@@ -93,6 +95,12 @@ const routes = [
         name: "casino",
         component: CasinoPage,
         meta: { title: "Casino" },
+      },
+      {
+        path: "leaderboard",
+        name: "leaderboard",
+        component: LeaderBoard,
+        meta: { title: "leaderboard" },
       },
       {
         path: "casino/aviator",
@@ -145,6 +153,12 @@ const routes = [
         meta: { title: "Profile", requiresAuth: true },
       },
       {
+        path: "notifications",
+        name: "notifications",
+        component: () => import('../pages/notifications/NotificationsPage.vue'),
+        meta: { title: "Notifications", requiresAuth: true },
+      },
+      {
         path: "bets",
         name: "bets",
         component: BetsPage,
@@ -157,6 +171,12 @@ const routes = [
         meta: { title: "Bet Detail", requiresAuth: true },
       },
       {
+        path: 'share/bet/:ticketCode',
+        name: 'share-bet',
+        component: () => import('../pages/share/ShareBetPage.vue'),
+        meta: { title: "Shared Bet" },
+      },
+      {
         path: '/deposit/status',
         name: 'DepositStatus',
         component: () => import('../pages/money/deposite/views/DepositStatus.vue'),
@@ -166,8 +186,18 @@ const routes = [
   },
 
   // ════════════════════════════════════════════════════════════════════
-  // 3. ADMIN / AGENT ROUTES
+  // 3. PUBLIC SHARE ROUTES (no auth required)
   // ════════════════════════════════════════════════════════════════════
+  // /booking/:code → BookingLoadPage hupakia code halafu yenyewe inaamua ku-redirect
+  {
+    path: "/booking/:code",
+    name: "booking-load",
+    component: () => import('../pages/booking/BookingLoadPage.vue'),
+    meta: { title: "Load Booking" },
+  },
+
+  // ════════════════════════════════════════════════════════════════════
+  // 3. ADMIN / AGENT ROUTES
   {
     path: "/admin",
     component: AdminLayout,
@@ -201,7 +231,7 @@ const routes = [
         name: "admin-bets",
         component: () => import('../pages/admin/components/AdminBets.vue'),
         meta: { 
-          title: "Manage Bets", 
+          title: "All Bets", 
           requiresAuth: true, 
           requiresRole: ['ADMIN', 'AGENT'] 
         },
@@ -211,7 +241,7 @@ const routes = [
         name: "admin-booking-codes",
         component: () => import('../pages/admin/components/bookingcode/AdminBookingCodes.vue'),
         meta: { 
-          title: "Manage booking-codes", 
+          title: "Booking Codes", 
           requiresAuth: true, 
           requiresRole: ['ADMIN', 'AGENT'] 
         },
@@ -239,11 +269,21 @@ const routes = [
       {
         path: "fixtures",
         name: "admin-fixtures",
-        component: () => import('../pages/admin/components/AdminFixtures.vue'),
+        component: () => import('../pages/admin/components/fixctures/AdminFixtures.vue'),
         meta: { 
           title: "Fixtures", 
           requiresAuth: true, 
           requiresRole: ['ADMIN', 'AGENT'] 
+        },
+      },
+      {
+        path: "deposits",
+        name: "admin-deposits",
+        component: () => import('../pages/admin/components/AdminDeposits.vue'),
+        meta: {
+          title: "Deposits",
+          requiresAuth: true,
+          requiresRole: ['ADMIN']
         },
       },
     ],

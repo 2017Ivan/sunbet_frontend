@@ -3,7 +3,7 @@
   <div>
     <div class="mb-8">
       <h2 class="text-2xl font-bold text-white">Welcome back 👋</h2>
-      <p class="text-sm text-[#606060] mt-1">Login to continue betting</p>
+      <p class="text-sm text-gray-500 mt-1">Login to continue betting</p>
     </div>
 
     <form class="space-y-4" @submit.prevent="handleLogin">
@@ -11,18 +11,13 @@
         v-model="form.phone"
         label="Phone Number"
         placeholder="Enter 9 digit number"
-        type="tel"
+type="tel"
+       
         required
         :phone="true"
         hint="Enter 9 digits (e.g., 798764567)"
         :error="errors.phone"
-      >
-        <template #icon-left>
-          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 014.69 12 19.79 19.79 0 011.61 3.4 2 2 0 013.6 1.22h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L7.91 8.82a16 16 0 006.29 6.29l.97-.97a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/>
-          </svg>
-        </template>
-      </AppInput>
+      />
 
       <AppInput
         v-model="form.password"
@@ -53,7 +48,7 @@
               <polyline points="20 6 9 17 4 12"/>
             </svg>
           </div>
-          <span class="text-xs text-[#606060]">Remember me</span>
+          <span class="text-xs text-gray-500">Remember me</span>
         </label>
         <button type="button" class="text-xs text-[#A32D2D] hover:text-[#C94040] transition-colors" @click="goToForgotPassword">
           Forgot password?
@@ -78,7 +73,7 @@
       </AppButton>
     </form>
 
-    <p class="text-center text-sm text-[#606060] mt-6">
+    <p class="text-center text-sm text-gray-500 mt-6">
       Don't have an account?
       <router-link to="/register" class="text-[#A32D2D] font-semibold hover:text-[#C94040] transition-colors">
         Register free
@@ -116,18 +111,50 @@ const errors = ref({ phone: '', password: '' })
 const validatePhone = (phone) => {
   if (!phone) return 'Phone number is required'
   
+  // Remove all non-digit characters
   const cleaned = String(phone).replace(/\D/g, '')
   
+  // Must be exactly 9 digits
   if (cleaned.length !== 9) {
     return 'Phone number must be exactly 9 digits'
   }
   
+  // Must start with 6, 7, or 4
   const validPrefixes = ['6', '7', '4']
   if (!validPrefixes.includes(cleaned[0])) {
     return 'Phone number must start with 6, 7, or 4'
   }
   
   return null
+}
+
+// ---- Format phone to 255 + 9 digits ----
+const formatPhoneForAPI = (phone) => {
+  if (!phone) return ''
+  
+  // Remove all non-digit characters
+  let cleaned = String(phone).replace(/\D/g, '')
+  
+  // If it's 9 digits, add 255 prefix
+  if (cleaned.length === 9) {
+    return '255' + cleaned
+  }
+  
+  // If it already has 255 and is 12 digits, return as is
+  if (cleaned.length === 12 && cleaned.startsWith('255')) {
+    return cleaned
+  }
+  
+  // If it starts with 0, replace with 255
+  if (cleaned.startsWith('0')) {
+    const withoutZero = cleaned.substring(1)
+    if (withoutZero.length === 9) {
+      return '255' + withoutZero
+    }
+  }
+  
+  // Return cleaned as fallback
+  return cleaned
 }
 
 // ---- Go to Forgot Password ----
@@ -141,10 +168,7 @@ const handleLogin = async () => {
   loginError.value = ''
   let valid = true
 
-  console.log('🔄 Starting login process...')
-  console.log('📱 Phone:', form.value.phone)
-
-  // Validate phone
+  // Validate phone (must be 9 digits)
   const phoneError = validatePhone(form.value.phone)
   if (phoneError) {
     errors.value.phone = phoneError
@@ -162,40 +186,41 @@ const handleLogin = async () => {
 
   if (!valid) return
 
+  // Format phone to 255 + 9 digits for API
+  const formattedPhone = formatPhoneForAPI(form.value.phone)
+  
+  console.log('🔄 Starting login process...')
+  console.log('📱 Original phone (user input):', form.value.phone)
+  console.log('📱 Formatted phone (for API):', formattedPhone)
+
   loading.value = true
   
   try {
     const result = await authStore.login(
-      form.value.phone,
+      formattedPhone,  // Send with 255 prefix
       form.value.password
     )
 
     console.log('📨 Login result:', result)
 
-    // ONLY redirect if login was successful
     if (result.success) {
       console.log('✅ Login successful!')
       
-      // Check if store is updated
       if (!authStore.isLoggedIn) {
         console.warn('⚠️ Store says not logged in, re-initializing...')
         await authStore.initialize()
       }
       
-      // Small delay
       await new Promise(resolve => setTimeout(resolve, 100))
       
       const redirect = route.query.redirect || '/'
       console.log('🔄 Redirecting to:', redirect)
       
-      // 👇 USE replace to avoid back button issues
       router.replace(redirect)
     } else {
-      // 👇 SHOW ERROR - DO NOT REDIRECT
       console.log('❌ Login failed:', result.message)
       loginError.value = result.message || 'Login failed. Please try again.'
       
-      // Set field-specific errors
       if (result.message?.toLowerCase().includes('phone') || 
           result.message?.toLowerCase().includes('number') ||
           result.message?.toLowerCase().includes('not found')) {
@@ -204,14 +229,11 @@ const handleLogin = async () => {
         errors.value.password = result.message
       }
       
-      // 👇 IMPORTANT: Stay on login page
-      // Do NOT redirect
       return
     }
   } catch (error) {
     console.error('❌ Login error:', error)
     loginError.value = 'An unexpected error occurred. Please try again.'
-    // 👇 Stay on login page
   } finally {
     loading.value = false
   }

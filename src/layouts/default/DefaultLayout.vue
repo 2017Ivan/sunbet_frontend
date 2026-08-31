@@ -1,6 +1,6 @@
 <!-- DefaultLayout.vue -->
 <template>
-  <div class="min-h-screen bg-gray-950 px-0 lg:px-45">
+  <div class="min-h-screen flex flex-col bg-gray-950">
     <!-- Loading State -->
     <DefaultLayoutSkeleton v-if="isLoading" />
     
@@ -15,31 +15,25 @@
         @logout="handleLogout"
       />
 
-      <!-- Main Content Area -->
-      <div class="max-w-7xl mx-auto">
-        <div class="flex flex-col lg:flex-row">
-          <!-- Main Content - Left Side -->
-          <div class="flex-1 min-w-0 flex flex-col">
-            <div class="flex-1">
-              <slot name="main">
-                <router-view></router-view>
-              </slot>
-            </div>
-            
-            <div class="lg:pb-0">
-              <Footer />
-            </div>
-          </div>
+      <!-- Main Content Area (left padding reserved for fixed sidebar) -->
+      <div class="max-w-7xl mx-auto w-full lg:pr-[300px] xl:pr-[360px] 2xl:pr-[420px]">
+        <!-- Main Content - shrinks/expands to fit the page content -->
+        <slot name="main">
+          <router-view></router-view>
+        </slot>
 
-          <!-- Right Sidebar - Desktop only (Fixed/Sticky) -->
-          <div class="hidden lg:block flex-shrink-0 bg-gray-800 border-l border-gray-700 sticky top-[56px] h-[calc(100vh-56px)] overflow-y-auto"
-               :class="sidebarWidthClass">
-            <slot name="sidebar">
-              <!-- Desktop Bet Slip -->
-              <BetSlip mode="desktop" />
-            </slot>
-          </div>
-        </div>
+        <Footer />
+      </div>
+
+      <!-- Right Sidebar - Desktop only (fixed, aligned with centered container) -->
+      <div
+        class="hidden lg:block lg:fixed lg:top-14 lg:right-[max(0px,calc((100vw-80rem)/2))] lg:h-[calc(100vh-3.5rem)] bg-gray-800 border-l border-gray-700 overflow-y-auto"
+        :class="sidebarWidthClass"
+      >
+        <slot name="sidebar">
+          <!-- Desktop Bet Slip -->
+          <BetSlip mode="desktop" />
+        </slot>
       </div>
 
       <!-- Bottom Navigation - Mobile only -->
@@ -66,23 +60,38 @@
         @close="closeBetSlip"
         @place-bet="handlePlaceBet"
       />
+
+      <!-- Win Celebration (appears on first login when a bet won while away) -->
+      <WinCelebrationModal v-if="currentCelebrationWin" :win="currentCelebrationWin" @close="dismissWin" />
+
+      <!-- Daily Login Reward (after win celebration queue, only if claimable) -->
+      <DailyRewardModal
+        v-if="showDailyRewardModal && dailyRewardStatus"
+        :status="dailyRewardStatus"
+        @close="dismissDailyReward"
+      />
     </template>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useAuthStore } from '../../stores/auth/authStore.js'
-import { useBetStore } from '../../stores/bets/betStore.js'
+import { useBetStore } from '../../stores/bet/betStore.js'
 import Header from '../../components/main components/header/Header.vue'
 import Footer from '../../components/main components/footer/Footer.vue'
 import BottomNav from '../../components/main components/BottomNav/BottomNav.vue'
 import BetSlip from '../../components/betting/betslip/BetSlip.vue'
 import MobileSidebar from '../../components/main components/MobileSidebar/MobileSidebar.vue'
 import DefaultLayoutSkeleton from '../../components/skeletons/default/DefaultLayoutSkeleton.vue'
+import WinCelebrationModal from '../../components/bet/WinCelebrationModal.vue'
+import DailyRewardModal from '../../components/reward/DailyRewardModal.vue'
 
 const authStore = useAuthStore()
 const betStore = useBetStore()
+
+// ---- Bet Slip state ----
+const isBetSlipOpen = ref(false)
 
 // ---- Loading State ----
 const isLoading = ref(true)
@@ -99,7 +108,6 @@ const userBalance = computed(() => {
 })
 
 // ---- Bet Slip state ----
-const isBetSlipOpen = ref(false)
 const isMobileSidebarOpen = ref(false)
 const betSlipCount = computed(() => betStore.slipCount)
 
@@ -151,6 +159,63 @@ onMounted(() => {
     isLoading.value = false
   }, 800)
 })
+
+// ---- Win Celebration ----
+const currentCelebrationWin = ref(null)
+
+const showNextCelebration = () => {
+  const wins = Array.isArray(betStore.winNotifications) ? betStore.winNotifications : []
+  currentCelebrationWin.value = wins.length > 0 ? wins[0] : null
+}
+
+const dismissWin = async () => {
+  const win = currentCelebrationWin.value
+  currentCelebrationWin.value = null
+  if (win) {
+    await betStore.acknowledgeWin(win.id)
+  }
+  showNextCelebration()
+  if (!currentCelebrationWin.value && showDailyRewardStatus.value === 'QUEUED') {
+    await showDailyRewardIfClaimable()
+  }
+}
+
+watch(
+  () => authStore.isLoggedIn,
+  async (loggedIn) => {
+    if (loggedIn) {
+      await betStore.fetchWinNotifications()
+      showNextCelebration()
+      if (!currentCelebrationWin.value) {
+        await showDailyRewardIfClaimable()
+      } else {
+        showDailyRewardStatus.value = 'QUEUED'
+      }
+    } else {
+      currentCelebrationWin.value = null
+      showDailyRewardModal.value = false
+    }
+  },
+  { immediate: true }
+)
+
+// ---- Daily Login Reward ----
+const dailyRewardStatus = ref(null)
+const showDailyRewardModal = ref(false)
+const showDailyRewardStatus = ref('IDLE')
+
+const showDailyRewardIfClaimable = async () => {
+  const status = await authStore.fetchDailyRewardStatus(true)
+  dailyRewardStatus.value = status
+  if (status && status.can_claim && !status.claimed_today) {
+    showDailyRewardModal.value = true
+  }
+}
+
+const dismissDailyReward = async () => {
+  showDailyRewardModal.value = false
+  dailyRewardStatus.value = await authStore.fetchDailyRewardStatus(true)
+}
 </script>
 
 <style scoped>

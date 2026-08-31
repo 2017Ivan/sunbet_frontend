@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-[#0D0D0D]">
+  <div class="p-0 bg-gray-950">
     <div class="max-w-2xl mx-auto px-1 py-3">
       
       <!-- Bet ID Header -->
@@ -106,23 +106,63 @@
         </div>
 
         <!-- Share Your Win -->
-        <div class="mt-4">
-          <button 
-            @click="shareWin"
-            class="group relative w-full cursor-pointer overflow-hidden bg-gradient-to-r from-green-600/50 via-green-500 to-green-400/40 border border-rose-400/30 rounded-xl p-3.5 transition-all duration-300 shadow-lg shadow-rose-500/20 hover:shadow-teal-500/40"
-          >
-            <div class="absolute inset-0 bg-gradient-to-r from-rose-400/20 to-rose-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-            <div class="relative flex items-center justify-center gap-3">
-              <span class="text-white font-bold text-base tracking-wide uppercase">Share Your Win</span>
-              <svg class="w-4 h-4 text-white/70 group-hover:rotate-6 transition-transform duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <circle cx="18" cy="5" r="3" stroke-linecap="round" stroke-linejoin="round"/>
-                <circle cx="6" cy="12" r="3" stroke-linecap="round" stroke-linejoin="round"/>
-                <circle cx="18" cy="19" r="3" stroke-linecap="round" stroke-linejoin="round"/>
-                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" stroke-linecap="round"/>
-                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" stroke-linecap="round"/>
-              </svg>
+        <div v-if="!isOpen" class="mt-4">
+          <div class="bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-4">
+            <p class="text-center text-xs text-[#8E8E8E] font-medium mb-3">
+              Share this {{ isWon ? 'win' : 'bet' }} with friends
+            </p>
+
+            <!-- Native Share -->
+            <button
+              class="w-full mb-3 py-3 rounded-xl bg-gradient-to-r from-rose-600 to-rose-500 text-white font-bold text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-opacity"
+              :title="'Share this result via any social app'"
+              @click="shareWin()"
+            >
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+              Share Result
+            </button>
+
+            <div class="flex items-center justify-center gap-3 flex-wrap">
+              <!-- WhatsApp -->
+              <button
+                class="w-12 h-12 rounded-full bg-[#25D366] text-white flex items-center justify-center hover:scale-105 transition-transform shadow-lg"
+                :title="'Share on WhatsApp'"
+                @click="shareWin('whatsapp')"
+              >
+                <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.019-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+              </button>
+
+              <!-- Facebook -->
+              <button
+                class="w-12 h-12 rounded-full bg-[#1877F2] text-white flex items-center justify-center hover:scale-105 transition-transform shadow-lg"
+                :title="'Share on Facebook'"
+                @click="shareWin('facebook')"
+              >
+                <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor"><path d="M22 12.06C22 6.5 17.52 2 12 2S2 6.5 2 12.06c0 5.02 3.66 9.18 8.44 9.94v-7.03H7.9v-2.91h2.54V9.85c0-2.52 1.49-3.91 3.77-3.91 1.09 0 2.23.2 2.23.2v2.46h-1.26c-1.24 0-1.62.77-1.62 1.56v1.87h2.76l-.44 2.91h-2.32V22c4.78-.76 8.44-4.92 8.44-9.94z"/></svg>
+              </button>
+
+              <!-- Instagram -->
+              <button
+                class="w-12 h-12 rounded-full bg-gradient-to-tr from-[#F58529] via-[#DD2A7B] to-[#8134AF] text-white flex items-center justify-center hover:scale-105 transition-transform shadow-lg"
+                :title="'Share link for Instagram'"
+                @click="shareWin('instagram')"
+              >
+                <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4.5"/><circle cx="17.5" cy="6.5" r="1.3" fill="currentColor" stroke="none"/></svg>
+              </button>
+
+              <!-- Copy link -->
+              <button
+                class="w-12 h-12 rounded-full bg-[#4A4A4A] text-white flex items-center justify-center hover:scale-105 transition-transform shadow-lg"
+                :title="'Copy share link'"
+                @click="shareWin('copy')"
+              >
+                <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+              </button>
             </div>
-          </button>
+            <p class="text-center text-[10px] text-[#8E8E8E] mt-3">
+              Friends see only the result — no account details
+            </p>
+          </div>
         </div>
 
         <!-- Selections - Using bookingCode selections -->
@@ -156,8 +196,7 @@
               </div>
               
               <div class="flex justify-between items-center py-1">
-                <span class="inline-block max-w-full truncate text-xs text-gray-500 font-bold ">{{ selection.league || '' }}</span>
-     
+                <span class="text-xs text-gray-500 font-bold truncate">{{ selection.league || '' }}</span>
                 <span class="text-xs text-[#A0A0A0] font-semibold">
                   <span class="text-xs text-gray-400 font-bold px-1">
                     {{ selection.score ? `${selection.score.home} - ${selection.score.away}` : '—' }}
@@ -242,13 +281,12 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { useBetStore } from '../../stores/bets/betStore.js'
-import { useBookingCodeStore } from '../../stores/bookingcode/bookingCodeStore.js'
+import { useBetStore } from '../../stores/bet/betStore.js'
+import * as shareUtil from '../../utils/share.js'
 
 const router = useRouter()
 const route = useRoute()
 const betStore = useBetStore()
-const bookingCodeStore = useBookingCodeStore()
 
 const bet = ref(null)
 const selections = ref([])
@@ -258,15 +296,53 @@ const isLoading = ref(false)
 const marketMap = {
   '1X2': '1X2 | Full Time',
   'Double Chance': 'Double Chance | Full Time',
-  'BTTS': 'Both Teams to Score | Full Time',
+  'Double_Chance': 'Double Chance | Full Time',
+  'BTTS': 'Both Teams To Score | Full Time',
   'Over/Under': 'Over/Under | Full Time',
+  'Over_Under': 'Over/Under | Full Time',
   'Correct Score': 'Correct Score | Full Time',
+  'Correct_Score': 'Correct Score | Full Time',
   'CS_FH': 'Correct Score | First Half',
-  'CS_SH': 'Correct Score | Second Half'
+  'CS_SH': 'Correct Score | Second Half',
+  'Handicap': 'Handicap | Full Time',
+  'HT_FT': 'Half Time/Full Time',
+  'BTTS_Win': 'BTTS & Match Result',
+  'Odd_Even': 'Total Goals (Odd/Even)',
+  'Total_Goals': 'Exact Total Goals',
+  'Both_Halves': 'Goals In Both Halves',
+  'First_Last_Goal': 'First/Last Goal',
+  'Highest_Scoring_Half': 'Highest Scoring Half',
+  'Clean_Sheet': 'Clean Sheet'
 }
 
 const getMarketDisplay = (marketKey) => {
-  return marketMap[marketKey] || marketKey || '1X2 | Full Time'
+  const clean = typeof marketKey === 'string' ? marketKey.split('|')[0].trim() : ''
+  return marketMap[clean] || marketMap[marketKey] || marketKey || '1X2 | Full Time'
+}
+
+const titleCaseWord = (w) => {
+  if (w === undefined || w === null || w === '') return ''
+  return String(w).charAt(0).toUpperCase() + String(w).slice(1).toLowerCase()
+}
+
+const formatOutcomeLabel = (outcomeKey) => {
+  if (outcomeKey === undefined || outcomeKey === null) return ''
+  const o = String(outcomeKey)
+
+  if (o === '1') return '1'
+  if (o === 'X') return 'Draw'
+  if (o === '2') return '2'
+
+  if (/^OVER\b/i.test(o)) return 'Over ' + o.replace(/^OVER[_ ]*/i, '').trim()
+  if (/^UNDER\b/i.test(o)) return 'Under ' + o.replace(/^UNDER[_ ]*/i, '').trim()
+
+  const parts = o.split('_')
+  const joined = parts.map((p) => {
+    if (/^[+\-]?\d+(\.\d+)?$/.test(p) || /^[0-9.]+[+]?$/.test(p)) return p
+    return titleCaseWord(p)
+  }).join(' ')
+
+  return joined.trim()
 }
 
 // ---- Result Class ----
@@ -276,30 +352,12 @@ const getResultClass = (result) => {
   return 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20'
 }
 
-// ---- Selection Display - FIXED ----
+// ---- Selection Display ----
 const getSelectionDisplay = (selection) => {
   if (!selection) return 'N/A'
-  
-  // Map selectionType to display value
-  const typeMap = {
-    'HOME': '1',
-    'DRAW': 'X',
-    'AWAY': '2',
-    'OVER': 'Over',
-    'UNDER': 'Under',
-    'YES': 'Yes',
-    'NO': 'No'
-  }
-  
-  const type = selection.selectionType || ''
-  
-  // Kama type ipo kwenye map, return thamani sahihi
-  if (typeMap[type]) {
-    return typeMap[type]
-  }
-  
-  // Vinginevyo tumia selectionValue ikiwa ipo
-  return selection.selectionValue || selection.pick || 'N/A'
+  const type = selection.selectionType || selection.pick || ''
+  if (!type) return 'N/A'
+  return formatOutcomeLabel(type)
 }
 
 // ---- Computed ----
@@ -390,20 +448,19 @@ const loadBet = async () => {
 
   isLoading.value = true
   try {
-    // Find bet in store
+    // Find bet in store (has embedded selections)
     const existingBet = betStore.userBets?.find(b => String(b.id) === String(id))
     if (existingBet) {
       bet.value = existingBet
-      // Load selections from booking code
-      await loadSelections(existingBet.bookingCodeId)
+      mapSelections(existingBet.selections)
       return
     }
 
-    // If not found, try API
-    const response = await betStore.fetchBetById(id)
+    // If not found and we have a ticket code, try public ticket API
+    const response = await betStore.fetchBetByTicket(id)
     if (response && response.data) {
       bet.value = response.data
-      await loadSelections(response.data.bookingCodeId)
+      mapSelections(response.data.selections)
     } else {
       bet.value = null
     }
@@ -415,63 +472,70 @@ const loadBet = async () => {
   }
 }
 
-// ---- Load Selections from Booking Code ----
-const loadSelections = async (bookingCodeId) => {
-  if (!bookingCodeId) {
-    selections.value = []
-    return
-  }
-
-  try {
-    // Fetch booking code with selections
-    const result = await bookingCodeStore.fetchBookingCodeById(bookingCodeId)
-    if (result && result.data) {
-      selections.value = result.data.selections || []
-    } else {
-      selections.value = []
+// ---- Map backend embedded selections to display format ----
+const mapSelections = (rawSelections) => {
+  const raw = rawSelections || []
+  selections.value = raw.map((sel) => {
+    const m = sel.match || {}
+    return {
+      time: m.time || '',
+      date: m.date || '',
+      matchName: `${m.home_team || ''} vs ${m.away_team || ''}`,
+      odds: sel.odds_at_placement || sel.odds || 1,
+      league: m.league || '',
+      score: m.current_score || null,
+      marketType: sel.market_key || sel.market || '1X2',
+      result: sel.status || 'PENDING',
+      selectionType: sel.outcome_key || sel.pick || ''
     }
-  } catch (error) {
-    console.error('Error loading selections:', error)
-    selections.value = []
-  }
+  })
 }
 
 // ---- Share Win ----
-const shareWin = async () => {
-  if (!bet.value) return
-  
-  const shareText = `🏆 I won ${formatNumber(payout.value)} TZS on SunBet! 🎉\nBet ID: #${bet.value.id}`
-  
-  if (navigator.share) {
-    try {
-      await navigator.share({
-        title: 'SunBet Win',
-        text: shareText,
-        url: window.location.href
-      })
-    } catch (err) {
-      if (err.name !== 'AbortError') {
-        console.error('Share failed:', err)
-        copyToClipboard(shareText)
-      }
-    }
+const ticketCode = computed(() => bet.value?.ticket_code || bet.value?.ticketCode || '')
+
+const publicShareUrl = computed(() => {
+  if (!ticketCode.value) return ''
+  return `${shareUtil.getShareOrigin()}/share/bet/${ticketCode.value}`
+})
+
+const buildShareText = () => {
+  const statusWord = isWon.value ? '🏆 I just WON' : isLost.value ? '😔 Bet lost' : '⏳ Check out my bet'
+  return `${statusWord} on SunBet! Bet ID: #${bet.value?.id} Payout: ${formatNumber(payout.value)} TZS`
+}
+
+const shareWin = async (platform) => {
+  const url = publicShareUrl.value
+  if (!url) return
+
+  if (platform === 'whatsapp') {
+    shareUtil.shareWhatsApp(`${buildShareText()}\n\n${url}`)
+  } else if (platform === 'facebook') {
+    shareUtil.shareFacebook(url)
+  } else if (platform === 'instagram') {
+    // Instagram haina web share-intent; nakili link
+    await copyToClipboard(`Join me on SunBet & see my result: ${url}`)
+  } else if (platform === 'copy') {
+    await copyToClipboard(`I just shared a bet on SunBet. View it here: ${url}`)
   } else {
-    copyToClipboard(shareText)
+    // Native share (default)
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: 'SunBet', text: buildShareText(), url })
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          await copyToClipboard(`${buildShareText()}\n${url}`)
+        }
+      }
+    } else {
+      await copyToClipboard(`${buildShareText()}\n${url}`)
+    }
   }
 }
 
-const copyToClipboard = (text) => {
-  navigator.clipboard.writeText(text).then(() => {
-    alert('✅ Copied to clipboard!')
-  }).catch(() => {
-    const textarea = document.createElement('textarea')
-    textarea.value = text
-    document.body.appendChild(textarea)
-    textarea.select()
-    document.execCommand('copy')
-    document.body.removeChild(textarea)
-    alert('✅ Copied to clipboard!')
-  })
+const copyToClipboard = async (text) => {
+  await shareUtil.copyToClipboard(text)
+  alert('✅ Copied to clipboard!')
 }
 
 // ---- Go Back ----

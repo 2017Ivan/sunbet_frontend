@@ -1,7 +1,7 @@
 <template>
-  <header class="bg-rose-700 shadow-lg sticky top-0 z-50 max-w-7xl mx-auto">
+  <header class="bg-rose-950 shadow-lg sticky top-0 z-50 w-full max-w-7xl mx-auto">
     <!-- ROW 1: Logo + User Actions -->
-    <div class="flex items-center justify-between mx-auto px-1 h-14 bg-gradient-to-r from-rose-900 to-rose-950 border-b border-rose-800">
+    <div class="flex items-center justify-between mx-auto px-2 h-14 bg-rose-950 border-b border-[#2A2A2A]">
       <div class="flex items-center gap-1">
         <!-- Hamburger (mobile only) -->
         <button
@@ -23,7 +23,7 @@
             </svg>
           </div>
           <span class="font-bold text-lg tracking-tight">
-            <span class="text-white">Sun</span><span class="text-rose-600">Bet</span>
+            <span class="text-white">Sun</span><span class="text-[#A32D2D]">Bet</span>
           </span>
         </RouterLink>
       </div>
@@ -31,7 +31,7 @@
       <div class="flex items-center">
         <!-- Live indicator -->
         <RouterLink
-          to="/live"
+          to="/sports/live"
           class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#FF3B3B]/10 border border-[#FF3B3B]/25 text-[#FF3B3B] text-xs font-semibold hover:bg-[#FF3B3B]/20 transition-colors"
         >
           <span class="w-1.5 h-1.5 rounded-full bg-[#FF3B3B] animate-pulse" />
@@ -40,8 +40,8 @@
 
         <button 
           @click="toggleSearch" 
-          class="text-rose-200 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200 p-1.5"
-          :class="{ 'bg-transparent text-white': isSearchOpen }"
+          class="text-gray-300 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200 p-2"
+          :class="{ 'bg-transparent text-[#FF3B3B]': isSearchOpen }"
         >
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -52,7 +52,7 @@
         <template v-if="!isLoggedIn">
           <RouterLink 
             to="/login" 
-            class="px-2 py-1.5 text-sm font-bold text-gray-200 hover:text-white transition-colors"
+            class="px-3 py-1.5 text-sm font-bold text-gray-200 hover:text-white transition-colors"
           >
             Login
           </RouterLink>
@@ -64,27 +64,39 @@
           </RouterLink>
         </template>
 
-        <!-- Logged in: Balance + Avatar -->
+        <!-- Logged in: Notifications + Balance + Avatar -->
         <template v-else>
-          <!-- Balance Chip with animation -->
+          <!-- Notification Bell (inaonekana tu kama kuna arifa isiyosomwa) -->
           <RouterLink
-            to="/deposite"
-            class="flex items-center gap-1 px-2 py-1.5 sm:py-2 rounded-[8px] sm:rounded-[10px] bg-gray-950/40 border border-[#A32D2D]/40 hover:border-[#A32D2D] transition-colors relative"
+            v-if="notificationStore.unreadCount > 0"
+            to="/notifications"
+            class="relative ml-2 p-2 text-gray-300 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200"
+            :title="notificationStore.unreadCount ? `${notificationStore.unreadCount} arifa mpya` : 'Arifa'"
           >
-            <!-- Balance update indicator -->
-            <span v-if="balanceUpdated" class="absolute -top-1 -right-1 w-2 h-2 bg-green-400 rounded-full animate-ping"></span>
-            
-            <span class="text-[9px] text-gray-300 font-medium xs:inline">TZS</span>
-            <span class="text-xs font-bold text-[#D23434] transition-all duration-300" 
-                  :class="{ 'scale-110 text-green-400': balanceUpdated }">
-              {{ formattedBalance }}
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+            </svg>
+            <span
+              v-if="notificationStore.unreadCount > 0"
+              class="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full bg-[#FF3B3B] text-white text-[9px] font-bold flex items-center justify-center animate-pulse"
+            >
+              {{ notificationStore.unreadCount > 99 ? '99+' : notificationStore.unreadCount }}
             </span>
           </RouterLink>
 
+          <!-- Balance Chip -->
+          <RouterLink
+            to="/deposite"
+            class="flex items-center gap-1.5  px-2  py-1.5 sm:py-2 rounded-[8px] sm:rounded-[10px] bg-rose-950 border border-rose-900 hover:border-[#A32D2D] transition-colors"
+          >
+            <span class="text-[9px] text-gray-200 font-medium xs:inline">TZS</span>
+            <span class="text-xs font-bold text-white">{{ formattedBalance }}</span>
+          </RouterLink>
+
           <!-- Avatar -->
-          <div class="relative ml-1" ref="avatarRef">
+          <div class="relative ml-2" ref="avatarRef">
             <button
-              class="w-7 h-7 rounded-full bg-gradient-to-br from-[#A32D2D] to-[#7A1F1F] flex items-center justify-center text-white font-bold text-sm border-2 border-[#A32D2D]/30 hover:border-[#A32D2D] transition-colors"
+              class="w-9 h-9 rounded-full bg-gradient-to-br from-[#A32D2D] to-[#7A1F1F] flex items-center justify-center text-white font-bold text-sm border-2 border-[#2A2A2A] hover:border-[#A32D2D] transition-colors"
               @click="dropdownOpen = !dropdownOpen"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -133,8 +145,7 @@
         </template>
       </div>
     </div>
-
-    <!-- ROW 2: Search Bar -->
+<!-- ROW 2: Search Bar -->
     <div 
       v-show="isSearchOpen"
       class="py-2 sm:py-3 transition-all duration-300 max-w-7xl mx-auto px-2 bg-rose-950"
@@ -170,6 +181,7 @@
 
       <div v-if="searchQuery.length > 0" class="mt-2 sm:mt-3 space-y-1">
         <div class="text-xs text-rose-300 px-2">Recent Searches</div>
+
         <div class="flex flex-wrap gap-1 sm:gap-2">
           <span 
             v-for="suggestion in suggestions" 
@@ -182,14 +194,42 @@
         </div>
       </div>
     </div>
-    
+
+    <!-- ROW 3: Navigation Menu -->
+<div class="bg-rose-950 border-t border-rose-900/50">
+  <div class="max-w-7xl mx-auto px-2">
+    <nav class="flex items-center overflow-x-auto overflow-y-hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+      <div class="flex items-center gap-1 sm:gap-2 py-1.5 min-w-max">
+        <RouterLink
+          v-for="link in navLinks"
+          :key="link.to"
+          :to="link.to"
+          class="flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md transition-all duration-200 whitespace-nowrap flex-shrink-0"
+          :class="$route.name === link.name
+            ? 'bg-rose-900/60 text-white font-semibold'
+            : 'text-rose-200 hover:text-white hover:bg-rose-900/30'"
+        >
+          <component :is="link.icon" class="w-4 h-4" />
+          {{ link.label }}
+          <span
+            v-if="link.badge"
+            class="px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-rose-600 text-white tracking-wider"
+          >
+            {{ link.badge }}
+          </span>
+        </RouterLink>
+      </div>
+    </nav>
+  </div>
+</div>
   </header>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, watch, h } from 'vue'
+import { ref, computed, onMounted, onUnmounted, h } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
-import { useAuthStore } from '../../../stores/auth/authStore'
+import { useNotificationStore } from '../../../stores/notifications.store'
+import socketService from '../../../services/socket/socket.service'
 
 const props = defineProps({
   isLoggedIn: { type: Boolean, default: false },
@@ -197,45 +237,11 @@ const props = defineProps({
   balance: { type: Number, default: 0 },
 })
 
-const emit = defineEmits(['toggle-sidebar', 'logout', 'update-balance'])
+const emit = defineEmits(['toggle-sidebar', 'logout'])
 
 const route = useRoute()
-const authStore = useAuthStore()
 
-// ── Balance State ──────────────────────────────────────────────────────────
-const balanceUpdated = ref(false)
-let balanceUpdateTimeout = null
-
-// ── NEW: Watch for balance changes ──────────────────────────────────────
-watch(() => props.balance, (newVal, oldVal) => {
-  if (newVal !== oldVal) {
-    // Show balance update animation
-    balanceUpdated.value = true
-    clearTimeout(balanceUpdateTimeout)
-    balanceUpdateTimeout = setTimeout(() => {
-      balanceUpdated.value = false
-    }, 1000)
-    
-    // Emit update event
-    emit('update-balance', newVal)
-  }
-}, { immediate: false })
-
-// ── NEW: Auto-refresh balance every 30 seconds ──────────────────────────
-let balanceRefreshInterval = null
-
-const refreshBalance = async () => {
-  if (props.isLoggedIn && authStore.isLoggedIn) {
-    try {
-      await authStore.fetchUserBalance()
-      // The balance will update via watch
-    } catch (error) {
-      console.error('Error refreshing balance:', error)
-    }
-  }
-}
-
-// ── Search State ──────────────────────────────────────────────────────────
+// ---- Search State ----
 const isSearchOpen = ref(false)
 const searchQuery = ref('')
 const suggestions = ref([
@@ -264,7 +270,7 @@ const performSearch = () => {
   }
 }
 
-// ── Icons ──────────────────────────────────────────────────────────────────
+// ---- Icons ----
 const HomeIcon = {
   render: () => h('svg', { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': '2' }, [
     h('path', { d: 'M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z' }),
@@ -323,7 +329,7 @@ const BetsIcon = {
   ])
 }
 
-// ── Nav Links ──────────────────────────────────────────────────────────────
+// ---- Nav Links ----
 const navLinks = [
   { to: '/', name: 'home', label: 'Home', icon: HomeIcon },
   { to: '/sports', name: 'sports', label: 'Sports', icon: SportsIcon },
@@ -338,18 +344,16 @@ const dropdownItems = [
   { to: '/bets', label: 'My Bets', icon: BetsIcon },
 ]
 
-// ── Dropdown ──────────────────────────────────────────────────────────────
+// ---- Dropdown ----
 const dropdownOpen = ref(false)
 const avatarRef = ref(null)
 
-// ── NEW: Use auth store balance directly ────────────────────────────────
 const formattedBalance = computed(() => {
-  // Use auth store balance if available, otherwise props
-  const balance = authStore.isLoggedIn ? authStore.userBalance : props.balance
+  const bal = props.balance || 0.00
   return new Intl.NumberFormat('en-TZ', { 
     minimumFractionDigits: 2,
     maximumFractionDigits: 2 
-  }).format(balance || 0)
+  }).format(bal)
 })
 
 const handleLogout = () => {
@@ -363,21 +367,40 @@ const handleClickOutside = (e) => {
   }
 }
 
-// ── Lifecycle ──────────────────────────────────────────────────────────────
+// ---- Notifications ----
+const notificationStore = useNotificationStore()
+let unreadTimer = null
+
+const refreshUnread = async () => {
+  if (!props.isLoggedIn) return
+  await notificationStore.fetchUnreadCount()
+}
+
+const handleNewNotification = () => {
+  refreshUnread()
+}
+
+const initNotifications = () => {
+  if (!props.isLoggedIn) return
+
+  const token = localStorage.getItem('access_token')
+  if (token) {
+    socketService.connect(token)
+    socketService.onNewNotification(handleNewNotification)
+  }
+
+  refreshUnread()
+  unreadTimer = setInterval(refreshUnread, 30000)
+}
+
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)
-  
-  // Start auto-refresh for balance
-  if (props.isLoggedIn) {
-    refreshBalance()
-    balanceRefreshInterval = setInterval(refreshBalance, 30000) // 30 seconds
-  }
+  initNotifications()
 })
 
 onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside)
-  clearInterval(balanceRefreshInterval)
-  clearTimeout(balanceUpdateTimeout)
+  if (unreadTimer) clearInterval(unreadTimer)
 })
 </script>
 
@@ -417,25 +440,5 @@ onUnmounted(() => {
 .dropdown-leave-to {
   opacity: 0;
   transform: scale(0.95) translateY(-8px);
-}
-
-/* Balance update animation */
-.scale-110 {
-  transform: scale(1.1);
-}
-
-.animate-ping {
-  animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;
-}
-
-@keyframes ping {
-  0% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  75%, 100% {
-    transform: scale(2);
-    opacity: 0;
-  }
 }
 </style>

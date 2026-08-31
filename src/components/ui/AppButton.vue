@@ -53,7 +53,7 @@
   const classes = computed(() => {
     const base = [
       'inline-flex items-center justify-center font-medium transition-all duration-200',
-      'focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[#0D0D0D]',
+      'focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white',
       'disabled:opacity-50 disabled:cursor-not-allowed',
       props.fullWidth ? 'w-full' : '',
       props.rounded ? 'rounded-full' : 'rounded-[10px]',
@@ -73,9 +73,9 @@
         'focus:ring-[#A32D2D]',
       ],
       secondary: [
-        'bg-[#1E1E1E] hover:bg-[#2A2A2A] active:bg-[#333]',
-        'text-[#F0F0F0] border border-[#2A2A2A]',
-        'focus:ring-[#333]',
+        'bg-gray-100 hover:bg-gray-200 active:bg-gray-300',
+        'text-gray-700 border border-gray-200',
+        'focus:ring-gray-400',
       ],
       outline: [
         'bg-transparent hover:bg-[#A32D2D]/10 active:bg-[#A32D2D]/20',
@@ -83,9 +83,9 @@
         'focus:ring-[#A32D2D]',
       ],
       ghost: [
-        'bg-transparent hover:bg-[#2A2A2A] active:bg-[#333]',
-        'text-[#A0A0A0] hover:text-[#F0F0F0]',
-        'focus:ring-[#333]',
+        'bg-transparent hover:bg-gray-100 active:bg-gray-200',
+        'text-gray-500 hover:text-gray-900',
+        'focus:ring-gray-400',
       ],
       danger: [
         'bg-[#EF4444] hover:bg-[#DC2626] active:bg-[#B91C1C]',

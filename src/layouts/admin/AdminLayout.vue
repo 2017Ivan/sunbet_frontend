@@ -213,23 +213,25 @@ onBeforeUnmount(() => {
 // ── NAVIGATION ITEMS ──────────────────────────────────────────────────────
 const navItems = [
   { path: '/admin', icon: '📊', label: 'Dashboard' },
-  { path: '/admin/bets', icon: '🎲', label: 'Bets Management' },
+  { path: '/admin/bets', icon: '🎲', label: 'All Bets' },
   { path: '/admin/users', icon: '👥', label: 'Users Management' },
   { path: '/admin/booking-codes', icon: '📋', label: 'Booking Codes' },  // ← ADDED
   { path: '/admin/notifications', icon: '🔔', label: 'Send Notification' },
   { path: '/admin/settings', icon: '⚙️', label: 'Settings' },
   { path: '/admin/fixtures', icon: '📅', label: 'Fixtures' },
+  { path: '/admin/deposits', icon: '💰', label: 'Deposits' },
 ]
 
 // ── PAGE TITLES ───────────────────────────────────────────────────────────
 const pageTitles = {
   '/admin': { title: 'Dashboard', subtitle: 'Overview of platform performance' },
-  '/admin/bets': { title: 'Bets Management', subtitle: 'Manage and settle bets' },
+  '/admin/bets': { title: 'All Bets', subtitle: 'Bets zote - tafuta kwa namba ya simu ya user' },
   '/admin/users': { title: 'Users Management', subtitle: 'View and manage users' },
-  '/admin/booking-codes': { title: 'Booking Codes', subtitle: 'Manage booking codes and update match scores' },  // ← ADDED
-  '/admin/notifications': { title: 'Send Notification', subtitle: 'Send push notifications to users' },
+  '/admin/booking-codes': { title: 'Booking Codes', subtitle: 'Codes zote na status - tafuta kwa code' },  // ← ADDED
+  '/admin/notifications': { title: 'Send Notification', subtitle: 'Tuma notification kwa mteja mmoja au wateja wote' },
   '/admin/settings': { title: 'Settings', subtitle: 'Configure admin settings' },
   '/admin/fixtures': { title: 'Fixtures', subtitle: 'Manage and add fixtures' },
+  '/admin/deposits': { title: 'Deposits', subtitle: 'Tazama na simamia deposits zote (completed / pending / failed)' },
 }
 
 const pageTitle = computed(() => pageTitles[route.path]?.title || 'Dashboard')

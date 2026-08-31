@@ -1,12 +1,12 @@
 <!-- pages/promotions/PromotionsPage.vue -->
 <template>
-  <div class="min-h-screen bg-[#0D0D0D]">
+  <div class="min-h-screen bg-white">
     <div class="max-w-6xl mx-auto px-4 py-6">
       
       <!-- Header -->
       <div class="mb-8">
         <h1 class="text-2xl font-bold text-white">🎁 Promotions</h1>
-        <p class="text-sm text-[#606060] mt-1">Exclusive offers and bonuses for you</p>
+        <p class="text-sm text-gray-500 mt-1">Exclusive offers and bonuses for you</p>
       </div>
 
       <!-- Active Promotions -->
@@ -14,7 +14,7 @@
         <div 
           v-for="promo in activePromotions" 
           :key="promo.id"
-          class="bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl overflow-hidden hover:border-rose-600/30 transition-all duration-300 group"
+          class="bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-rose-600/30 transition-all duration-300 group"
         >
           <!-- Banner -->
           <div class="relative h-32 bg-gradient-to-r" :class="promo.gradient">
@@ -30,11 +30,11 @@
           <!-- Content -->
           <div class="p-4">
             <h3 class="text-white font-bold text-base">{{ promo.title }}</h3>
-            <p class="text-[#606060] text-sm mt-1 line-clamp-2">{{ promo.description }}</p>
+            <p class="text-gray-500 text-sm mt-1 line-clamp-2">{{ promo.description }}</p>
             
-            <div class="flex items-center justify-between mt-4 pt-3 border-t border-[#2A2A2A]">
+            <div class="flex items-center justify-between mt-4 pt-3 border-t border-gray-200">
               <div>
-                <p class="text-[10px] text-[#606060] uppercase tracking-wider">Valid until</p>
+                <p class="text-[10px] text-gray-500 uppercase tracking-wider">Valid until</p>
                 <p class="text-white text-xs font-semibold">{{ promo.validUntil }}</p>
               </div>
               <button 
@@ -50,12 +50,12 @@
 
       <!-- Inactive / Expired Promotions -->
       <div v-if="expiredPromotions.length > 0" class="mt-10">
-        <h2 class="text-sm font-bold text-[#606060] uppercase tracking-wider mb-4">Expired Promotions</h2>
+        <h2 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4">Expired Promotions</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 opacity-60">
           <div 
             v-for="promo in expiredPromotions" 
             :key="promo.id"
-            class="bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl overflow-hidden"
+            class="bg-white border border-gray-200 rounded-xl overflow-hidden"
           >
             <!-- Banner -->
             <div class="relative h-28 bg-gradient-to-r" :class="promo.gradient">
@@ -71,9 +71,9 @@
             <!-- Content -->
             <div class="p-4">
               <h3 class="text-white font-bold text-sm">{{ promo.title }}</h3>
-              <p class="text-[#606060] text-xs mt-1 line-clamp-2">{{ promo.description }}</p>
-              <div class="mt-3 pt-2 border-t border-[#2A2A2A]">
-                <p class="text-[10px] text-[#606060]">Expired on {{ promo.validUntil }}</p>
+              <p class="text-gray-500 text-xs mt-1 line-clamp-2">{{ promo.description }}</p>
+              <div class="mt-3 pt-2 border-t border-gray-200">
+                <p class="text-[10px] text-gray-500">Expired on {{ promo.validUntil }}</p>
               </div>
             </div>
           </div>

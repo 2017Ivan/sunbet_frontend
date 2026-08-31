@@ -1,13 +1,27 @@
 <template>
   <div class="flex flex-col gap-1.5">
-    <label v-if="label" :for="inputId" class="text-xs font-medium text-[#A0A0A0] tracking-wide">
+    <label v-if="label" :for="inputId" class="text-xs font-medium text-gray-500 tracking-wide">
       {{ label }}
       <span v-if="required" class="text-[#A32D2D] ml-0.5">*</span>
     </label>
 
     <div class="relative flex items-center">
+      <!-- Phone country code prefix -->
+      <div v-if="phone" class="absolute left-3 flex items-center gap-1.5 pointer-events-none select-none">
+        <svg class="w-[22px] h-[15px] rounded-[2px]" viewBox="0 0 30 20">
+          <polygon points="0,0 30,0 0,20" fill="#1EB53A"/>
+          <polygon points="30,0 30,20 0,20" fill="#00A3DD"/>
+          <g transform="rotate(-33.69 15 10)">
+            <rect x="-8" y="6.8" width="46" height="1.2" fill="#FCD116"/>
+            <rect x="-8" y="8" width="46" height="4" fill="#000000"/>
+            <rect x="-8" y="12" width="46" height="1.2" fill="#FCD116"/>
+          </g>
+        </svg>
+        <span class="text-sm font-semibold text-gray-500">+255</span>
+      </div>
+
       <!-- Left icon -->
-      <div v-if="$slots['icon-left']" class="absolute left-3 text-[#606060] flex items-center pointer-events-none">
+      <div v-else-if="$slots['icon-left']" class="absolute left-3 text-gray-500 flex items-center pointer-events-none">
         <slot name="icon-left" />
       </div>
 
@@ -30,7 +44,7 @@
         <button
           v-if="type === 'password'"
           type="button"
-          class="text-[#606060] hover:text-[#A0A0A0] transition-colors"
+          class="text-gray-500 hover:text-gray-500 transition-colors"
           @click="showPassword = !showPassword"
         >
           <svg v-if="showPassword" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -53,7 +67,7 @@
       </svg>
       {{ error }}
     </p>
-    <p v-else-if="hint" class="text-xs text-[#606060]">{{ hint }}</p>
+    <p v-else-if="hint" class="text-xs text-gray-500">{{ hint }}</p>
   </div>
 </template>
 
@@ -97,18 +111,20 @@ const sizes = {
 // ─── INPUT CLASSES ────────────────────────────────────────────────────────
 const inputClasses = computed(() => {
   let classes = [
-    'w-full rounded-[10px]  bg-[#1E1E1E] border transition-all duration-200',
-    'text-[#F0F0F0] pl-8 placeholder:text-[#606060]',
+    'w-full rounded-[10px]  bg-gray-100 border transition-all duration-200',
+    'text-gray-900 placeholder:text-gray-400',
     'focus:outline-none',
     sizes[props.size] || sizes.md,
     props.error
       ? 'border-[#EF4444] focus:border-[#EF4444] focus:ring-1 focus:ring-[#EF4444]/30'
-      : 'border-[#2A2A2A] focus:border-[#A32D2D] focus:ring-1 focus:ring-[#A32D2D]/30',
+      : 'border-gray-200 focus:border-[#A32D2D] focus:ring-1 focus:ring-[#A32D2D]/30',
     props.disabled ? 'opacity-50 cursor-not-allowed' : '',
   ]
 
   // Add padding for left icon
-  if (props.$slots?.['icon-left']) {
+  if (props.phone) {
+    classes.push('pl-[96px]')
+  } else if (props.$slots?.['icon-left']) {
     classes.push('pl-10')
   } else {
     classes.push('pl-4')

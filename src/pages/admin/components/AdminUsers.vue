@@ -336,7 +336,7 @@
 
 <script setup>
 import { ref, onMounted, watch } from 'vue'
-import { useManageUsersStore } from '../../../stores/users/manageUsersStore'
+import { useManageUsersStore } from '../../../stores/manageUsersStore'
 import api from '../../../services/api'
 
 // ── Store ──────────────────────────────────────────────────────────────────

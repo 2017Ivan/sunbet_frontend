@@ -3,7 +3,7 @@
   <div>
     <div class="mb-8">
       <h2 class="text-2xl font-bold text-white">Create account 🎯</h2>
-      <p class="text-sm text-[#606060] mt-1">Join 2M+ bettors on SunBet</p>
+      <p class="text-sm text-gray-500 mt-1">Join 2M+ bettors on SunBet</p>
     </div>
 
     <form class="space-y-4" @submit.prevent="handleRegister">
@@ -14,15 +14,9 @@
         type="tel"
         required
         :phone="true"
-        hint="Enter 9 digits without 0 or 255 (e.g., 798764567)"
+        hint="Enter 9 digits (e.g., 798764567)"
         :error="errors.phone"
-      >
-        <template #icon-left>
-          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 014.69 12 19.79 19.79 0 011.61 3.4 2 2 0 013.6 1.22h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L7.91 8.82a16 16 0 006.29 6.29l.97-.97a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/>
-          </svg>
-        </template>
-      </AppInput>
+      />
 
       <AppInput
         v-model="form.password"
@@ -46,13 +40,29 @@
             v-for="i in 4"
             :key="i"
             class="flex-1 h-1 rounded-full transition-all duration-300"
-            :class="i <= passwordStrength.score ? passwordStrength.color : 'bg-[#2A2A2A]'"
+            :class="i <= passwordStrength.score ? passwordStrength.color : 'bg-gray-100'"
           />
         </div>
         <p class="text-xs" :class="passwordStrength.textColor">
           {{ passwordStrength.label }}
         </p>
       </div>
+
+      <AppInput
+        v-model="form.promoCode"
+        label="Promo Code"
+        placeholder="Enter promo code (optional)"
+        hint="Get 1.5% bonus on your first deposit"
+        :error="errors.promoCode"
+      >
+        <template #icon-left>
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M19 8l3 3-3 3M15 11l3 3-3 3"/>
+          </svg>
+        </template>
+      </AppInput>
 
       <label class="flex items-start gap-3 cursor-pointer group pt-2">
         <div
@@ -66,7 +76,7 @@
             <polyline points="20 6 9 17 4 12"/>
           </svg>
         </div>
-        <span class="text-xs text-[#606060] leading-relaxed">
+        <span class="text-xs text-gray-500 leading-relaxed">
           I confirm I am 18+ years old and agree to the
           <a href="#" class="text-[#A32D2D] hover:underline">Terms</a> &
           <a href="#" class="text-[#A32D2D] hover:underline">Privacy Policy</a>
@@ -92,7 +102,7 @@
       </AppButton>
     </form>
 
-    <p class="text-center text-sm text-[#606060] mt-6">
+    <p class="text-center text-sm text-gray-500 mt-6">
       Already have an account?
       <router-link to="/login" class="text-[#A32D2D] font-semibold hover:text-[#C94040] transition-colors">
         Login here
@@ -101,8 +111,6 @@
   </div>
 </template>
 
-
-<!-- pages/Auth/RegisterPage.vue -->
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
@@ -124,20 +132,24 @@ const registerError = ref('')
 const form = ref({
   phone: '',
   password: '',
+  promoCode: '',
   agreed: false,
 })
-const errors = ref({ phone: '', password: '', agreed: '' })
+const errors = ref({ phone: '', password: '', promoCode: '', agreed: '' })
 
 // ---- Validation Functions ----
 const validatePhone = (phone) => {
   if (!phone) return 'Phone number is required'
   
+  // Remove all non-digit characters
   const cleaned = String(phone).replace(/\D/g, '')
   
+  // Must be exactly 9 digits
   if (cleaned.length !== 9) {
     return 'Phone number must be exactly 9 digits'
   }
   
+  // Must start with 6, 7, or 4
   const validPrefixes = ['6', '7', '4']
   if (!validPrefixes.includes(cleaned[0])) {
     return 'Phone number must start with 6, 7, or 4'
@@ -146,16 +158,42 @@ const validatePhone = (phone) => {
   return null
 }
 
+// ---- Format phone to 255 + 9 digits ----
+const formatPhoneForAPI = (phone) => {
+  if (!phone) return ''
+  
+  // Remove all non-digit characters
+  let cleaned = String(phone).replace(/\D/g, '')
+  
+  // If it's 9 digits, add 255 prefix
+  if (cleaned.length === 9) {
+    return '255' + cleaned
+  }
+  
+  // If it already has 255 and is 12 digits, return as is
+  if (cleaned.length === 12 && cleaned.startsWith('255')) {
+    return cleaned
+  }
+  
+  // If it starts with 0, replace with 255
+  if (cleaned.startsWith('0')) {
+    const withoutZero = cleaned.substring(1)
+    if (withoutZero.length === 9) {
+      return '255' + withoutZero
+    }
+  }
+  
+  // Return cleaned as fallback
+  return cleaned
+}
+
 // ---- HANDLE REGISTER ----
 const handleRegister = async () => {
-  errors.value = { phone: '', password: '', agreed: '' }
+  errors.value = { phone: '', password: '', promoCode: '', agreed: '' }
   registerError.value = ''
   let valid = true
 
-  console.log('🔄 Starting register process...')
-  console.log('📱 Phone:', form.value.phone)
-
-  // Validate phone
+  // Validate phone (must be 9 digits)
   const phoneError = validatePhone(form.value.phone)
   if (phoneError) {
     errors.value.phone = phoneError
@@ -179,41 +217,37 @@ const handleRegister = async () => {
 
   if (!valid) return
 
+  // Format phone to 255 + 9 digits for API
+  const formattedPhone = formatPhoneForAPI(form.value.phone)
+
+  console.log('🔄 Starting register process...')
+  console.log('📱 Original phone (user input):', form.value.phone)
+  console.log('📱 Formatted phone (for API):', formattedPhone)
+
   loading.value = true
 
   try {
     const result = await authStore.register(
-      form.value.phone,
-      form.value.password
+      formattedPhone,  // Send with 255 prefix
+      form.value.password,
+      form.value.promoCode ? form.value.promoCode.trim() : null
     )
 
     console.log('📨 Register result:', result)
-    console.log('📊 AuthStore state:', {
-      isLoggedIn: authStore.isLoggedIn,
-      initialized: authStore.initialized,
-      user: authStore.user
-    })
 
     if (result.success) {
       console.log('✅ Registration successful!')
       
-      // 👇 Force re-initialize to make sure store is updated
       if (!authStore.isLoggedIn) {
         console.warn('⚠️ Store says not logged in, re-initializing...')
         await authStore.initialize()
-        console.log('📊 After re-init:', {
-          isLoggedIn: authStore.isLoggedIn,
-          initialized: authStore.initialized
-        })
       }
       
-      // 👇 Small delay to let store update
       await new Promise(resolve => setTimeout(resolve, 100))
       
       const redirect = route.query.redirect || '/'
       console.log('🔄 Redirecting to:', redirect)
       
-      // 👇 Use replace instead of push
       router.replace(redirect)
     } else {
       console.log('❌ Registration failed:', result.message)

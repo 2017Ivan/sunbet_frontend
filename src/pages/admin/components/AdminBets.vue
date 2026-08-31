@@ -1,434 +1,261 @@
-<!-- views/admin/AdminBets.vue - SunBet Theme with Horizontal Scroll -->
+<!-- views/admin/AdminBets.vue - Bets zote (list-only) + search kwa namba ya simu -->
 <template>
   <div class="space-y-6">
     <!-- Filters -->
     <div class="bg-[#1A1A1A] rounded-2xl border border-[#2A2A2A] p-4">
       <div class="flex flex-wrap gap-4">
-        <select v-model="filters.status" 
-                class="px-4 py-2 rounded-lg bg-[#0D0D0D] border border-[#2A2A2A] text-white text-sm focus:border-rose-500/50 focus:outline-none transition-colors">
-          <option value="" class="bg-[#0D0D0D]">All Status</option>
-          <option value="OPEN">Open</option>
-          <option value="SETTLED">Settled</option>
-          <option value="CANCELLED">Cancelled</option>
-        </select>
-        
-        <select v-model="filters.result" 
-                class="px-4 py-2 rounded-lg bg-[#0D0D0D] border border-[#2A2A2A] text-white text-sm focus:border-rose-500/50 focus:outline-none transition-colors">
-          <option value="">All Results</option>
-          <option value="PENDING">Pending</option>
-          <option value="WON">Won</option>
-          <option value="LOST">Lost</option>
-        </select>
-        
-        <input 
+        <input
           v-model="filters.search"
-          type="text" 
-          placeholder="Search by user or bet ID..."
-          class="flex-1 min-w-[200px] px-4 py-2 rounded-lg bg-[#0D0D0D] border border-[#2A2A2A] text-white text-sm placeholder-gray-500 focus:border-rose-500/50 focus:outline-none transition-colors"
+          type="text"
+          placeholder="Tafuta kwa namba ya simu ya user (mf. 2557...)"
+          class="flex-1 min-w-[220px] px-4 py-2 rounded-lg bg-[#0D0D0D] border border-[#2A2A2A] text-white text-sm placeholder-gray-500 focus:border-rose-500/50 focus:outline-none transition-colors"
+          @keyup.enter="searchBets"
         />
-        
-        <button @click="loadBets" 
+
+        <button @click="searchBets"
                 class="px-6 py-2 bg-gradient-to-r from-rose-500 to-rose-600 text-white rounded-lg hover:from-rose-600 hover:to-rose-700 transition-all duration-300 shadow-lg shadow-rose-500/20 whitespace-nowrap">
-          🔍 Search
+          🔍 Tafuta
         </button>
       </div>
     </div>
 
-    <!-- Bets Table with Horizontal Scroll -->
+    <!-- Bets Table -->
     <div class="bg-[#1A1A1A] rounded-2xl border border-[#2A2A2A] overflow-hidden">
-      <!-- Table Container with Scroll -->
       <div class="overflow-x-auto overflow-y-auto" style="max-height: 600px;">
-        <!-- Scroll Indicators -->
-        <div class="relative">
-          <!-- Left Scroll Shadow -->
-          <div class="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-[#1A1A1A] to-transparent pointer-events-none z-10 hidden md:block"></div>
-          <!-- Right Scroll Shadow -->
-          <div class="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-[#1A1A1A] to-transparent pointer-events-none z-10 hidden md:block"></div>
-          
-          <table class="w-full min-w-[900px]">
-            <thead class="bg-[#0D0D0D] sticky top-0 z-20">
-              <tr>
-                <th class="text-left px-4 py-4 text-gray-400 text-xs font-medium uppercase tracking-wider whitespace-nowrap">Bet ID</th>
-                <th class="text-left px-4 py-4 text-gray-400 text-xs font-medium uppercase tracking-wider whitespace-nowrap">User</th>
-                <th class="text-left px-4 py-4 text-gray-400 text-xs font-medium uppercase tracking-wider whitespace-nowrap">Selections</th>
-                <th class="text-left px-4 py-4 text-gray-400 text-xs font-medium uppercase tracking-wider whitespace-nowrap">Stake</th>
-                <th class="text-left px-4 py-4 text-gray-400 text-xs font-medium uppercase tracking-wider whitespace-nowrap">Potential Win</th>
-                <th class="text-left px-4 py-4 text-gray-400 text-xs font-medium uppercase tracking-wider whitespace-nowrap">Status</th>
-                <th class="text-left px-4 py-4 text-gray-400 text-xs font-medium uppercase tracking-wider whitespace-nowrap">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-if="bets.length === 0 && !isLoading">
-                <td colspan="7" class="px-6 py-8 text-center text-gray-400">
-                  No bets found
-                </td>
-              </tr>
-              <tr v-for="bet in bets" :key="bet.id" 
-                  class="border-t border-[#2A2A2A] hover:bg-[#2A2A2A]/30 transition-all duration-200">
-                <td class="px-4 py-4 text-white text-sm font-mono whitespace-nowrap">#{{ bet.id }}</td>
-                <td class="px-4 py-4 text-gray-300 text-sm whitespace-nowrap">{{ bet.user?.phone_number || 'N/A' }}</td>
-                <td class="px-4 py-4">
-                  <div class="space-y-1 min-w-[150px]">
-                    <div v-for="(sel, idx) in bet.selections?.slice(0, 2)" :key="idx" class="text-xs text-gray-400 truncate max-w-[200px]">
-                      {{ sel.match?.name || sel.matchName }}
-                    </div>
-                    <span v-if="bet.selections?.length > 2" class="text-xs text-gray-500">+{{ bet.selections.length - 2 }} more</span>
+        <table class="w-full min-w-[900px]">
+          <thead class="bg-[#0D0D0D] sticky top-0 z-20">
+            <tr>
+              <th class="text-left px-4 py-4 text-gray-400 text-xs font-medium uppercase tracking-wider whitespace-nowrap">Ticket</th>
+              <th class="text-left px-4 py-4 text-gray-400 text-xs font-medium uppercase tracking-wider whitespace-nowrap">User</th>
+              <th class="text-left px-4 py-4 text-gray-400 text-xs font-medium uppercase tracking-wider whitespace-nowrap">Selections</th>
+              <th class="text-left px-4 py-4 text-gray-400 text-xs font-medium uppercase tracking-wider whitespace-nowrap">Stake</th>
+              <th class="text-left px-4 py-4 text-gray-400 text-xs font-medium uppercase tracking-wider whitespace-nowrap">Odds</th>
+              <th class="text-left px-4 py-4 text-gray-400 text-xs font-medium uppercase tracking-wider whitespace-nowrap">Potential Win</th>
+              <th class="text-left px-4 py-4 text-gray-400 text-xs font-medium uppercase tracking-wider whitespace-nowrap">Status</th>
+              <th class="text-left px-4 py-4 text-gray-400 text-xs font-medium uppercase tracking-wider whitespace-nowrap">Result</th>
+              <th class="text-left px-4 py-4 text-gray-400 text-xs font-medium uppercase tracking-wider whitespace-nowrap">Tarehe</th>
+              <th class="text-left px-4 py-4 text-gray-400 text-xs font-medium uppercase tracking-wider whitespace-nowrap">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-if="isLoading">
+              <td colspan="10" class="px-6 py-10 text-center text-gray-400">Inapakia bets...</td>
+            </tr>
+            <tr v-else-if="bets.length === 0">
+              <td colspan="10" class="px-6 py-10 text-center text-gray-400">Hakuna bets zilizopatikana</td>
+            </tr>
+            <tr v-for="bet in bets" :key="bet.id"
+                class="border-t border-[#2A2A2A] hover:bg-[#2A2A2A]/30 transition-all duration-200">
+              <td class="px-4 py-4 text-white text-sm font-mono whitespace-nowrap">{{ bet.ticket_code }}</td>
+              <td class="px-4 py-4 text-gray-300 text-sm whitespace-nowrap">{{ bet.user?.phone_number || 'N/A' }}</td>
+              <td class="px-4 py-4">
+                <div class="space-y-1 min-w-[150px]">
+                  <div v-for="(sel, idx) in bet.selections?.slice(0, 2)" :key="idx" class="text-xs text-gray-400 truncate max-w-[220px]">
+                    {{ sel.match ? `${sel.match.home_team} vs ${sel.match.away_team}` : 'Mechi' }} — {{ getMarketDisplay(sel.market_key) }} {{ sel.outcome_key }}
                   </div>
-                </td>
-                <td class="px-4 py-4 text-rose-400 text-sm font-bold whitespace-nowrap">TZS {{ formatMoney(bet.stake) }}</td>
-                <td class="px-4 py-4 text-rose-400 text-sm font-bold whitespace-nowrap">TZS {{ formatMoney(bet.potentialReturn) }}</td>
-                <td class="px-4 py-4">
-                  <span class="px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap" :class="getStatusClass(bet)">
-                    {{ bet.status }} · {{ bet.result }}
-                  </span>
-                </td>
-                <td class="px-4 py-4">
-                  <div class="flex gap-2">
-                    <button @click="viewBetDetails(bet)" 
-                            class="p-1.5 text-gray-400 hover:text-rose-400 transition-colors rounded-lg hover:bg-[#2A2A2A]"
-                            title="View Details">
-                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                      </svg>
-                    </button>
-                    <button v-if="bet.status === 'OPEN' && bet.result === 'PENDING'" 
-                            @click="openSettleModal(bet)" 
-                            class="p-1.5 text-gray-400 hover:text-rose-400 transition-colors rounded-lg hover:bg-[#2A2A2A]"
-                            title="Settle Bet">
-                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                      </svg>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-      
-      <!-- Scroll Hint for Mobile -->
-      <div class="md:hidden flex items-center justify-center gap-2 px-4 py-2 border-t border-[#2A2A2A] bg-[#0D0D0D]/50">
-        <svg class="w-4 h-4 text-gray-500 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"></path>
-        </svg>
-        <span class="text-xs text-gray-500">Scroll left/right for more columns</span>
-        <svg class="w-4 h-4 text-gray-500 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"></path>
-        </svg>
-      </div>
-      
-      <!-- Pagination -->
-      <div class="flex flex-wrap items-center justify-between gap-4 px-4 py-4 border-t border-[#2A2A2A]">
-        <p class="text-sm text-gray-500">Showing {{ bets.length }} of {{ total }} bets</p>
-        <div class="flex gap-2">
-          <button @click="prevPage" 
-                  :disabled="page === 1 || isLoading" 
-                  class="px-4 py-2 rounded-lg bg-[#0D0D0D] text-gray-400 hover:text-white hover:bg-[#2A2A2A] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 text-sm">
-            ← Previous
-          </button>
-          <span class="px-4 py-2 text-gray-400 text-sm">
-            Page {{ page }}
-          </span>
-          <button @click="nextPage" 
-                  :disabled="page * limit >= total || isLoading" 
-                  class="px-4 py-2 rounded-lg bg-[#0D0D0D] text-gray-400 hover:text-white hover:bg-[#2A2A2A] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 text-sm">
-            Next →
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Settle Bet Modal -->
-    <div v-if="showSettleModal" 
-         class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4" 
-         @click.self="closeSettleModal">
-      <div class="bg-[#1A1A1A] rounded-2xl border border-[#2A2A2A] p-6 w-full max-w-md shadow-2xl shadow-rose-500/10 animate-fadeIn">
-        <!-- Header -->
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="text-xl font-bold text-white">Settle Bet</h3>
-          <button @click="closeSettleModal" class="text-gray-500 hover:text-rose-400 transition-colors">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-            </svg>
-          </button>
-        </div>
-        
-        <p class="text-gray-400 mb-4 font-mono text-sm">Bet #{{ selectedBet?.id }}</p>
-        
-        <div class="space-y-4">
-          <!-- Bet Details -->
-          <div class="bg-[#0D0D0D] rounded-xl p-4 border border-[#2A2A2A]">
-            <div class="flex justify-between mb-2">
-              <span class="text-gray-400 text-sm">Stake</span>
-              <span class="text-white font-bold">TZS {{ formatMoney(selectedBet?.stake) }}</span>
-            </div>
-            <div class="flex justify-between">
-              <span class="text-gray-400 text-sm">Potential Win</span>
-              <span class="text-rose-400 font-bold">TZS {{ formatMoney(selectedBet?.potentialReturn) }}</span>
-            </div>
-          </div>
-          
-          <!-- Action Buttons -->
-          <div class="flex flex-col sm:flex-row gap-3">
-            <button @click="confirmSettle('WON')" 
-                    class="flex-1 py-3 bg-gradient-to-r from-rose-500 to-rose-600 text-white rounded-xl font-bold hover:from-rose-600 hover:to-rose-700 transition-all duration-300 shadow-lg shadow-rose-500/20">
-              ✅ Won
-            </button>
-            <button @click="confirmSettle('LOST')" 
-                    class="flex-1 py-3 bg-[#2A2A2A] text-gray-300 rounded-xl font-bold hover:bg-[#3A3A3A] hover:text-white transition-all duration-300">
-              ❌ Lost
-            </button>
-          </div>
-          
-          <button @click="closeSettleModal" 
-                  class="w-full py-2 text-gray-500 hover:text-gray-300 transition-colors text-sm">
-            Cancel
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Bet Details Modal -->
-    <div v-if="showDetailsModal" 
-         class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4" 
-         @click.self="closeDetailsModal">
-      <div class="bg-[#1A1A1A] rounded-2xl border border-[#2A2A2A] p-6 w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-2xl shadow-rose-500/10 animate-fadeIn">
-        <!-- Header -->
-        <div class="flex items-center justify-between mb-4 pb-4 border-b border-[#2A2A2A]">
-          <div>
-            <h3 class="text-xl font-bold text-white">Bet Details</h3>
-            <p class="text-sm text-gray-500 font-mono">Bet #{{ selectedBet?.id }}</p>
-          </div>
-          <button @click="closeDetailsModal" class="text-gray-500 hover:text-rose-400 transition-colors">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-            </svg>
-          </button>
-        </div>
-
-        <!-- Bet Info Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          <div class="bg-[#0D0D0D] rounded-xl p-4 border border-[#2A2A2A]">
-            <p class="text-xs text-gray-500 uppercase tracking-wider">User</p>
-            <p class="text-white font-medium mt-1">{{ selectedBet?.user?.phone_number || 'N/A' }}</p>
-          </div>
-          <div class="bg-[#0D0D0D] rounded-xl p-4 border border-[#2A2A2A]">
-            <p class="text-xs text-gray-500 uppercase tracking-wider">Booking Code</p>
-            <p class="text-rose-400 font-mono font-bold mt-1">{{ selectedBet?.bookingCode?.code || 'N/A' }}</p>
-          </div>
-          <div class="bg-[#0D0D0D] rounded-xl p-4 border border-[#2A2A2A]">
-            <p class="text-xs text-gray-500 uppercase tracking-wider">Stake</p>
-            <p class="text-white font-bold mt-1">TZS {{ formatMoney(selectedBet?.stake) }}</p>
-          </div>
-          <div class="bg-[#0D0D0D] rounded-xl p-4 border border-[#2A2A2A]">
-            <p class="text-xs text-gray-500 uppercase tracking-wider">Potential Return</p>
-            <p class="text-rose-400 font-bold mt-1">TZS {{ formatMoney(selectedBet?.potentialReturn) }}</p>
-          </div>
-          <div class="bg-[#0D0D0D] rounded-xl p-4 border border-[#2A2A2A]">
-            <p class="text-xs text-gray-500 uppercase tracking-wider">Status</p>
-            <span class="px-3 py-1 rounded-full text-xs font-medium inline-block mt-1" :class="getStatusClass(selectedBet)">
-              {{ selectedBet?.status }} · {{ selectedBet?.result }}
-            </span>
-          </div>
-          <div class="bg-[#0D0D0D] rounded-xl p-4 border border-[#2A2A2A]">
-            <p class="text-xs text-gray-500 uppercase tracking-wider">Placed At</p>
-            <p class="text-white mt-1">{{ formatDate(selectedBet?.createdAt) }}</p>
-          </div>
-        </div>
-
-        <!-- Selections List -->
-        <div class="mt-4">
-          <h4 class="text-white font-semibold mb-3 flex items-center gap-2">
-            <span>📋 Selections</span>
-            <span class="text-xs text-gray-500">({{ selectedBet?.selections?.length || 0 }})</span>
-          </h4>
-          
-          <div v-if="selectedBet?.selections?.length === 0" class="text-gray-400 text-sm">
-            No selections found for this bet.
-          </div>
-          
-          <div v-for="(sel, idx) in selectedBet?.selections" :key="idx"
-               class="bg-[#0D0D0D] rounded-xl p-4 border border-[#2A2A2A] mb-3 hover:border-rose-500/30 transition-all duration-300">
-            <div class="flex justify-between items-start mb-2">
-              <div>
-                <p class="text-white font-medium text-sm">{{ sel.matchName || sel.match?.name || 'Match' }}</p>
-                <div class="flex flex-wrap gap-2 mt-1">
-                  <span class="text-xs text-gray-400">{{ sel.league || '' }}</span>
-                  <span v-if="sel.time" class="text-xs text-gray-500">{{ sel.time }}</span>
-                  <span v-if="sel.date" class="text-xs text-gray-500">{{ sel.date }}</span>
+                  <span v-if="bet.selections?.length > 2" class="text-xs text-gray-500">+{{ bet.selections.length - 2 }} zaidi</span>
                 </div>
-              </div>
-              <span class="text-xs text-gray-500">Match ID: {{ sel.matchId }}</span>
-            </div>
-            
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
-              <div>
-                <p class="text-gray-500 text-xs">Selection</p>
-                <p class="text-white font-medium">{{ sel.selectionValue }} ({{ sel.selectionType }})</p>
-              </div>
-              <div>
-                <p class="text-gray-500 text-xs">Odds</p>
-                <p class="text-rose-400 font-bold">{{ sel.odds }}</p>
-              </div>
-              <div>
-                <p class="text-gray-500 text-xs">Score</p>
-                <p class="text-white font-medium">{{ sel.score ? `${sel.score.home} - ${sel.score.away}` : '—' }}</p>
-              </div>
-              <div>
-                <p class="text-gray-500 text-xs">Result</p>
-                <span class="px-2 py-1 rounded text-xs font-medium"
-                  :class="{
-                    'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20': sel.result === 'PENDING',
-                    'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20': sel.result === 'WON',
-                    'bg-red-500/10 text-red-400 border border-red-500/20': sel.result === 'LOST'
-                  }"
-                >
-                  {{ sel.result || 'PENDING' }}
-                </span>
-              </div>
-            </div>
-            
-            <!-- Market Type -->
-            <div class="mt-2 pt-2 border-t border-[#2A2A2A]">
-              <p class="text-gray-500 text-xs">Market</p>
-              <p class="text-gray-400 text-sm">{{ getMarketDisplay(sel.marketType) }}</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Actions -->
-        <div class="mt-4 pt-4 border-t border-[#2A2A2A] flex flex-wrap gap-3">
-          <button v-if="selectedBet?.status === 'OPEN' && selectedBet?.result === 'PENDING'" 
-                  @click="closeDetailsModal(); openSettleModal(selectedBet)" 
-                  class="flex-1 px-4 py-2 bg-gradient-to-r from-rose-500 to-rose-600 text-white rounded-lg hover:from-rose-600 hover:to-rose-700 transition-all duration-300 shadow-lg shadow-rose-500/20">
-            ⚖️ Settle Bet
-          </button>
-          <button @click="closeDetailsModal" 
-                  class="flex-1 px-4 py-2 bg-[#2A2A2A] text-gray-300 rounded-lg hover:bg-[#3A3A3A] hover:text-white transition-all duration-300">
-            Close
-          </button>
-        </div>
+              </td>
+              <td class="px-4 py-4 text-rose-400 text-sm font-bold whitespace-nowrap">TZS {{ formatMoney(bet.stake) }}</td>
+              <td class="px-4 py-4 text-white text-sm font-semibold whitespace-nowrap">{{ formatOdds(bet.total_odds) }}</td>
+              <td class="px-4 py-4 text-emerald-400 text-sm font-bold whitespace-nowrap">TZS {{ formatMoney(bet.possible_win) }}</td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <span :class="statusClass(bet)" class="px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap">{{ bet.status || '—' }}</span>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <span :class="resultClass(bet)" class="px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap">{{ resultLabel(bet) }}</span>
+              </td>
+              <td class="px-4 py-4 text-gray-400 text-xs whitespace-nowrap">{{ formatDate(bet.created_at || bet.createdAt) }}</td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <button @click="viewBetDetails(bet)"
+                        class="px-3 py-1.5 bg-white/5 text-white border border-[#2A2A2A] rounded-lg text-xs font-semibold hover:bg-white/10 transition-all">
+                  👁 Angalia
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
-    <!-- Loading Overlay -->
-    <div v-if="isLoading" class="fixed inset-0 z-40 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div class="bg-[#1A1A1A] rounded-2xl border border-[#2A2A2A] p-8 flex flex-col items-center gap-4">
-        <div class="w-12 h-12 border-4 border-rose-500 border-t-transparent rounded-full animate-spin"></div>
-        <p class="text-gray-400 text-sm">Loading bets...</p>
+    <!-- Pagination -->
+    <div class="flex items-center justify-between bg-[#1A1A1A] rounded-2xl border border-[#2A2A2A] p-4">
+      <p class="text-sm text-gray-400">
+        Showing <span class="text-white font-semibold">{{ bets.length }}</span> of <span class="text-white font-semibold">{{ total }}</span> bets
+      </p>
+      <div class="flex gap-2">
+        <button @click="prevPage" :disabled="offset === 0 || isLoading"
+                class="px-4 py-2 bg-white/5 border border-[#2A2A2A] text-white text-sm rounded-lg disabled:opacity-40 hover:bg-white/10 transition-all">
+          ← Prev
+        </button>
+        <button @click="nextPage" :disabled="!hasMore || isLoading"
+                class="px-4 py-2 bg-white/5 border border-[#2A2A2A] text-white text-sm rounded-lg disabled:opacity-40 hover:bg-white/10 transition-all">
+          Next →
+        </button>
+      </div>
+    </div>
+
+    <!-- Details Modal (read-only) -->
+    <div v-if="showDetailsModal && selectedBet" class="fixed inset-0 z-[200] flex items-center justify-center px-4 bg-black/70 backdrop-blur-sm" @click.self="closeDetailsModal">
+      <div class="relative w-full max-w-lg bg-[#1A1A1A] border border-[#2A2A2A] rounded-2xl p-6 max-h-[85vh] overflow-y-auto">
+        <button class="absolute top-4 right-4 p-2 rounded-lg text-gray-400 hover:bg-[#2A2A2A] transition-colors" @click="closeDetailsModal">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+
+        <h3 class="text-lg font-bold text-white font-mono">{{ selectedBet.ticket_code }}</h3>
+        <p class="mt-1 text-xs text-gray-400">User: <span class="text-white font-semibold">{{ selectedBet.user?.phone_number || 'N/A' }}</span>
+          &nbsp;·&nbsp; {{ formatDate(selectedBet.created_at || selectedBet.createdAt) }}</p>
+
+        <div class="mt-4 grid grid-cols-2 gap-3 text-sm">
+          <div class="bg-[#0D0D0D] rounded-xl p-3">
+            <p class="text-xs text-gray-400 uppercase">Stake</p>
+            <p class="mt-1 text-lg font-bold text-white">TZS {{ formatMoney(selectedBet.stake) }}</p>
+          </div>
+          <div class="bg-[#0D0D0D] rounded-xl p-3">
+            <p class="text-xs text-gray-400 uppercase">Odds</p>
+            <p class="mt-1 text-lg font-bold text-white">{{ formatOdds(selectedBet.total_odds) }}</p>
+          </div>
+          <div class="bg-[#0D0D0D] rounded-xl p-3">
+            <p class="text-xs text-gray-400 uppercase">Potential Win</p>
+            <p class="mt-1 text-lg font-bold text-emerald-400">TZS {{ formatMoney(selectedBet.possible_win) }}</p>
+          </div>
+          <div class="bg-[#0D0D0D] rounded-xl p-3">
+            <p class="text-xs text-gray-400 uppercase">Payout</p>
+            <p class="mt-1 text-lg font-bold text-rose-400">TZS {{ formatMoney(selectedBet.payout) }}</p>
+          </div>
+          <div class="bg-[#0D0D0D] rounded-xl p-3">
+            <p class="text-xs text-gray-400 uppercase">Status</p>
+            <p class="mt-1"><span :class="statusClass(selectedBet)" class="px-2.5 py-1 rounded-full text-xs font-semibold">{{ selectedBet.status }}</span></p>
+          </div>
+          <div class="bg-[#0D0D0D] rounded-xl p-3">
+            <p class="text-xs text-gray-400 uppercase">Result</p>
+            <p class="mt-1"><span :class="resultClass(selectedBet)" class="px-2.5 py-1 rounded-full text-xs font-semibold">{{ resultLabel(selectedBet) }}</span></p>
+          </div>
+        </div>
+
+        <div class="mt-4">
+          <p class="text-xs text-gray-400 uppercase tracking-wider mb-2">Selections ({{ selectedBet.selections?.length || 0 }})</p>
+          <div class="space-y-2">
+            <div v-for="(sel, idx) in selectedBet.selections" :key="idx" class="bg-[#0D0D0D] rounded-xl p-3 text-sm">
+              <p class="text-white font-semibold">{{ sel.match ? `${sel.match.home_team} vs ${sel.match.away_team}` : 'Mechi' }}</p>
+              <div class="mt-1 flex items-center justify-between text-xs text-gray-400">
+                <span>{{ sel.match?.league || 'League' }} · {{ getMarketDisplay(sel.market_key) }} · {{ sel.outcome_key }}</span>
+                <span class="text-white font-semibold">{{ sel.odds_at_placement || formatOdds(sel.odds) }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useBetStore } from '../../../stores/bets/betStore'
-
-const betStore = useBetStore()
+import { ref, reactive, onMounted } from 'vue'
+import BetService from '../../../services/bet/bet.service'
 
 const bets = ref([])
 const total = ref(0)
-const page = ref(1)
-const limit = ref(100)
-const showSettleModal = ref(false)
-const showDetailsModal = ref(false)
-const selectedBet = ref(null)
+const offset = ref(0)
+const limit = ref(20)
+const hasMore = ref(false)
 const isLoading = ref(false)
 
-const filters = ref({
-  status: '',
-  result: '',
-  search: ''
-})
+const showDetailsModal = ref(false)
+const selectedBet = ref(null)
+
+const filters = reactive({ search: '' })
 
 function formatMoney(n) {
-  return new Intl.NumberFormat('en-TZ').format(n || 0)
+  return new Intl.NumberFormat('en-TZ').format(Number(n || 0))
+}
+
+function formatOdds(o) {
+  const v = Number(o)
+  return isNaN(v) ? '—' : v.toFixed(2)
 }
 
 function formatDate(d) {
   if (!d) return 'N/A'
-  return new Date(d).toLocaleDateString('en-US', { 
-    year: 'numeric', 
-    month: 'short', 
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
+  return new Date(d).toLocaleString('en-US', {
+    year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
   })
 }
 
 function getMarketDisplay(marketKey) {
   const marketMap = {
-    '1X2': '1X2 | Full Time',
-    'Double Chance': 'Double Chance | Full Time',
-    'BTTS': 'Both Teams to Score | Full Time',
-    'Over/Under': 'Over/Under | Full Time',
-    'Correct Score': 'Correct Score | Full Time',
-    'CS_FH': 'Correct Score | First Half',
-    'CS_SH': 'Correct Score | Second Half'
+    '1X2': '1X2',
+    'Double Chance': 'Double Chance',
+    'BTTS': 'BTTS',
+    'Over/Under': 'Over/Under',
+    'Correct Score': 'Correct Score',
+    'CS_FH': 'CS FH',
+    'CS_SH': 'CS SH'
   }
-  return marketMap[marketKey] || marketKey || '1X2 | Full Time'
+  return marketMap[marketKey] || marketKey || '1X2'
 }
 
-function getStatusClass(bet) {
-  if (!bet) return ''
-  if (bet.result === 'WON') return 'bg-rose-500/20 text-rose-400 border border-rose-500/20'
-  if (bet.result === 'LOST') return 'bg-gray-500/20 text-gray-400 border border-gray-500/20'
-  if (bet.status === 'OPEN') return 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+function statusClass(bet) {
+  if (!bet) return 'bg-gray-500/10 text-gray-400 border border-gray-500/20'
+  if (bet.status === 'OPEN') return 'bg-rose-500/15 text-rose-400 border border-rose-500/25'
+  if (bet.status === 'SETTLED') return 'bg-amber-500/15 text-amber-400 border border-amber-500/25'
   return 'bg-gray-500/10 text-gray-400 border border-gray-500/20'
+}
+
+function resultLabel(bet) {
+  if (!bet) return '—'
+  if (bet.result === 'CASHED_OUT') return 'CASH OUT'
+  return bet.result || '—'
+}
+
+function resultClass(bet) {
+  if (!bet) return ''
+  if (bet.result === 'WON') return 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/25'
+  if (bet.result === 'LOST') return 'bg-gray-500/15 text-gray-400 border border-gray-500/25'
+  if (bet.result === 'CASHED_OUT') return 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+  return 'bg-white/5 text-gray-300 border border-white/10'
 }
 
 async function loadBets() {
   isLoading.value = true
   try {
-    const result = await betStore.loadAdminBets({
-      ...filters.value,
-      page: page.value,
-      limit: limit.value
+    const response = await BetService.getAdminBets({
+      search: filters.search,
+      limit: limit.value,
+      offset: offset.value
     })
-    if (result.success) {
-      bets.value = result.data.bets || []
-      total.value = result.data.total || 0
+    if (response?.success) {
+      bets.value = response.data.bets || []
+      total.value = response.data.total || 0
+      hasMore.value = response.data.hasMore || false
     } else {
       bets.value = []
       total.value = 0
+      hasMore.value = false
     }
   } catch (error) {
     console.error('Error loading bets:', error)
     bets.value = []
     total.value = 0
+    hasMore.value = false
   } finally {
     isLoading.value = false
   }
 }
 
-function openSettleModal(bet) {
-  selectedBet.value = bet
-  showSettleModal.value = true
+function searchBets() {
+  offset.value = 0
+  loadBets()
 }
 
-function closeSettleModal() {
-  showSettleModal.value = false
-  selectedBet.value = null
+function nextPage() {
+  offset.value = offset.value + limit.value
+  loadBets()
 }
 
-async function confirmSettle(result) {
-  if (!selectedBet.value) return
-  
-  try {
-    const response = await betStore.settleBet(selectedBet.value.id, result)
-    if (response.success) {
-      closeSettleModal()
-      await loadBets()
-    } else {
-      alert(response.message || 'Failed to settle bet')
-    }
-  } catch (error) {
-    console.error('Error settling bet:', error)
-    alert('An error occurred while settling the bet')
-  }
+function prevPage() {
+  offset.value = Math.max(0, offset.value - limit.value)
+  loadBets()
 }
 
 function viewBetDetails(bet) {
@@ -438,151 +265,7 @@ function viewBetDetails(bet) {
 
 function closeDetailsModal() {
   showDetailsModal.value = false
-  setTimeout(() => {
-    if (!showDetailsModal.value) {
-      // Clean up if needed
-    }
-  }, 300)
 }
 
-function prevPage() {
-  if (page.value > 1) {
-    page.value--
-    loadBets()
-  }
-}
-
-function nextPage() {
-  if (page.value * limit.value < total.value) {
-    page.value++
-    loadBets()
-  }
-}
-
-onMounted(() => {
-  loadBets()
-})
+onMounted(loadBets)
 </script>
-
-<style scoped>
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: scale(0.95) translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.animate-fadeIn {
-  animation: fadeIn 0.2s ease-out forwards;
-}
-
-.animate-spin {
-  animation: spin 1s linear infinite;
-}
-
-.animate-pulse {
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-@keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
-}
-
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: #0D0D0D;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #2A2A2A;
-  border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #3A3A3A;
-}
-
-/* Sticky header */
-.sticky {
-  position: sticky;
-}
-
-/* Table container for smooth scrolling */
-.overflow-x-auto {
-  -webkit-overflow-scrolling: touch;
-  scroll-behavior: smooth;
-}
-
-/* Scroll indicators for desktop */
-@media (min-width: 768px) {
-  .overflow-x-auto {
-    position: relative;
-  }
-}
-
-/* Truncate text on mobile */
-@media (max-width: 640px) {
-  .truncate {
-    max-width: 120px;
-  }
-}
-
-/* Button hover effects */
-button {
-  position: relative;
-  overflow: hidden;
-}
-
-button:active {
-  transform: scale(0.97);
-}
-
-/* Select dropdown styling */
-select option {
-  background: #0D0D0D;
-  color: white;
-}
-
-/* Input focus effects */
-input:focus, select:focus {
-  box-shadow: 0 0 0 2px rgba(244, 63, 94, 0.1);
-}
-
-/* Disabled button styles */
-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
-}
-
-/* Modal max height */
-.max-h-\[90vh\] {
-  max-height: 90vh;
-}
-
-/* Grid responsive */
-@media (max-width: 640px) {
-  .grid-cols-2.md\:grid-cols-4 {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-</style>

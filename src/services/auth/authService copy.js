@@ -1,8 +1,7 @@
-// services/auth/authService.js
+// services/authService.js
 import api from '../api'
 
 const authService = {
-  // REGISTER - kujiandikisha
   async register(phone_number, password) {
     try {
       const response = await api.post('/auth/register', {
@@ -10,91 +9,123 @@ const authService = {
         password
       })
       
-      // Backend inarudisha: { message, data: { id, phone_number } }
-      if (response.data && response.data.data) {
+      console.log('🔍 Register response:', response.data)
+      
+      if (response.data?.data) {
+        const { user, tokens } = response.data.data
+        
+        if (tokens?.access_token) {
+          localStorage.setItem('access_token', tokens.access_token)
+        }
+        if (tokens?.refresh_token) {
+          localStorage.setItem('refresh_token', tokens.refresh_token)
+        }
+        
         return {
           success: true,
-          user: response.data.data,
+          user: user,
+          tokens: tokens,
           message: response.data.message
         }
       }
       
-      return {
-        success: true,
-        user: response.data,
-        message: 'Registration successful'
-      }
+      return { success: false, message: 'Invalid response' }
     } catch (error) {
       console.error('Register error:', error)
       return {
         success: false,
-        message: error.response?.data?.message || 'Registration failed. Please try again.'
+        message: error.response?.data?.message || 'Registration failed'
       }
     }
   },
 
-  // LOGIN - kuingia
   async login(phone_number, password) {
+    console.log('🚀 ===== AUTH SERVICE LOGIN CALLED =====')
+    console.log('📞 Phone:', phone_number)
+    console.log('🔑 Password:', password)
+    
     try {
+      console.log('⏳ Calling API: POST /auth/login')
+      
       const response = await api.post('/auth/login', {
         phone_number,
         password
       })
-
-      console.log('Login response:', response.data) // Onyesha data ya response kwenye console
       
-      // Backend inarudisha: { message, data: { id, phone_number, accessToken, refreshToken } }
-      if (response.data && response.data.data) {
-        const { accessToken, refreshToken, id, phone_number: userPhone } = response.data.data
+      console.log('✅ ===== API RESPONSE RECEIVED =====')
+      console.log('📦 Full response object:', response)
+      console.log('📦 response.status:', response.status)
+      console.log('📦 response.data:', response.data)
+      console.log('📦 response.data.data:', response.data?.data)
+      
+      // Check if response has data
+      if (response.data?.data) {
+        const user = response.data.data.user
+        const tokens = response.data.data.tokens
         
-        // Hifadhi token kwenye localStorage
-        if (accessToken) {
-          localStorage.setItem('access_token', accessToken)
+        console.log('👤 User data:', user)
+        console.log('🔑 Tokens data:', tokens)
+        console.log('🔑 access_token:', tokens?.access_token)
+        console.log('🔑 refresh_token:', tokens?.refresh_token)
+        
+        // Save tokens to localStorage
+        if (tokens?.access_token) {
+          localStorage.setItem('access_token', tokens.access_token)
+          console.log('💾 access_token saved to localStorage')
         }
-        if (refreshToken) {
-          localStorage.setItem('refresh_token', refreshToken)
+        if (tokens?.refresh_token) {
+          localStorage.setItem('refresh_token', tokens.refresh_token)
+          console.log('💾 refresh_token saved to localStorage')
         }
         
-        return {
+        // Return success with data
+        const result = {
           success: true,
-          user: {
-            id,
-            phone_number: userPhone
-          },
+          user: user,
           tokens: {
-            accessToken,
-            refreshToken
+            access_token: tokens?.access_token,
+            refresh_token: tokens?.refresh_token
           },
-          message: response.data.message
+          message: response.data.message || 'Login successful'
         }
+        
+        console.log('📤 Returning from authService:', result)
+        return result
       }
+      
+      // If no data in response
+      console.error('❌ No data in response:', response.data)
+      return {
+        success: false,
+        message: response.data?.message || 'Invalid response from server'
+      }
+      
+    } catch (error) {
+      console.error('❌ ===== LOGIN ERROR =====')
+      console.error('❌ Error object:', error)
+      console.error('❌ error.message:', error.message)
+      console.error('❌ error.response:', error.response)
+      console.error('❌ error.response?.data:', error.response?.data)
+      console.error('❌ error.response?.status:', error.response?.status)
       
       return {
         success: false,
-        message: 'Invalid response from server'
-      }
-    } catch (error) {
-      console.error('Login error:', error)
-      return {
-        success: false,
-        message: error.response?.data?.message || 'Login failed. Invalid phone or password.'
+        message: error.response?.data?.message || error.message || 'Login failed. Please try again.'
       }
     }
   },
 
-  // LOGOUT - kutoka
   logout() {
     localStorage.removeItem('access_token')
     localStorage.removeItem('refresh_token')
-    return { success: true, message: 'Logged out successfully' }
+    return { success: true }
   },
 
-  // GET CURRENT USER PROFILE - kupata taarifa za user aliyeingia
   async getProfile() {
     try {
       const response = await api.get('/auth/profile')
       
-      if (response.data && response.data.data) {
+      if (response.data?.data) {
         return {
           success: true,
           user: response.data.data,
@@ -102,10 +133,7 @@ const authService = {
         }
       }
       
-      return {
-        success: false,
-        message: 'Failed to get profile'
-      }
+      return { success: false, message: 'Failed to get profile' }
     } catch (error) {
       console.error('Get profile error:', error)
       return {
@@ -115,116 +143,50 @@ const authService = {
     }
   },
 
-  // GET BALANCE - kuangalia salio
-  // async getBalance() {
-  //   try {
-  //     const response = await api.get('/account/balance')
-      
-  //     if (response.data && response.data.data) {
-  //       return {
-  //         success: true,
-  //         balance: response.data.data.balance,
-  //         data: response.data.data,
-  //         message: response.data.message
-  //       }
-  //     }
-      
-  //     return {
-  //       success: false,
-  //       message: 'Failed to get balance'
-  //     }
-  //   } catch (error) {
-  //     console.error('Get balance error:', error)
-  //     return {
-  //       success: false,
-  //       message: error.response?.data?.message || 'Failed to get balance'
-  //     }
-  //   }
-  // },
-
-
-  // services/authService.js
-async getBalance() {
-  try {
-    // 👇 Badilisha kutoka '/account' kwenda '/account/balance'
-    const response = await api.get('/account/balance')
-    
-    if (response.data && response.data.data) {
-      return {
-        success: true,
-        balance: response.data.data.balance,
-        data: response.data.data,
-        message: response.data.message
-      }
-    }
-    
-    return {
-      success: false,
-      message: 'Failed to get balance'
-    }
-  } catch (error) {
-    console.error('Get balance error:', error)
-    return {
-      success: false,
-      message: error.response?.data?.message || 'Failed to get balance'
-    }
-  }
-},
-  // REFRESH TOKEN - kubadilisha token iliyomalizika muda
   async refreshToken() {
     try {
       const refreshToken = localStorage.getItem('refresh_token')
       
       if (!refreshToken) {
-        return {
-          success: false,
-          message: 'No refresh token found'
-        }
+        return { success: false, message: 'No refresh token' }
       }
       
       const response = await api.post('/auth/refresh', { refreshToken })
       
-      if (response.data && response.data.data && response.data.data.accessToken) {
+      if (response.data?.data?.accessToken) {
         const newAccessToken = response.data.data.accessToken
         localStorage.setItem('access_token', newAccessToken)
         
         return {
           success: true,
           accessToken: newAccessToken,
-          message: 'Token refreshed successfully'
+          message: response.data.message
         }
       }
       
-      return {
-        success: false,
-        message: 'Failed to refresh token'
-      }
+      return { success: false, message: 'Failed to refresh' }
     } catch (error) {
       console.error('Refresh token error:', error)
-      // Kama refresh token imekataa, fanya logout
       this.logout()
       return {
         success: false,
-        message: 'Session expired. Please login again.'
+        message: 'Session expired'
       }
     }
   },
 
-  // CHECK IF USER IS LOGGED IN - angalia kama user ameingia
   isAuthenticated() {
-    const token = localStorage.getItem('access_token')
-    return !!token // Inarudisha true kama token ipo
+    return !!localStorage.getItem('access_token')
   },
 
-  // FORGOT PASSWORD - kusahau password (hatua ya kwanza)
   async forgotPassword(phone_number) {
     try {
       const response = await api.post('/auth/forgot-password', { phone_number })
       
       return {
         success: true,
-        userId: response.data.userId,
-        message: response.data.message
+        userId: response.data?.userId,
+        message: response.data?.message || 'Reset link sent'
       }
     } catch (error) {
       console.error('Forgot password error:', error)
@@ -235,7 +197,6 @@ async getBalance() {
     }
   },
 
-  // RESET PASSWORD - kuweka password mpya (hatua ya pili)
   async resetPassword(userId, newPassword, confirmPassword) {
     try {
       const response = await api.post('/auth/reset-password', {
@@ -246,7 +207,7 @@ async getBalance() {
       
       return {
         success: true,
-        message: response.data.message
+        message: response.data?.message || 'Password reset successfully'
       }
     } catch (error) {
       console.error('Reset password error:', error)
@@ -257,7 +218,6 @@ async getBalance() {
     }
   },
 
-  // CHANGE PASSWORD kwa moja kwa kutumia phone number
   async changePassword(phone_number, newPassword, confirmPassword) {
     try {
       const response = await api.post('/auth/change-password', {
@@ -268,7 +228,7 @@ async getBalance() {
       
       return {
         success: true,
-        message: response.data.message
+        message: response.data?.message || 'Password changed successfully'
       }
     } catch (error) {
       console.error('Change password error:', error)
@@ -277,7 +237,32 @@ async getBalance() {
         message: error.response?.data?.message || 'Failed to change password'
       }
     }
-  }
+  },
+
+  async getBalance() {
+    try {
+      const response = await api.get('/auth/profile')
+      
+      if (response.data?.data) {
+        return {
+          success: true,
+          balance: response.data.data.balance || 0,
+          data: response.data.data,
+          message: response.data.message
+        }
+      }
+      
+      return { success: false, message: 'Failed to get balance' }
+    } catch (error) {
+      console.error('Get balance error:', error)
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to get balance'
+      }
+    }
+  },
+
+
 }
 
 export default authService

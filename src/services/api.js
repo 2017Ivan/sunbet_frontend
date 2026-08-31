@@ -3,10 +3,12 @@ import axios from 'axios'
 // http://13.140.157.161:5000/api
 // https://vatesbet.com//api/api
 // http://localhost:5000/api
-// https://sunbeting.com/api
+// https://boombet365.com/api
+// https://boombet365.com/api
+// http://169.58.130.62/api
 // Create axios instance
 const api = axios.create({
-  baseURL: 'https://sunbeting.com/api',
+  baseURL: 'http://localhost:5000/api',
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',   
@@ -34,14 +36,9 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      const url = error.config?.url || ''
-      const isAuthRoute = url.includes('/auth/login') || url.includes('/auth/register') || url.includes('/auth/refresh')
-      
-      if (!isAuthRoute) {
-        localStorage.removeItem('access_token')
-        localStorage.removeItem('refresh_token')
-        window.location.href = '/'
-      }
+      localStorage.removeItem('access_token')
+      localStorage.removeItem('refresh_token')
+      window.location.href = '/'
     }
     return Promise.reject(error)
   }
