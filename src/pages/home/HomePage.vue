@@ -65,7 +65,8 @@
             @click="navigateToSports" 
             class="text-gray-600 hover:text-rose-600 font-semibold text-sm transition-colors"
           >
-            View All Football ({{ totalGamesCount }}) 
+            <!-- View All Football ({{ totalGamesCount }})  -->
+            View All Football
           </button>
         </div>
 
@@ -87,7 +88,8 @@
               @click="navigateToLive" 
               class="text-gray-600 hover:text-rose-600 font-semibold text-sm transition-colors"
             >
-              View All Live ({{ liveTotalCount }}) 
+              <!-- View All Live ({{ liveTotalCount }})  -->
+              View All Livess
             </button>
           </div>
         </div>
