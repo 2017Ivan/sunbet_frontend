@@ -135,6 +135,11 @@
               :key="index"
               class="bg-white p-1 flex flex-col group border-amber-600/20 transition-all border-b border-gray-200"
             >
+             <!-- Time and Date -->
+              <div v-if="sel.time || sel.date" class="flex gap-2 mt-1 text-[10px] text-gray-500">
+                <span v-if="sel.time">{{ sel.time }}</span>
+                <span v-if="sel.date">{{ sel.date }}</span>
+              </div>
               <div class="flex justify-between items-center">
                 <p class="text-[#A7A7A7] font-medium text-xs">{{ sel.home_team || 'Home' }} vs {{ sel.away_team || 'Away' }}</p>
                 <span class="text-[#8E8E8E] font-bold text-sm px-1 py-1 rounded-lg">{{ Number(sel.odds_at_placement).toFixed(2) }}</span>
@@ -143,14 +148,14 @@
               <div class="flex justify-between items-center py-1">
                 <span class="text-xs text-gray-500 font-bold truncate">{{ sel.league || '' }}</span>
                 <span class="text-xs text-gray-500 font-semibold">
-                  <span class="text-xs text-gray-400 font-bold px-1">—</span>
+                  <span class="text-xs text-gray-400 font-bold px-1">{{ sel.score ? `${sel.score.home} - ${sel.score.away}` : '—' }}</span>
                 </span>
               </div>
               
               <div class="flex justify-between items-center">
                 <span class="text-xs text-gray-500 font-semibold">
                   {{ marketTitle(sel.market_key) }} - 
-                  <span class="text-[#F2E4E4] font-medium">{{ outcomeLabel(sel.outcome_key) }}</span>
+                  <span class="text-gray-600 font-medium">{{ outcomeLabel(sel.outcome_key) }}</span>
                 </span>
                 <span 
                   class="text-xs font-semibold px-2 py-0.5 rounded"
