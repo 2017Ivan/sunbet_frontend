@@ -1,114 +1,187 @@
 <template>
-  <div class="min-h-screen bg-gray-950">
-    <div class="max-w-2xl mx-auto px-4 pb-10 pt-6">
+  <div class="p-0 bg-gray-100">
+    <div class="max-w-2xl mx-auto px-1 py-3">
+      
+      <!-- Bet Code Header -->
+      <div class="px-0 py-1 bg-white flex items-center justify-between">
+        <div class="flex items-center gap-3 mb-6">
+          <span class="text-gray-950 font-mono font-bold text-sm tracking-wider">
+            {{ bet?.ticket_code || route.params.ticketCode }}
+          </span>
+        </div>
+      </div>
+
       <!-- Loading -->
-      <div v-if="loading" class="flex flex-col items-center justify-center py-24 gap-3">
-        <div class="w-10 h-10 border-4 border-rose-500 border-t-transparent rounded-full animate-spin"></div>
-        <p class="text-gray-400 text-sm">Loading result...</p>
+      <div v-if="loading" class="bg-white border border-gray-200 rounded-xl p-8">
+        <div class="flex items-center justify-center gap-3">
+          <div class="w-5 h-5 border-2 border-rose-500 border-t-transparent rounded-full animate-spin"></div>
+          <span class="text-gray-500">Loading result...</span>
+        </div>
       </div>
 
       <!-- Error -->
-      <div v-else-if="error" class="flex flex-col items-center justify-center py-24 gap-4 text-center">
-        <div class="w-16 h-16 rounded-full bg-gray-800 flex items-center justify-center">
-          <svg class="w-8 h-8 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <div v-else-if="error" class="text-center py-12">
+        <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-white flex items-center justify-center">
+          <svg class="w-8 h-8 text-[#333]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
             <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
             <rect x="9" y="3" width="6" height="4" rx="2"/>
           </svg>
         </div>
-        <h2 class="text-white text-lg font-bold">Bet not found</h2>
-        <p class="text-gray-500 text-sm max-w-sm">{{ errorMessage }}</p>
+        <p class="text-gray-500 font-medium">Bet not found</p>
+        <p class="text-gray-400 text-sm mt-2 max-w-sm mx-auto">{{ errorMessage }}</p>
         <button
           @click="goRegister"
-          class="px-6 py-3 rounded-xl bg-rose-500 text-white font-bold hover:bg-rose-600 transition-colors"
+          class="mt-4 px-6 py-3 rounded-xl bg-rose-500 text-white font-bold hover:bg-rose-600 transition-colors"
         >
           Join SunBet &amp; Start Winning
         </button>
       </div>
 
-      <!-- Result -->
-      <div v-else-if="bet" class="space-y-4">
-        <!-- Result Hero -->
-        <div
-          class="p-6 rounded-2xl text-center border"
-          :class="isWon ? 'bg-gradient-to-b from-green-900/50 to-gray-900 border-green-700/30' :
-                   isLost ? 'bg-gradient-to-b from-red-900/40 to-gray-900 border-red-700/30' :
-                   'bg-gradient-to-b from-amber-900/40 to-gray-900 border-amber-700/30'"
+      <!-- Bet Details -->
+      <div v-else-if="bet" class="space-y-0">
+        
+        <!-- Status Banner -->
+        <div 
+          class="p-3 rounded-t-xl flex items-center justify-between"
+          :class="isWon ? 'bg-gradient-to-r from-green-900/40 to-green-950/40 border-t border-green-700/30' : 
+                   isLost ? 'bg-gradient-to-r from-red-900/90 to-red-950/80 border border-red-700/30' : 
+                   isCashedOut ? 'bg-gradient-to-r from-emerald-900/40 to-emerald-950/40 border-t border-emerald-700/30' :
+                   'bg-gradient-to-r from-amber-900/40 to-amber-950/40 border-t border-amber-700/30'"
         >
-          <div class="text-6xl mb-3">{{ isWon ? '🏆' : isLost ? '😔' : '⏳' }}</div>
-          <h1 class="text-2xl font-extrabold text-white mb-1">
-            {{ isWon ? 'This Ticket WON!' : isLost ? 'Not This Time' : 'Still Running' }}
-          </h1>
-          <p class="text-sm text-gray-400 mb-4">
-            {{ isWon ? 'Share this winning feeling!' : isLost ? 'Every bet brings you closer.' : 'This bet is still in progress.' }}
-          </p>
-
-          <div v-if="isWon" class="inline-block px-5 py-2 rounded-full bg-green-500/20 border border-green-500/40">
-            <span class="text-green-300 font-bold text-lg">+ TZS {{ formatNumber(payout) }}</span>
+          <div class="flex items-center gap-3">
+            <span class="text-4xl">{{ isWon ? '🏆' : isLost ? '😔' : isCashedOut ? '💰' : '⏳' }}</span>
+            <div>
+              <p class="text-white font-semibold text-sm my-5">
+                {{ isWon ? 'Bet Won!' : isLost ? 'Bet Lost' : isCashedOut ? 'Bet Cashed Out!' : 'Bet in Progress' }}
+              </p>
+              <p class="text-xs text-gray-100">
+                {{ isWon ? 'Congratulations on your win!' : isLost ? 'Better luck next time!' : isCashedOut ? 'You locked in your payout early' : 'Waiting for results...' }}
+              </p>
+            </div>
           </div>
-
-          <div class="mt-4 inline-block px-4 py-1.5 rounded-full text-xs font-bold"
-               :class="isWon ? 'bg-green-500/20 text-green-400' : isLost ? 'bg-red-500/20 text-red-400' : 'bg-amber-500/20 text-amber-400'">
-            {{ isWon ? 'WON' : isLost ? 'LOST' : 'OPEN' }}
-          </div>
+          <span 
+            class="px-4 py-3 text-xs font-bold rounded-full"
+            :class="isWon ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 
+                     isLost ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 
+                     isCashedOut ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
+                     'bg-amber-500/20 text-amber-400 border border-amber-500/30'"
+          >
+            {{ isWon ? 'WON' : isLost ? 'LOST' : isCashedOut ? 'CASHED OUT' : 'OPEN' }}
+          </span>
         </div>
 
-        <!-- Ticket summary -->
-        <div class="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
-          <div class="px-4 py-3 border-b border-gray-800 flex items-center justify-between">
-            <span class="text-xs uppercase tracking-wider text-gray-500 font-medium">Ticket</span>
-            <span class="font-mono text-sm text-gray-300">{{ bet.ticket_code }}</span>
+        <!-- Main Card -->
+        <div class="bg-white border-b border-gray-200 rounded-b-xl overflow-hidden">
+          
+          <!-- Stats -->
+          <div class="">
+            <!-- Total Odds -->
+            <div class="flex items-center justify-between px-2 pt-2">
+              <p class="text-[10px] uppercase tracking-wider text-gray-950 font-medium">Total Odds</p>
+              <p class="text-gray-600 font-bold text-xs">{{ totalOdds.toFixed(2) }}</p>
+            </div>
+            
+            <!-- Stake -->
+            <div class="flex items-center justify-between px-2 py-0.5">
+              <p class="text-[10px] uppercase tracking-wider text-gray-950 font-medium">Stake</p>
+              <p class="text-gray-600 font-bold text-xs">TZS {{ formatNumber(stakeAmount) }}</p>
+            </div>
+            
+            <!-- Potential Win -->
+            <div class="flex items-center justify-between px-2 py-0.5">
+              <p class="text-[10px] uppercase tracking-wider text-gray-950 font-medium">Potential Win</p>
+              <p class="text-gray-600 font-bold text-xs">TZS {{ formatNumber(potentialWin) }}</p>
+            </div>
+            
+            <!-- Tax -->
+            <div class="flex items-center justify-between px-2 pb-2">
+              <p class="text-[10px] uppercase tracking-wider text-gray-950 font-medium">Tax (12%)</p>
+              <p class="text-gray-600 font-semibold text-xs">- TZS {{ formatNumber(tax) }}</p>
+            </div>
           </div>
-          <div class="grid grid-cols-3 divide-x divide-gray-800 text-center py-4">
-            <div>
-              <p class="text-[10px] uppercase text-gray-500">Stake</p>
-              <p class="text-white font-bold text-sm mt-1">TZS {{ formatNumber(bet.stake) }}</p>
-            </div>
-            <div>
-              <p class="text-[10px] uppercase text-gray-500">Odds</p>
-              <p class="text-white font-bold text-sm mt-1">{{ totalOdds.toFixed(2) }}</p>
-            </div>
-            <div>
-              <p class="text-[10px] uppercase text-gray-500">Payout</p>
-              <p class="text-emerald-400 font-bold text-sm mt-1">TZS {{ formatNumber(payout) }}</p>
-            </div>
-          </div>
-        </div>
 
-        <!-- Selections -->
-        <div class="bg-gray-900 border border-gray-800 rounded-2xl p-4">
-          <h3 class="text-sm font-bold text-white mb-3">Selections ({{ selections.length }})</h3>
-          <div class="space-y-2">
-            <div
-              v-for="(sel, i) in selections"
-              :key="i"
-              class="bg-gray-800/60 border border-gray-800 rounded-xl p-3"
-            >
-              <p class="text-sm text-gray-200 font-medium">{{ sel.home_team || 'Home' }} <span class="text-gray-500 text-xs">vs</span> {{ sel.away_team || 'Away' }}</p>
-              <p class="text-xs text-gray-500 mt-0.5">{{ sel.league }}</p>
-              <div class="flex items-center justify-between mt-2">
-                <span class="text-xs text-gray-400">{{ marketTitle(sel.market_key) }} - <span class="text-gray-200 font-semibold">{{ outcomeLabel(sel.outcome_key) }}</span></span>
-                <div class="flex items-center gap-2">
-                  <span class="text-xs text-gray-400">@{{ Number(sel.odds_at_placement).toFixed(2) }}</span>
-                  <span class="text-[10px] font-bold px-2 py-0.5 rounded"
-                    :class="sel.status === 'WON' ? 'bg-green-500/20 text-green-400' : sel.status === 'LOST' ? 'bg-red-500/20 text-red-400' : 'bg-amber-500/20 text-amber-400'">
-                    {{ sel.status }}
-                  </span>
-                </div>
+          <!-- Net Payout -->
+          <div class="px-4 py-4 bg-gradient-to-r from-emerald-800/80 to-emerald-800/80 border-t border-gray-200">
+            <div class="flex items-center justify-between">
+              <p class="text-sm text-gray-100 font-bold">Payout</p>
+              <div class="text-right">
+                <p class="text-green-100 font-bold text-sm">
+                  TZS {{ formatNumber(payout) }}
+                </p>
+                <span v-if="resultLabel" class="text-xs font-semibold" :class="isWon ? 'text-green-400' : isLost ? 'text-red-400' : 'text-emerald-400'">
+                  {{ resultLabel }}
+                </span>
               </div>
             </div>
           </div>
         </div>
 
+        <!-- Selections -->
+        <div v-if="selections.length > 0" class="mt-0 p-2">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-sm font-semibold text-gray-600 flex items-center gap-2">
+              <svg class="w-4 h-4 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
+                <rect x="9" y="3" width="6" height="4" rx="2"/>
+              </svg>
+              Selections
+            </h3>
+            <span class="text-xs text-gray-500 font-medium">{{ selections.length }} picks</span>
+          </div>
+          
+          <div class="space-y-1">
+            <div 
+              v-for="(sel, index) in selections" 
+              :key="index"
+              class="bg-white p-1 flex flex-col group border-amber-600/20 transition-all border-b border-gray-200"
+            >
+              <div class="flex justify-between items-center">
+                <p class="text-[#A7A7A7] font-medium text-xs">{{ sel.home_team || 'Home' }} vs {{ sel.away_team || 'Away' }}</p>
+                <span class="text-[#8E8E8E] font-bold text-sm px-1 py-1 rounded-lg">{{ Number(sel.odds_at_placement).toFixed(2) }}</span>
+              </div>
+              
+              <div class="flex justify-between items-center py-1">
+                <span class="text-xs text-gray-500 font-bold truncate">{{ sel.league || '' }}</span>
+                <span class="text-xs text-gray-500 font-semibold">
+                  <span class="text-xs text-gray-400 font-bold px-1">—</span>
+                </span>
+              </div>
+              
+              <div class="flex justify-between items-center">
+                <span class="text-xs text-gray-500 font-semibold">
+                  {{ marketTitle(sel.market_key) }} - 
+                  <span class="text-[#F2E4E4] font-medium">{{ outcomeLabel(sel.outcome_key) }}</span>
+                </span>
+                <span 
+                  class="text-xs font-semibold px-2 py-0.5 rounded"
+                  :class="getResultClass(sel.status)"
+                >
+                  {{ sel.status || 'PENDING' }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- No Selections -->
+        <div v-else class="mt-4 p-4 bg-white border border-gray-200 rounded-xl text-center">
+          <p class="text-gray-500 text-sm">No selections found for this bet.</p>
+        </div>
+
         <!-- CTA -->
-        <div class="pt-2 space-y-3">
-          <p v-if="!isWon" class="text-center text-xs text-gray-500">Think you can do better? Give it a try!</p>
+        <div class="mt-5 bg-white border border-gray-200 p-4">
+          <p v-if="!isWon" class="text-center text-xs text-gray-500 mb-3">Think you can do better? Give it a try!</p>
           <button
             @click="goRegister"
-            class="w-full py-4 rounded-xl bg-gradient-to-r from-rose-600 to-rose-500 text-white font-extrabold text-base tracking-wide hover:opacity-90 transition-opacity"
+            class="w-full py-3 rounded-xl bg-gradient-to-r from-rose-600 to-rose-500 text-white font-extrabold text-sm tracking-wide hover:opacity-90 transition-opacity"
           >
-            {{ isWon ? '🎉 Join &amp; Win Too' : '🚀 Join SunBet &amp; Start Betting' }}
+            {{ isWon ? 'Join & Win Too' : 'Join SunBet & Start Betting' }}
           </button>
-          <p class="text-center text-[10px] text-gray-600">18+ · Play responsibly · Terms apply</p>
+          <p class="text-center text-[10px] text-gray-400 mt-2">18+ · Play responsibly · Terms apply</p>
+        </div>
+
+        <div class="flex flex-col items-center justify-center text-center py-2">
+          <span class="text-gray-400 text-[13px] font-bold">All Bets are accepted and settled in accordance with <span class="text-gray-400 text-xs">our <span class="underline">Terms and Conditions</span> and <span class="underline">Rules</span> </span></span>
         </div>
       </div>
     </div>
@@ -129,22 +202,7 @@ const loading = ref(true)
 const error = ref(false)
 const errorMessage = ref('')
 
-const stakeAmount = computed(() => parseFloat(bet.value?.stake) || 0)
-const totalOdds = computed(() => parseFloat(bet.value?.totalOdds || bet.value?.total_odds) || 1)
-const potentialWin = computed(() => Math.round(stakeAmount.value * (totalOdds.value - 1)))
-const tax = computed(() => Math.round(potentialWin.value * 0.12))
-const payout = computed(() => Math.round(potentialWin.value - tax.value) + stakeAmount.value)
-
-const result = computed(() => (bet.value?.result || '').toUpperCase())
-const isWon = computed(() => result.value === 'WON' && (bet.value?.status || '').toUpperCase() !== 'OPEN')
-const isLost = computed(() => ['LOST', 'CANCELLED'].includes(result.value))
-
-const formatNumber = (v) => {
-  const n = parseFloat(v)
-  if (isNaN(n)) return '0.00'
-  return n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-}
-
+// ---- Market Titles ----
 const marketTitles = {
   '1X2': '1X2 | Full Time',
   'Double_Chance': 'Double Chance | Full Time',
@@ -190,6 +248,100 @@ const outcomeLabel = (key) => {
   return joined.trim()
 }
 
+// ---- Result Class ----
+const getResultClass = (status) => {
+  if (status === 'WON') return 'bg-green-500/20 text-green-400 border border-green-500/20'
+  if (status === 'LOST') return 'bg-red-500/20 text-red-400 border border-red-500/20'
+  return 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20'
+}
+
+// ---- Computed ----
+const betStatus = computed(() => {
+  if (!bet.value) return 'unknown'
+  
+  const status = (bet.value.status || '').toUpperCase()
+  const result = (bet.value.result || '').toUpperCase()
+  
+  if (status === 'SETTLED') {
+    if (result === 'WON') return 'won'
+    if (result === 'LOST') return 'lost'
+    if (result === 'CASHED_OUT') return 'cashed-out'
+    return 'settled'
+  }
+  
+  if (status === 'OPEN' || status === 'PENDING') {
+    return 'open'
+  }
+  
+  if (result === 'WON') return 'won'
+  if (result === 'LOST') return 'lost'
+  
+  return 'unknown'
+})
+
+const isWon = computed(() => betStatus.value === 'won')
+const isLost = computed(() => betStatus.value === 'lost')
+const isOpen = computed(() => betStatus.value === 'open')
+const isCashedOut = computed(() => betStatus.value === 'cashed-out')
+
+const resultLabel = computed(() => {
+  if (isWon.value) return 'WON'
+  if (isLost.value) return 'LOST'
+  if (isCashedOut.value) return 'CASHED OUT'
+  return ''
+})
+
+// ---- Bet Calculations ----
+const stakeAmount = computed(() => {
+  if (!bet.value) return 0
+  return parseFloat(bet.value.stake) || 0
+})
+
+const totalOdds = computed(() => {
+  if (!bet.value) return 0
+  const odds = parseFloat(bet.value.total_odds) || parseFloat(bet.value.totalOdds) || parseFloat(bet.value.odds) || 1.00
+  return odds
+})
+
+const potentialWin = computed(() => {
+  const dbValue = parseFloat(bet.value?.possible_win)
+  if (!isNaN(dbValue) && dbValue > 0) return dbValue
+  if (!stakeAmount.value || !totalOdds.value) return 0
+  return Math.round(stakeAmount.value * (totalOdds.value - 1))
+})
+
+const tax = computed(() => {
+  const dbValue = parseFloat(bet.value?.tax)
+  if (!isNaN(dbValue) && dbValue > 0) return dbValue
+  if (!potentialWin.value) return 0
+  return Math.round(potentialWin.value * 0.12)
+})
+
+const payout = computed(() => {
+  if (!bet.value) return 0
+  if (isLost.value) return 0
+  if (!isOpen.value) {
+    const actual = parseFloat(bet.value.cashout_amount) || parseFloat(bet.value.payout)
+    return isNaN(actual) ? 0 : actual
+  }
+  const dbValue = parseFloat(bet.value.payout)
+  if (!isNaN(dbValue) && dbValue > 0) return dbValue
+  if (!potentialWin.value) return 0
+  return Math.round((potentialWin.value - tax.value) + stakeAmount.value)
+})
+
+// ---- Helpers ----
+const formatNumber = (value) => {
+  if (value === undefined || value === null) return '0.00'
+  const num = parseFloat(value)
+  if (isNaN(num)) return '0.00'
+  return num.toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  })
+}
+
+// ---- Map Selections ----
 const mapSelections = (raw) => {
   return (raw || []).map((sel) => {
     const m = sel.match || {}
@@ -205,10 +357,12 @@ const mapSelections = (raw) => {
   })
 }
 
+// ---- Register ----
 const goRegister = () => {
   router.push({ name: 'register', query: { redirect: route.fullPath } })
 }
 
+// ---- Load Ticket ----
 const loadTicket = async () => {
   const ticketCode = route.params.ticketCode
   if (!ticketCode) {
@@ -237,3 +391,28 @@ const loadTicket = async () => {
 
 onMounted(loadTicket)
 </script>
+
+<style scoped>
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #2A2A2A;
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #A32D2D;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+</style>
