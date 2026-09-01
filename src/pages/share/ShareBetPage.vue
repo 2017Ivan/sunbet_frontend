@@ -172,16 +172,32 @@
           <p class="text-gray-500 text-sm">No selections found for this bet.</p>
         </div>
 
-        <!-- CTA -->
-        <div class="mt-5 bg-white border border-gray-200 p-4">
-          <p v-if="!isWon" class="text-center text-xs text-gray-500 mb-3">Think you can do better? Give it a try!</p>
-          <button
-            @click="goRegister"
-            class="w-full py-3 rounded-xl bg-gradient-to-r from-rose-600 to-rose-500 text-white font-extrabold text-sm tracking-wide hover:opacity-90 transition-opacity"
-          >
-            {{ isWon ? 'Join & Win Too' : 'Join SunBet & Start Betting' }}
-          </button>
-          <p class="text-center text-[10px] text-gray-400 mt-2">18+ · Play responsibly · Terms apply</p>
+        <!-- Timestamps & Actions -->
+        <div class="mt-5 bg-white border border-gray-200 p-2">
+          <div class="flex flex-col items-center justify-center gap-3">
+            <div class="flex flex-wrap items-center gap-3 justify-center">
+              <p class="text-[10px] tracking-wider text-[#8C8C8C] font-medium">Bet Placed on</p>
+              <p class="text-gray-400 text-xs">{{ formatDate(bet.created_at) }}</p>
+            </div>
+            <div class="flex flex-row items-center gap-3 justify-center">
+              <div class="flex flex-row gap-1.5 items-center justify-center">
+                <div class="w-0 h-0 border-l-[7px] border-r-[7px] border-b-[8px] border-l-transparent border-r-transparent border-b-gray-400"></div>
+                <span class="text-gray-600 text-xs font-medium">Pending</span>
+              </div>
+              <div class="flex flex-row gap-1.5 items-center justify-center">
+                <div class="w-0 h-0 border-l-[7px] border-r-[7px] border-b-[8px] border-l-transparent border-r-transparent border-b-green-500"></div>
+                <span class="text-gray-600 text-xs font-medium">Won</span>
+              </div>
+              <div class="flex flex-row gap-1.5 items-center justify-center">
+                <div class="w-0 h-0 border-l-[7px] border-r-[7px] border-b-[8px] border-l-transparent border-r-transparent border-b-rose-500"></div>
+                <span class="text-gray-600 text-xs font-medium">Lost</span>
+              </div>
+              <div class="flex flex-row gap-1.5 items-center justify-center">
+                <div class="w-0 h-0 border-l-[7px] border-r-[7px] border-b-[8px] border-l-transparent border-r-transparent border-b-gray-500"></div>
+                <span class="text-gray-600 text-xs font-medium">Void</span>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div class="flex flex-col items-center justify-center text-center py-2">
@@ -390,6 +406,19 @@ const formatNumber = (value) => {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
   })
+}
+
+const formatDate = (dateString) => {
+  if (!dateString) return 'N/A'
+  try {
+    const date = new Date(dateString)
+    return date.toLocaleString('en-US', { 
+      dateStyle: 'medium', 
+      timeStyle: 'short' 
+    })
+  } catch {
+    return 'N/A'
+  }
 }
 
 // ---- Map Selections ----
