@@ -224,8 +224,8 @@ const handleDeposit = async () => {
     lastDepositAmount.value = depositAmount.value
     
     const result = await DepositService.requestDeposit({
-      amount: depositAmount.value
-      // payer_phone inatumia namba ya mteja kutoka DB (backend default)
+      amount: depositAmount.value,
+      payer_phone: authStore.userPhone || authStore.user?.phone_number || undefined
     })
     
     if (result.success) {
