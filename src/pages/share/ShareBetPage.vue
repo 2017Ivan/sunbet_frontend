@@ -137,8 +137,7 @@
             >
              <!-- Time and Date -->
               <div v-if="sel.time || sel.date" class="flex gap-2 mt-1 text-[10px] text-gray-500">
-                <span v-if="sel.time">{{ sel.time }}</span>
-                <span v-if="sel.date">{{ sel.date }}</span>
+                <span>{{ formatUpcomingTime(sel.date, sel.time) }}</span>
               </div>
               <div class="flex justify-between items-center">
                 <p class="text-[#A7A7A7] font-medium text-xs">{{ sel.home_team || 'Home' }} vs {{ sel.away_team || 'Away' }}</p>
@@ -334,6 +333,53 @@ const payout = computed(() => {
   if (!potentialWin.value) return 0
   return Math.round((potentialWin.value - tax.value) + stakeAmount.value)
 })
+
+// ---- Date/Time Format (same as MatchCard.vue) ----
+function formatUpcomingTime(dateStr, timeStr) {
+  if (!dateStr && !timeStr) return ''
+
+  try {
+    let matchDateObj
+
+    if (dateStr && timeStr) {
+      matchDateObj = new Date(`${dateStr}T${timeStr}`)
+      if (isNaN(matchDateObj.getTime())) {
+        matchDateObj = new Date(`${dateStr} ${timeStr}`)
+      }
+    } else if (dateStr) {
+      matchDateObj = new Date(dateStr)
+    } else {
+      return timeStr
+    }
+
+    if (isNaN(matchDateObj.getTime())) {
+      return timeStr || dateStr
+    }
+
+    const today = new Date()
+    const isToday =
+      matchDateObj.getDate() === today.getDate() &&
+      matchDateObj.getMonth() === today.getMonth() &&
+      matchDateObj.getFullYear() === today.getFullYear()
+
+    const timeFormatted = matchDateObj.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    })
+
+    if (isToday) {
+      return `${timeFormatted} Today`
+    } else {
+      const dayName = matchDateObj.toLocaleDateString('en-US', { weekday: 'short' })
+      const dayNum = String(matchDateObj.getDate()).padStart(2, '0')
+      const monthNum = String(matchDateObj.getMonth() + 1).padStart(2, '0')
+      return `${timeFormatted} ${dayName} ${dayNum}/${monthNum}`
+    }
+  } catch (err) {
+    return timeStr || dateStr || ''
+  }
+}
 
 // ---- Helpers ----
 const formatNumber = (value) => {
