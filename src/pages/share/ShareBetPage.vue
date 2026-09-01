@@ -177,7 +177,7 @@
           <div class="flex flex-col items-center justify-center gap-3">
             <div class="flex flex-wrap items-center gap-3 justify-center">
               <p class="text-[10px] tracking-wider text-[#8C8C8C] font-medium">Bet Placed on</p>
-              <p class="text-gray-400 text-xs">{{ formatDate(bet.created_at) }}</p>
+              <p class="text-gray-400 text-xs">{{ formatDate(bet.created_at || bet.createdAt) }}</p>
             </div>
             <div class="flex flex-row items-center gap-3 justify-center">
               <div class="flex flex-row gap-1.5 items-center justify-center">
