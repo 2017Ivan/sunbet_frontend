@@ -1,6 +1,6 @@
 <template>
-  <div class="min-h-screen bg-gray-950 flex items-center justify-center px-4">
-    <div class="w-full max-w-md bg-gray-900 border border-gray-800 rounded-2xl p-8 text-center">
+  <div class="min-h-screen bg-transparent flex items-center justify-center px-4">
+    <div class="w-full max-w-md bg-transparent border border-gray-800 rounded-2xl p-8 text-center">
       <!-- Loading -->
       <div v-if="status === 'loading'" class="space-y-4">
         <div class="mx-auto w-14 h-14 border-4 border-rose-500 border-t-transparent rounded-full animate-spin"></div>
