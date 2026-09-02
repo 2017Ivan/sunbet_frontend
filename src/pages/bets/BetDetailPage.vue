@@ -179,11 +179,23 @@
                   <span class="text-gray-600 font-medium">{{ getSelectionDisplay(selection) }}</span>
                 </span>
                 <span 
+                  v-if="isMatchFinished(selection)"
                   class="text-xs font-semibold px-2 py-0.5 rounded"
                   :class="getResultClass(selection.result)"
                 >
                   {{ selection.result || 'PENDING' }}
                 </span>
+                <span 
+                  v-else-if="isMatchStarted(selection)"
+                  class="text-xs font-extrabold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 animate-pulse"
+                >
+                  Live
+                </span>
+                <div 
+                  v-else
+                  class="inline-flex items-center h-5 w-5 rounded-full bg-gray-500/20 text-gray-400"
+                >
+                </div>
               </div>
             </div>
           </div>
@@ -336,6 +348,11 @@ const isMatchStarted = (selection) => {
   if (!selection) return false
   const status = String(selection.matchStatus || '').toUpperCase()
   return status !== 'UPCOMING' && status !== ''
+}
+
+const isMatchFinished = (selection) => {
+  if (!selection) return false
+  return String(selection.matchStatus || '').toUpperCase() === 'FINISHED'
 }
 
 // ---- Selection Display ----
