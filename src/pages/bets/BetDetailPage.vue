@@ -156,7 +156,15 @@
             >
               <!-- Time and Date -->
               <div v-if="selection.time || selection.date" class="flex gap-2 mt-1 text-[10px] text-gray-500">
-                <span>{{ formatUpcomingTime(selection.date, selection.time) }}</span>
+                <span v-if="isMatchPlaying(selection) && getLiveMinute(selection)" class="inline-flex items-center gap-1.5 text-rose-500 font-bold">
+                  <span class="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span>
+                  LIVE {{ getLiveMinute(selection) }}
+                </span>
+                <span v-else-if="isMatchPlaying(selection)" class="inline-flex items-center gap-1.5 text-rose-500 font-bold">
+                  <span class="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span>
+                  LIVE
+                </span>
+                <span v-else>{{ formatUpcomingTime(selection.date, selection.time) }}</span>
               </div>
 
               <div class="flex justify-between items-center">
@@ -353,6 +361,32 @@ const isMatchStarted = (selection) => {
 const isMatchFinished = (selection) => {
   if (!selection) return false
   return String(selection.matchStatus || '').toUpperCase() === 'FINISHED'
+}
+
+const isMatchPlaying = (selection) => {
+  return isMatchStarted(selection) && !isMatchFinished(selection)
+}
+
+const getLiveMinute = (selection) => {
+  if (!selection) return ''
+  const em = selection.elapsed_minute
+  if (em !== undefined && em !== null && em !== '' && !isNaN(parseInt(em))) {
+    const m = parseInt(em)
+    return m >= 90 ? "90+'" : `${m}'`
+  }
+  const timeParts = String(selection.time || '').trim().toLowerCase().match(/^(\d{1,2}):(\d{2})\s*(am|pm)?$/)
+  if (selection.date && timeParts) {
+    let hours = parseInt(timeParts[1], 10)
+    const minutes = parseInt(timeParts[2], 10)
+    if (timeParts[3] === 'pm' && hours < 12) hours += 12
+    if (timeParts[3] === 'am' && hours === 12) hours = 0
+    const start = new Date(`${selection.date} ${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`)
+    if (!isNaN(start.getTime())) {
+      const mins = Math.floor((Date.now() - start.getTime()) / 60000)
+      if (mins >= 0) return mins >= 90 ? "90+'" : `${mins}'`
+    }
+  }
+  return ''
 }
 
 // ---- Selection Display ----
@@ -576,6 +610,7 @@ const mapSelections = (rawSelections) => {
       league: m.league || '',
       score: m.current_score || null,
       matchStatus: m.status || '',
+      elapsed_minute: m.elapsed_minute ?? null,
       marketType: sel.market_key || sel.market || '1X2',
       result: sel.status || 'PENDING',
       selectionType: sel.outcome_key || sel.pick || ''
@@ -664,6 +699,18 @@ onMounted(() => {
 }
 .animate-spin {
   animation: spin 1s linear infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
 .bg-\[\#2A2A2A\]\/20 {
