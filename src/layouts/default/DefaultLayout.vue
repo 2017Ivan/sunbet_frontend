@@ -63,13 +63,6 @@
 
       <!-- Win Celebration (appears on first login when a bet won while away) -->
       <WinCelebrationModal v-if="currentCelebrationWin" :win="currentCelebrationWin" @close="dismissWin" />
-
-      <!-- Daily Login Reward (after win celebration queue, only if claimable) -->
-      <DailyRewardModal
-        v-if="showDailyRewardModal && dailyRewardStatus"
-        :status="dailyRewardStatus"
-        @close="dismissDailyReward"
-      />
     </template>
   </div>
 </template>
@@ -85,7 +78,6 @@ import BetSlip from '../../components/betting/betslip/BetSlip.vue'
 import MobileSidebar from '../../components/main components/MobileSidebar/MobileSidebar.vue'
 import DefaultLayoutSkeleton from '../../components/skeletons/default/DefaultLayoutSkeleton.vue'
 import WinCelebrationModal from '../../components/bet/WinCelebrationModal.vue'
-import DailyRewardModal from '../../components/reward/DailyRewardModal.vue'
 
 const authStore = useAuthStore()
 const betStore = useBetStore()
@@ -175,9 +167,6 @@ const dismissWin = async () => {
     await betStore.acknowledgeWin(win.id)
   }
   showNextCelebration()
-  if (!currentCelebrationWin.value && showDailyRewardStatus.value === 'QUEUED') {
-    await showDailyRewardIfClaimable()
-  }
 }
 
 watch(
@@ -186,36 +175,12 @@ watch(
     if (loggedIn) {
       await betStore.fetchWinNotifications()
       showNextCelebration()
-      if (!currentCelebrationWin.value) {
-        await showDailyRewardIfClaimable()
-      } else {
-        showDailyRewardStatus.value = 'QUEUED'
-      }
     } else {
       currentCelebrationWin.value = null
-      showDailyRewardModal.value = false
     }
   },
   { immediate: true }
 )
-
-// ---- Daily Login Reward ----
-const dailyRewardStatus = ref(null)
-const showDailyRewardModal = ref(false)
-const showDailyRewardStatus = ref('IDLE')
-
-const showDailyRewardIfClaimable = async () => {
-  const status = await authStore.fetchDailyRewardStatus(true)
-  dailyRewardStatus.value = status
-  if (status && status.can_claim && !status.claimed_today) {
-    showDailyRewardModal.value = true
-  }
-}
-
-const dismissDailyReward = async () => {
-  showDailyRewardModal.value = false
-  dailyRewardStatus.value = await authStore.fetchDailyRewardStatus(true)
-}
 </script>
 
 <style scoped>

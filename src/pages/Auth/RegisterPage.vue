@@ -52,7 +52,7 @@
         v-model="form.promoCode"
         label="Promo Code"
         placeholder="Enter promo code (optional)"
-        hint="Get 1.5% bonus on your first deposit"
+        hint="Enter promo code if you have one (optional)"
         :error="errors.promoCode"
       >
         <template #icon-left>
