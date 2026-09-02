@@ -7,7 +7,7 @@ import axios from 'axios'
 // http://169.58.130.62/api
 // Create axios instance
 const api = axios.create({
-  baseURL: 'https://sunbeting.com/api',
+  baseURL: ' https://sunbeting.com/api',
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',   

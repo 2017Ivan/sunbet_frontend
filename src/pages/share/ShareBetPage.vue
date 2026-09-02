@@ -412,10 +412,17 @@ const formatDate = (dateString) => {
   if (!dateString) return 'N/A'
   try {
     const date = new Date(dateString)
-    return date.toLocaleString('en-US', { 
-      dateStyle: 'medium', 
-      timeStyle: 'short' 
-    })
+    if (isNaN(date.getTime())) return 'N/A'
+    const dayName = date.toLocaleDateString('en-US', { weekday: 'short' })
+    const dayNum = String(date.getDate()).padStart(2, '0')
+    const monthNum = String(date.getMonth() + 1).padStart(2, '0')
+    const year = date.getFullYear()
+    const timeFormatted = date.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    }).toLowerCase()
+    return `${dayName} ${dayNum}/${monthNum}/${year} at ${timeFormatted}`
   } catch {
     return 'N/A'
   }
