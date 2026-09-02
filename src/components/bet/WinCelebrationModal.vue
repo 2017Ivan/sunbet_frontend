@@ -25,40 +25,17 @@
 
           <div class="px-6 pt-10 pb-7 relative">
             <!-- Trophy -->
-            <div class="relative w-32 h-32 mx-auto trophy-wrap">
+            <div class="relative w-44 h-44 mx-auto trophy-wrap flex items-center justify-center">
               <div class="absolute inset-0 glow-pulse"></div>
-              <svg class="relative w-32 h-32 trophy" viewBox="0 0 64 64" fill="none" aria-hidden="true">
-                <defs>
-                  <linearGradient id="tc-gold" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stop-color="#fde68a"/>
-                    <stop offset="45%" stop-color="#fbbf24"/>
-                    <stop offset="100%" stop-color="#b45309"/>
-                  </linearGradient>
-                  <linearGradient id="tc-golddim" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stop-color="#fcd34d"/>
-                    <stop offset="100%" stop-color="#92400e"/>
-                  </linearGradient>
-                </defs>
-                <!-- handles -->
-                <path d="M8 20c0 8 4 12 12 12M56 20c0 8-4 12-12 12" stroke="url(#tc-golddim)" stroke-width="3" stroke-linecap="round"/>
-                <!-- body -->
-                <path d="M32 8c-7 0-13 6-13 14 0 8 10 9 13 16 3-7 13-8 13-16 0-8-6-14-13-14z" fill="url(#tc-gold)"/>
-                <!-- stem -->
-                <path d="M32 40v10" stroke="url(#tc-golddim)" stroke-width="4" stroke-linecap="round"/>
-                <!-- base -->
-                <path d="M24 54h16" stroke="url(#tc-golddim)" stroke-width="5" stroke-linecap="round"/>
-                <path d="M21 60h22" stroke="url(#tc-golddim)" stroke-width="4" stroke-linecap="round"/>
-                <!-- shine -->
-                <path class="shine" d="M24 10c4-3 12-4 19-1" stroke="#fff" stroke-opacity="0.6" stroke-width="3" stroke-linecap="round"/>
-              </svg>
+              <span class="text-[140px] leading-none trophy drop-shadow-[0_0_40px_rgba(251,191,36,0.45)]">🏆</span>
               <!-- Sparkles -->
               <svg class="absolute -top-2 -right-4 w-8 h-8 sparkle" viewBox="0 0 24 24" fill="#fde68a"><path d="M12 1l2.4 6.6L21 10l-6.6 2.4L12 19l-2.4-6.6L3 10l6.6-2.4L12 1z"/></svg>
-              <svg class="absolute top-8 -left-6 w-5 h-5 sparkle" style="animation-delay:.6s" viewBox="0 0 24 24" fill="#fbbf24"><path d="M12 1l2.4 6.6L21 10l-6.6 2.4L12 19l-2.4-6.6L3 10l6.6-2.4L12 1z"/></svg>
-              <svg class="absolute bottom-0 -right-2 w-4 h-4 sparkle" style="animation-delay:1.1s" viewBox="0 0 24 24" fill="#fcd34d"><path d="M12 1l2.4 6.6L21 10l-6.6 2.4L12 19l-2.4-6.6L3 10l6.6-2.4L12 1z"/></svg>
+              <svg class="absolute top-10 -left-6 w-5 h-5 sparkle" style="animation-delay:.6s" viewBox="0 0 24 24" fill="#fbbf24"><path d="M12 1l2.4 6.6L21 10l-6.6 2.4L12 19l-2.4-6.6L3 10l6.6-2.4L12 1z"/></svg>
+              <svg class="absolute bottom-2 -right-3 w-4 h-4 sparkle" style="animation-delay:1.1s" viewBox="0 0 24 24" fill="#fcd34d"><path d="M12 1l2.4 6.6L21 10l-6.6 2.4L12 19l-2.4-6.6L3 10l6.6-2.4L12 1z"/></svg>
             </div>
 
             <!-- Headline -->
-            <h2 class="mt-5 text-3xl font-black text-white">You Won! 🏆</h2>
+            <h2 class="mt-4 text-3xl font-black text-white">You Won!</h2>
 
             <!-- Amount -->
             <div class="mt-4">
@@ -160,12 +137,6 @@ const confettiStyle = (c) => ({
 @keyframes trophy-bob {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-5px); }
-}
-.shine { animation: shine-sweep 2.2s ease-in-out 1.2s infinite; }
-@keyframes shine-sweep {
-  0%, 55% { transform: translateX(-8px); opacity: 0; }
-  70% { opacity: 0.9; }
-  100% { transform: translateX(10px); opacity: 0; }
 }
 .glow-pulse {
   border-radius: 9999px;
