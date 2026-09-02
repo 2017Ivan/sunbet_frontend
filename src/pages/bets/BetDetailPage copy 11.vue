@@ -34,10 +34,10 @@
         <!-- Status Banner -->
         <div 
           class="p-3 rounded-t-xl flex items-center justify-between"
-          :class="isWon ? 'bg-gradient-to-r from-emerald-900/80 to-green-950/40 border-t border-green-700/30' : 
+          :class="isWon ? 'bg-gradient-to-r from-green-900/40 to-green-950/40 border-t border-green-700/30' : 
                    isLost ? 'bg-gradient-to-r from-red-900/90 to-red-950/80 border border-red-700/30' : 
-                   isCashedOut ? 'bg-gradient-to-r from-emerald-900/80 to-emerald-950/40 border-t border-emerald-700/30' :
-                   'bg-gradient-to-r from-amber-900/80 to-amber-950/40 border-t border-amber-700/30'"
+                   isCashedOut ? 'bg-gradient-to-r from-emerald-900/40 to-emerald-950/40 border-t border-emerald-700/30' :
+                   'bg-gradient-to-r from-amber-900/40 to-amber-950/40 border-t border-amber-700/30'"
         >
           <div class="flex items-center gap-3">
             <span class="text-4xl">{{ isWon ? '🏆' : isLost ? '😔' : isCashedOut ? '💰' : '⏳' }}</span>
@@ -73,13 +73,13 @@
             </div>
             
             <!-- Stake -->
-            <div class="flex items-center justify-between px-2 py-1.5">
+            <div class="flex items-center justify-between px-2 py-0.5">
               <p class="text-[10px] uppercase tracking-wider text-gray-950 font-medium">Stake</p>
               <p class="text-gray-600 font-bold text-xs">TZS {{ formatNumber(stakeAmount) }}</p>
             </div>
             
             <!-- Potential Win -->
-            <div class="flex items-center justify-between px-2 py-1.5">
+            <div class="flex items-center justify-between px-2 py-0.5">
               <p class="text-[10px] uppercase tracking-wider text-gray-950 font-medium">Potential Win</p>
               <p class="text-gray-600 font-bold text-xs">TZS {{ formatNumber(potentialWin) }}</p>
             </div>
@@ -156,7 +156,8 @@
             >
               <!-- Time and Date -->
               <div v-if="selection.time || selection.date" class="flex gap-2 mt-1 text-[10px] text-gray-500">
-                <span>{{ formatUpcomingTime(selection.date, selection.time) }}</span>
+                <span v-if="selection.time">{{ selection.time }}</span>
+                <span v-if="selection.date">{{ selection.date }}</span>
               </div>
 
               <div class="flex justify-between items-center">
@@ -167,8 +168,8 @@
               <div class="flex justify-between items-center py-1">
                 <span class="text-xs text-gray-500 font-bold truncate">{{ selection.league || '' }}</span>
                 <span class="text-xs text-gray-500 font-semibold">
-                  <span v-if="isMatchStarted(selection)" class="text-xs text-gray-400 font-bold px-1">
-                    {{ selection.score ? `${selection.score.home} - ${selection.score.away}` : '0 - 0' }}
+                  <span class="text-xs text-gray-400 font-bold px-1">
+                    {{ selection.score ? `${selection.score.home} - ${selection.score.away}` : '—' }}
                   </span>
                 </span>
               </div>
@@ -332,12 +333,6 @@ const getResultClass = (result) => {
   return 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20'
 }
 
-const isMatchStarted = (selection) => {
-  if (!selection) return false
-  const status = String(selection.matchStatus || '').toUpperCase()
-  return status !== 'UPCOMING' && status !== ''
-}
-
 // ---- Selection Display ----
 const getSelectionDisplay = (selection) => {
   if (!selection) return 'N/A'
@@ -439,61 +434,14 @@ const formatNumber = (value) => {
   })
 }
 
-// ---- Upcoming Match Time Formatting (same as MatchCard.vue) ----
-const formatUpcomingTime = (dateStr, timeStr) => {
-  if (!dateStr && !timeStr) return timeStr || ''
-
-  try {
-    let matchDateObj
-
-    if (dateStr && timeStr) {
-      matchDateObj = new Date(`${dateStr}T${timeStr}`)
-      if (isNaN(matchDateObj.getTime())) {
-        matchDateObj = new Date(`${dateStr} ${timeStr}`)
-      }
-    } else if (dateStr) {
-      matchDateObj = new Date(dateStr)
-    } else {
-      return timeStr
-    }
-
-    if (isNaN(matchDateObj.getTime())) {
-      return timeStr || dateStr
-    }
-
-    const today = new Date()
-    const isToday =
-      matchDateObj.getDate() === today.getDate() &&
-      matchDateObj.getMonth() === today.getMonth() &&
-      matchDateObj.getFullYear() === today.getFullYear()
-
-    const timeFormatted = matchDateObj.toLocaleTimeString('en-US', {
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true
-    })
-
-    if (isToday) {
-      return `${timeFormatted} Today`
-    } else {
-      const dayName = matchDateObj.toLocaleDateString('en-US', { weekday: 'short' })
-      const dayNum = String(matchDateObj.getDate()).padStart(2, '0')
-      const monthNum = String(matchDateObj.getMonth() + 1).padStart(2, '0')
-      return `${timeFormatted} ${dayName} ${dayNum}/${monthNum}`
-    }
-  } catch (err) {
-    return timeStr || dateStr || ''
-  }
-}
-
 const formatDate = (dateString) => {
   if (!dateString) return 'N/A'
   try {
     const date = new Date(dateString)
-    if (isNaN(date.getTime())) return 'N/A'
-    const datePart = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
-    const timePart = `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`
-    return formatUpcomingTime(datePart, timePart)
+    return date.toLocaleString('en-US', { 
+      dateStyle: 'medium', 
+      timeStyle: 'short' 
+    })
   } catch {
     return 'N/A'
   }
@@ -551,7 +499,6 @@ const mapSelections = (rawSelections) => {
       odds: sel.odds_at_placement || sel.odds || 1,
       league: m.league || '',
       score: m.current_score || null,
-      matchStatus: m.status || '',
       marketType: sel.market_key || sel.market || '1X2',
       result: sel.status || 'PENDING',
       selectionType: sel.outcome_key || sel.pick || ''
