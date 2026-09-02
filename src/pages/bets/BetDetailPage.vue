@@ -156,12 +156,12 @@
             >
               <!-- Time and Date -->
               <div v-if="selection.time || selection.date" class="flex gap-2 mt-1 text-[10px] text-gray-500">
-                <span v-if="isMatchPlaying(selection) && getLiveMinute(selection)" class="inline-flex items-center gap-1.5 text-rose-500 font-bold">
-                  <span class="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span>
+                <span v-if="isMatchPlaying(selection) && getLiveMinute(selection)" class="inline-flex items-center gap-1.5 text-emerald-500 font-bold">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                   LIVE {{ getLiveMinute(selection) }}
                 </span>
-                <span v-else-if="isMatchPlaying(selection)" class="inline-flex items-center gap-1.5 text-rose-500 font-bold">
-                  <span class="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span>
+                <span v-else-if="isMatchPlaying(selection)" class="inline-flex items-center gap-1.5 text-emerald-500 font-bold">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                   LIVE
                 </span>
                 <span v-else>{{ formatUpcomingTime(selection.date, selection.time) }}</span>
@@ -195,9 +195,9 @@
                 </span>
                 <span 
                   v-else-if="isMatchStarted(selection)"
-                  class="text-xs font-extrabold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 animate-pulse"
+                  class="text-xs animate-pulse"
                 >
-                  Live
+                  <!-- Live -->
                 </span>
                 <div 
                   v-else
