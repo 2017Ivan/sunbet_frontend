@@ -23,21 +23,11 @@
           <!-- Top light streak -->
           <div class="absolute -top-16 left-1/2 -translate-x-1/2 w-72 h-40 bg-amber-400/15 blur-3xl rounded-full"></div>
 
-          <!-- Close button -->
-          <button
-            class="absolute top-3 right-3 z-10 p-2 rounded-full text-amber-200/60 hover:text-white hover:bg-white/10 transition-colors"
-            @click="dismiss"
-          >
-            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M6 18L18 6M6 6l12 12"/>
-            </svg>
-          </button>
-
-          <div class="px-6 pt-8 pb-6 relative">
+          <div class="px-6 pt-10 pb-7 relative">
             <!-- Trophy -->
-            <div class="relative w-28 h-28 mx-auto trophy-wrap">
+            <div class="relative w-32 h-32 mx-auto trophy-wrap">
               <div class="absolute inset-0 glow-pulse"></div>
-              <svg class="relative w-28 h-28 trophy" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+              <svg class="relative w-32 h-32 trophy" viewBox="0 0 64 64" fill="none" aria-hidden="true">
                 <defs>
                   <linearGradient id="tc-gold" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stop-color="#fde68a"/>
@@ -68,48 +58,22 @@
             </div>
 
             <!-- Headline -->
-            <p class="mt-4 text-[10px] font-bold tracking-[0.3em] text-amber-400/80 uppercase">Congratulations Winner</p>
-            <h2 class="mt-1 text-2xl font-extrabold text-white">Your bet WON! 🎉</h2>
+            <h2 class="mt-5 text-3xl font-black text-white">You Won! 🏆</h2>
 
             <!-- Amount -->
             <div class="mt-4">
-              <p class="text-[10px] uppercase tracking-widest text-amber-200/50 font-medium">You won</p>
-              <p class="text-4xl font-black bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400 bg-clip-text text-transparent drop-shadow-[0_0_18px_rgba(251,191,36,0.45)] tabular-nums">
+              <p class="text-5xl font-black bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400 bg-clip-text text-transparent drop-shadow-[0_0_18px_rgba(251,191,36,0.45)] tabular-nums">
                 TZS {{ displayAmount }}
               </p>
             </div>
 
-            <!-- Divider -->
-            <div class="my-4 h-px bg-gradient-to-r from-transparent via-amber-500/40 to-transparent"></div>
-
-            <!-- Ticket details -->
-            <div class="space-y-2">
-              <div class="flex items-center justify-between text-xs">
-                <span class="text-[#8E8E8E]">Ticket</span>
-                <span class="text-white font-semibold tracking-wide">{{ win.ticket_code }}</span>
-              </div>
-              <div class="flex items-center justify-between text-xs">
-                <span class="text-[#8E8E8E]">Total Odds</span>
-                <span class="text-amber-300 font-semibold">{{ oddsText }}</span>
-              </div>
-              <div class="flex items-center justify-between text-xs">
-                <span class="text-[#8E8E8E]">Stake</span>
-                <span class="text-white font-semibold">TZS {{ formatNumber(win.stake) }}</span>
-              </div>
-              <div class="flex items-center justify-between text-xs">
-                <span class="text-[#8E8E8E]">Selections</span>
-                <span class="text-white font-semibold">{{ win.selections_count || 1 }} picks</span>
-              </div>
-            </div>
-
             <!-- CTA -->
             <button
-              class="mt-5 w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 text-[#221400] text-sm font-extrabold tracking-wide shadow-[0_6px_24px_rgba(251,191,36,0.35)] hover:brightness-110 active:scale-[0.98] transition-all"
+              class="mt-7 w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 text-[#221400] text-sm font-extrabold tracking-wide shadow-[0_6px_24px_rgba(251,191,36,0.35)] hover:brightness-110 active:scale-[0.98] transition-all"
               @click="dismiss"
             >
-              AMAZING!
+              CHEERS!
             </button>
-            <p class="mt-2 text-[10px] text-[#8E8E8E]">Payout already credited to your balance</p>
           </div>
         </div>
       </div>
@@ -118,7 +82,7 @@
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { onBeforeUnmount, onMounted, ref } from 'vue'
 
 const props = defineProps({
   win: { type: Object, required: true }
@@ -146,18 +110,7 @@ onBeforeUnmount(() => {
   if (rafId) cancelAnimationFrame(rafId)
 })
 
-const formatNumber = (value) => {
-  const num = parseFloat(value)
-  if (isNaN(num)) return '0'
-  return num.toLocaleString()
-}
-
-const oddsText = computed(() => {
-  const o = parseFloat(props.win.total_odds)
-  return isNaN(o) ? '1.00' : o.toFixed(2)
-})
-
-// ---- Confetti ----
+const dismiss = () => emit('close')
 const colors = ['#fbbf24', '#fde68a', '#10b981', '#f472b6', '#38bdf8', '#fb7185', '#a78bfa']
 const confetti = Array.from({ length: 55 }, (_, i) => ({
   id: i,
@@ -180,8 +133,6 @@ const confettiStyle = (c) => ({
   '--drift': `${c.drift}px`,
   '--rotate-end': `${c.rotate + (Math.random() > 0.5 ? 360 : -360)}deg`
 })
-
-const dismiss = () => emit('close')
 </script>
 
 <style scoped>

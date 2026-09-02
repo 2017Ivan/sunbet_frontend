@@ -43,7 +43,7 @@
         <!-- Status Banner -->
         <div 
           class="p-3 rounded-t-xl flex items-center justify-between"
-          :class="isWon ? 'bg-gradient-to-r from-green-900/40 to-green-950/40 border-t border-green-700/30' : 
+          :class="isWon ? 'bg-gradient-to-r from-green-900/80 to-green-950/40 border-t border-green-700/30' : 
                    isLost ? 'bg-gradient-to-r from-red-900/90 to-red-950/80 border border-red-700/30' : 
                    isCashedOut ? 'bg-gradient-to-r from-emerald-900/40 to-emerald-950/40 border-t border-emerald-700/30' :
                    'bg-gradient-to-r from-amber-900/40 to-amber-950/40 border-t border-amber-700/30'"
