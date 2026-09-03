@@ -61,7 +61,7 @@
             </div>
           </div>
 
-          <div class="text-center mb-6 py-1.5 bg-gradient-to-b from-emerald-600 via-green-400 to-emerald-600 backdrop-blur-sm">
+          <div class="text-center  py-1.5 backdrop-blur-sm">
             <button 
               @click="navigateToLive" 
               class="text-gray-600 hover:text-rose-600 font-semibold text-sm transition-colors"
