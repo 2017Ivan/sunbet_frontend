@@ -53,10 +53,10 @@
         <h3 class="text-lg font-bold text-white">💰 Deposit Requests</h3>
         <button @click="loadDepositRequests" class="text-xs text-rose-400 hover:text-rose-300 font-semibold">🔄 Refresh</button>
       </div>
-      <p class="text-xs text-gray-500 mb-4">For each request: make the payment to the customer's number, the user pays with PIN, then click <strong class="text-emerald-400">Accept</strong> to release the funds to their SunBet balance.</p>
+      <p class="text-xs text-gray-500 mb-4">Auto-credited deposits. Funds are added to the customer's balance automatically once payment is confirmed — no action needed.</p>
 
-      <div v-if="depositRequests.length > 0" class="mb-4 px-4 py-3 rounded-xl bg-emerald-950/40 border border-emerald-800/40 text-emerald-300 text-sm font-semibold animate-pulse">
-        🔔 {{ depositRequests.length }} deposit request(s) waiting — make the payment, then click <strong>Accept</strong>.
+      <div v-if="depositRequests.length > 0" class="mb-4 px-4 py-3 rounded-xl bg-emerald-950/40 border border-emerald-800/40 text-emerald-300 text-sm font-semibold">
+        🔔 {{ depositRequests.length }} deposit(s) — automatically confirmed on payment.
       </div>
 
       <div v-if="depositRequests.length === 0" class="text-gray-500 text-sm py-4 text-center">
@@ -68,26 +68,10 @@
           <div class="flex-1 min-w-0">
             <div class="flex items-center gap-2 flex-wrap">
               <p class="text-white font-semibold text-sm">TSh {{ formatMoney(d.amount) }}</p>
-              <span class="text-[10px] px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-400">PENDING</span>
+              <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400">CONFIRMED</span>
             </div>
             <p class="text-gray-400 text-sm mt-0.5 font-mono">📞 {{ d.payer_phone || d.user?.phone_number || '—' }}</p>
             <p class="text-[11px] text-gray-500 mt-0.5">⏰ {{ formatDate(d.createdAt || d.created_at) }}</p>
-          </div>
-          <div class="flex gap-2">
-            <button
-              @click="confirmDeposit(d)"
-              :disabled="d.busy"
-              class="px-4 py-2 text-sm bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50 transition-colors font-semibold"
-            >
-              {{ d.busy ? '...' : '✓ Accept' }}
-            </button>
-            <button
-              @click="cancelDeposit(d)"
-              :disabled="d.busy"
-              class="px-4 py-2 text-sm bg-gray-700 text-gray-300 rounded-lg hover:bg-gray-600 disabled:opacity-50 transition-colors font-semibold"
-            >
-              ✕ Cancel
-            </button>
           </div>
         </div>
       </div>
