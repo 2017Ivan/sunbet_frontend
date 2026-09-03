@@ -77,7 +77,7 @@
                   <polyline points="22 4 12 14.01 9 11.01"/>
                 </svg>
                 <p class="text-gray-400 text-xs">
-                  You will receive a mobile money prompt on your phone to enter your PIN (M-Pesa). Once confirmed, funds are added to your account. Minimum deposit: TSh {{ MINIMUM_DEPOSIT.toLocaleString() }}.00
+                  You will receive a mobile money prompt on your phone to enter your PIN. Once confirmed, funds are added to your account. Minimum deposit: TSh {{ MINIMUM_DEPOSIT.toLocaleString() }}.00
                 </p>
               </div>
             </div>
@@ -185,7 +185,7 @@ const router = useRouter()
 const authStore = useAuthStore()
 
 // CONFIG
-const MINIMUM_DEPOSIT = 125000
+const MINIMUM_DEPOSIT = 500
 
 // State
 const depositAmount = ref(0)
@@ -222,16 +222,16 @@ const handleDeposit = async () => {
   
   try {
     lastDepositAmount.value = depositAmount.value
-    
+
     const result = await DepositService.requestDeposit({
       amount: depositAmount.value,
-      payer_phone: authStore.userPhone || authStore.user?.phone_number || undefined
+      phone_number: authStore.userPhone || authStore.user?.phone_number || ''
     })
     
     if (result.success) {
-      trackedRequestId = result.data?.deposit_request?.id || ''
+      trackedTransactionId = result.data?.transaction_id || result.data?.order_id || ''
       showPendingModal.value = true
-      pendingStatusNote.value = '⏳ Checking payment status...'
+      pendingStatusNote.value = '⏳ Sending payment prompt to your phone...'
       depositAmount.value = 0
       startStatusPolling()
     } else {
@@ -248,7 +248,7 @@ const handleDeposit = async () => {
 }
 
 let statusTimer = null
-let trackedRequestId = ''
+let trackedTransactionId = ''
 
 const startStatusPolling = () => {
   stopStatusPolling()
@@ -264,25 +264,23 @@ const stopStatusPolling = () => {
 }
 
 const checkDepositStatus = async () => {
-  if (!trackedRequestId) return
+  if (!trackedTransactionId) return
   try {
-    const result = await DepositService.getMyDeposits()
-    const requests = result.data?.deposit_requests || []
-    const current = requests.find(r => r.id === trackedRequestId)
-    if (!current) return
+    const result = await DepositService.getDepositStatus(trackedTransactionId)
+    const status = result.data?.status || ''
 
-    if (current.status === 'CONFIRMED') {
+    if (status === 'completed') {
       pendingStatusNote.value = '✅ Payment successful!'
       showPendingModal.value = false
       showSuccessModal.value = true
       authStore.fetchUserBalance()
       stopStatusPolling()
-    } else if (current.status === 'CANCELLED') {
+    } else if (status === 'failed') {
       stopStatusPolling()
       showPendingModal.value = false
       errorMessage.value = 'Payment failed. Please try again.'
       showErrorModal.value = true
-      trackedRequestId = ''
+      trackedTransactionId = ''
     } else {
       pendingStatusNote.value = '⏳ Please confirm payment with PIN...'
     }
@@ -293,14 +291,14 @@ const checkDepositStatus = async () => {
 
 const closeSuccessModal = () => {
   showSuccessModal.value = false
-  trackedRequestId = ''
+  trackedTransactionId = ''
   authStore.fetchUserBalance()
 }
 
 const closeErrorModal = () => {
   showErrorModal.value = false
   errorMessage.value = ''
-  trackedRequestId = ''
+  trackedTransactionId = ''
 }
 
 const closePendingModal = () => {
