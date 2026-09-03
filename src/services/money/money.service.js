@@ -45,6 +45,37 @@ const MoneyService = {
         message: error.message || 'Failed to withdraw. Please try again.'
       }
     }
+  },
+
+  // ============ ADMIN - WITHDRAW REQUESTS ============
+  getWithdrawRequests: async (params = {}) => {
+    try {
+      const response = await api.get('/money/withdraw/requests', { params })
+      return response.data
+    } catch (error) {
+      if (error.response?.data) return error.response.data
+      return { success: false, message: error.message || 'Failed to load withdraw requests.' }
+    }
+  },
+
+  confirmWithdraw: async (request_id) => {
+    try {
+      const response = await api.post('/money/withdraw/confirm', { request_id })
+      return response.data
+    } catch (error) {
+      if (error.response?.data) return error.response.data
+      return { success: false, message: error.message || 'Failed to confirm withdraw.' }
+    }
+  },
+
+  cancelWithdraw: async (request_id) => {
+    try {
+      const response = await api.post('/money/withdraw/cancel', { request_id })
+      return response.data
+    } catch (error) {
+      if (error.response?.data) return error.response.data
+      return { success: false, message: error.message || 'Failed to cancel withdraw.' }
+    }
   }
 }
 
