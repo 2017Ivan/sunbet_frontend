@@ -201,7 +201,7 @@
     <div class="bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-cyan-800/30 p-6">
       <div class="flex items-center justify-between mb-4">
         <h3 class="text-lg font-bold text-white">Recent Notifications</h3>
-        <span class="text-sm text-cyan-600">{{ recentNotifications.length }} notifications</span>
+        <span class="text-sm text-cyan-600">{{ todayNotifications.length }} za leo</span>
       </div>
       
       <div v-if="isLoading" class="text-center py-8">
@@ -214,7 +214,7 @@
       
       <div v-else class="space-y-3">
         <div 
-          v-for="notif in recentNotifications" 
+          v-for="notif in todayNotifications" 
           :key="notif.id" 
           class="flex items-start gap-3 p-4 rounded-xl bg-slate-900/50 hover:bg-slate-900 transition-colors"
         >
@@ -237,8 +237,8 @@
           </div>
         </div>
         
-        <div v-if="recentNotifications.length === 0" class="text-center py-8">
-          <p class="text-cyan-600">No notifications sent yet</p>
+        <div v-if="todayNotifications.length === 0" class="text-center py-8">
+          <p class="text-cyan-600">No notifications sent today</p>
         </div>
       </div>
     </div>
@@ -296,7 +296,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, reactive, watch } from 'vue'
+import { ref, onMounted, reactive, watch, computed } from 'vue'
 import { useNotificationStore } from '../../../stores/notifications.store'
 import { useAuthStore } from '../../../stores/authStore'
 
@@ -332,6 +332,21 @@ const filters = reactive({
 
 // Recent notifications
 const recentNotifications = ref([])
+
+// ---- History: za leo tu (recent) ----
+const isToday = (dateString) => {
+  if (!dateString) return false
+  const date = new Date(dateString)
+  if (isNaN(date.getTime())) return false
+  const now = new Date()
+  return date.getDate() === now.getDate() &&
+    date.getMonth() === now.getMonth() &&
+    date.getFullYear() === now.getFullYear()
+}
+
+const todayNotifications = computed(() =>
+  recentNotifications.value.filter(n => isToday(n.created_at || n.createdAt))
+)
 
 // Stats
 const stats = reactive({

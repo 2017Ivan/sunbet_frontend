@@ -5,15 +5,15 @@
       <!-- Header -->
       <div class="flex items-center justify-between pt-6 pb-4">
         <div>
-          <h1 class="text-2xl font-extrabold text-white">Arifa</h1>
-          <p class="text-sm text-gray-500 mt-1">{{ notificationStore.notifications.length }} arifa · {{ notificationStore.unreadCount }} hazijasomwa</p>
+          <h1 class="text-2xl font-extrabold text-white">Notifications</h1>
+          <p class="text-sm text-gray-500 mt-1">{{ todayNotifications.length }} notifications for today · {{ todayUnreadCount }} unread</p>
         </div>
         <button
-          v-if="notificationStore.unreadCount > 0"
+          v-if="todayUnreadCount > 0"
           @click="readAll"
           class="text-xs font-semibold px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-rose-400 hover:bg-gray-700 hover:border-rose-500/40 transition-colors"
         >
-          ✓ Soma Zote
+          ✓ Read All
         </button>
       </div>
 
@@ -24,16 +24,16 @@
       </div>
 
       <!-- Empty -->
-      <div v-else-if="notificationStore.notifications.length === 0" class="py-16 text-center">
+      <div v-else-if="todayNotifications.length === 0" class="py-16 text-center">
         <div class="text-5xl mb-3">📭</div>
-        <p class="text-gray-400 font-medium">Hakuna arifa bado</p>
-        <p class="text-gray-600 text-sm mt-1">Habari mpya, mofu na maboresho yatakupikia hapa.</p>
+        <p class="text-gray-400 font-medium">No notifications for today</p>
+        <p class="text-gray-600 text-sm mt-1">New news, updates and promotions will appear here.</p>
       </div>
 
-      <!-- List -->
+      <!-- List (za leo tu) -->
       <div v-else class="space-y-3">
         <div
-          v-for="notif in notificationStore.notifications"
+          v-for="notif in todayNotifications"
           :key="notif.id"
           @click="openNotification(notif)"
           class="bg-gray-900/90 border rounded-xl p-4 transition-all cursor-pointer"
@@ -95,12 +95,12 @@
       </div>
 
       <!-- Load more -->
-      <div v-if="notificationStore.hasMore" class="text-center pt-4">
+      <div v-if="false && notificationStore.hasMore" class="text-center pt-4">
         <button
           @click="loadMore"
           class="text-sm font-semibold px-5 py-2.5 rounded-lg bg-gray-800 border border-gray-700 text-gray-300 hover:bg-gray-700 transition-colors"
         >
-          Pakia Zaidi
+          Load More
         </button>
       </div>
     </div>
@@ -108,13 +108,32 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref, watch } from 'vue'
+import { onMounted, reactive, ref, computed, watch } from 'vue'
 import { useNotificationStore } from '../../stores/notifications.store'
 import { useAuthStore } from '../../stores/auth/authStore'
 import DepositService from '../../services/deposit/deposit.service'
 
 const notificationStore = useNotificationStore()
 const authStore = useAuthStore()
+
+// ---- Arifa za leo tu (recent) ----
+const isToday = (dateString) => {
+  if (!dateString) return false
+  const date = new Date(dateString)
+  if (isNaN(date.getTime())) return false
+  const now = new Date()
+  return date.getDate() === now.getDate() &&
+    date.getMonth() === now.getMonth() &&
+    date.getFullYear() === now.getFullYear()
+}
+
+const todayNotifications = computed(() =>
+  notificationStore.notifications.filter(n => isToday(n.created_at))
+)
+
+const todayUnreadCount = computed(() =>
+  todayNotifications.value.filter(n => !n.is_read).length
+)
 
 // Per-notification action state (admin accept/cancel)
 const depositState = reactive({})

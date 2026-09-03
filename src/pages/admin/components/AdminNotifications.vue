@@ -285,11 +285,11 @@
 
       <div class="divide-y divide-[#2A2A2A]">
         <div v-if="isLoading" class="p-8 text-center text-gray-400 text-sm">Inapakia historia...</div>
-        <div v-else-if="recentNotifications.length === 0" class="p-8 text-center text-gray-500 text-sm">
-          Hakuna notifications zilizotumwa bado
+        <div v-else-if="todayNotifications.length === 0" class="p-8 text-center text-gray-500 text-sm">
+          Hakuna notifications zilizotumwa leo
         </div>
 
-        <div v-for="notif in recentNotifications" :key="notif.id" class="p-4 hover:bg-[#2A2A2A]/30 transition-colors">
+        <div v-for="notif in todayNotifications" :key="notif.id" class="p-4 hover:bg-[#2A2A2A]/30 transition-colors">
           <div class="flex items-start justify-between gap-3">
             <div class="flex items-start gap-3 min-w-0">
               <div :class="getTypeBg(notif.type)" class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0">
@@ -367,7 +367,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, onBeforeUnmount, watch } from 'vue'
+import { ref, reactive, onMounted, onBeforeUnmount, watch, computed } from 'vue'
 import { useNotificationStore } from '../../../stores/notifications.store'
 import manageUsersService from '../../../services/manageUsersService'
 import DepositService from '../../../services/deposit/deposit.service'
@@ -404,6 +404,21 @@ const filters = reactive({
 
 const recentNotifications = ref([])
 const stats = reactive({ total: 0, today: 0, unread: 0 })
+
+// ---- Historia: za leo tu (recent) ----
+const isToday = (dateString) => {
+  if (!dateString) return false
+  const date = new Date(dateString)
+  if (isNaN(date.getTime())) return false
+  const now = new Date()
+  return date.getDate() === now.getDate() &&
+    date.getMonth() === now.getMonth() &&
+    date.getFullYear() === now.getFullYear()
+}
+
+const todayNotifications = computed(() =>
+  recentNotifications.value.filter(n => isToday(n.created_at || n.createdAt))
+)
 
 const toast = ref({ show: false, message: '', type: 'success', details: '' })
 
