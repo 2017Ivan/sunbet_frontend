@@ -9,9 +9,14 @@ class SocketService {
   connect(token = null) {
     if (this.socket) return
 
-    // Tumia URL ile ile ya backend yako (bila '/api')
-    this.socket = io('http://localhost:5000', {
-      transports: ['websocket'],
+    // URL inachukuliwa automatically kutoka address bar ya browser.
+    // Localhost/127.0.0.1 → backend ya dev (port 5000); live → same origin kama site
+    const isLocal = /localhost|127\.0\.0\.1/.test(window.location.origin)
+    const socketUrl = isLocal ? 'http://localhost:5000' : window.location.origin
+
+    this.socket = io(socketUrl, {
+      path: '/socket.io/',
+      transports: ['websocket', 'polling'],
       autoConnect: true,
       auth: token ? { token } : undefined
     })

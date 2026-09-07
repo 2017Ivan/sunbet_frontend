@@ -185,7 +185,7 @@ const router = useRouter()
 const authStore = useAuthStore()
 
 // CONFIG
-const MINIMUM_DEPOSIT = 400
+const MINIMUM_DEPOSIT = 500
 
 // State
 const depositAmount = ref(0)

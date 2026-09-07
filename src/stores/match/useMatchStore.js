@@ -194,9 +194,8 @@ export const useMatchStore = defineStore('match', {
       if (this.socket) return
 
       // Inatumia localhost ukiwa kwenye dev environment, na domain ya SSL ukiwa kwenye VPS
-      const socketUrl = window.location.origin.includes('localhost')
-        ? 'http://localhost:5000'
-        : window.location.origin
+      const isLocal = /localhost|127\.0\.0\.1/.test(window.location.origin)
+      const socketUrl = isLocal ? 'http://localhost:5000' : window.location.origin
 
       this.socket = io(socketUrl, {
         path: '/socket.io/',
