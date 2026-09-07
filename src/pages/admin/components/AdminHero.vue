@@ -137,8 +137,8 @@ const { slides } = storeToRefs(heroStore)
 
 const hasImage = (slide) => !!(slide.thumb && slide.thumb.image)
 
-onMounted(() => {
-  heroStore.load()
+onMounted(async () => {
+  await heroStore.load()
 })
 
 const readAndCompressImage = (file, maxWidth = 900) => {
@@ -175,7 +175,7 @@ const onFileChange = async (e, index) => {
 
   try {
     const dataUrl = await readAndCompressImage(file)
-    const ok = heroStore.setSlideImage(index, dataUrl)
+    const ok = await heroStore.setSlideImage(index, dataUrl)
     if (ok) {
       toast.success(`✅ Slide ${index + 1}: thumbnail imehifadhiwa!`, { position: 'bottom-right', timeout: 4000 })
     } else {
@@ -186,20 +186,20 @@ const onFileChange = async (e, index) => {
   }
 }
 
-const removeImage = (index) => {
-  heroStore.clearSlideImage(index)
+const removeImage = async (index) => {
+  await heroStore.clearSlideImage(index)
   toast.info(`Slide ${index + 1}: imerejeshwa kwenye default bet-card`, { position: 'bottom-right', timeout: 4000 })
 }
 
-const saveAll = () => {
-  heroStore.persist()
+const saveAll = async () => {
+  await heroStore.persist()
   toast.success('✅ Thumbnails zote zimehifadhiwa!', { position: 'bottom-right', timeout: 4000 })
 }
 
-const resetAll = () => {
+const resetAll = async () => {
   const confirmReset = window.confirm('Unataka kufuta thumbnails zote na kurudi kwenye default?')
   if (!confirmReset) return
-  heroStore.resetAll()
+  await heroStore.resetAll()
   toast.success('↺ Imerejeshwa kwenye default', { position: 'bottom-right', timeout: 4000 })
 }
 </script>

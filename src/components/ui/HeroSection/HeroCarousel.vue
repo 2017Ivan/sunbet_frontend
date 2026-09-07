@@ -151,8 +151,8 @@ const resetTimer = () => {
   timer = setInterval(next, 4500)
 }
 
-onMounted(() => {
-  heroStore.load()
+onMounted(async () => {
+  await heroStore.load()
   resetTimer()
 })
 onUnmounted(() => clearInterval(timer))
