@@ -14,6 +14,11 @@
         <h1 class="text-lg font-bold text-gray-300">Deposit Funds</h1>
         <p class="text-gray-400 text-sm mt-1">Add funds to your account securely via Mobile Money</p>
       </div>
+      <div class="px-4 flex justify-content-center mb-5 text-amber-400">
+      <span>
+        Sorry for the inconvenience. We’re currently experiencing a small issue with Vodacom payments. Please use Airtel Money, Yas, or Halotel instead.
+      </span>
+      </div>
 
       <!-- Balance Card -->
       <div class="bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700 rounded-2xl p-6 mb-8">
