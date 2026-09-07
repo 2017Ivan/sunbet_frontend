@@ -39,12 +39,24 @@
         </select>
       </div>
 
+      <!-- Day of week -->
+      <div class="space-y-2 mb-4">
+        <label class="text-cyan-400 text-xs sm:text-sm block font-semibold">Day</label>
+        <select
+          v-model="day"
+          class="w-full bg-slate-900 border border-amber-600/50 rounded-xl text-white text-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-amber-500"
+        >
+          <option value="">Random Day (Auto)</option>
+          <option v-for="d in days" :key="d.value" :value="d.value">{{ d.label }}</option>
+        </select>
+      </div>
+
       <!-- Info -->
       <div class="bg-slate-900/60 border border-cyan-800/30 rounded-xl p-3 mb-5 text-[11px] sm:text-xs text-gray-300 space-y-1">
         <p>• Fictional team names — unique to our system</p>
         <p>• No African teams / leagues used</p>
         <p>• Each match gets its own odds + live script</p>
-        <p>• Scheduled randomly within the next 7 days</p>
+        <p>• Scheduled on the selected day (within the next 7 days)</p>
       </div>
 
       <!-- Actions -->
@@ -86,7 +98,19 @@ const emit = defineEmits(['update:modelValue', 'generated', 'close'])
 
 const matchCount = ref(5)
 const league = ref('')
+const day = ref('')
 const leagues = LEAGUES
+
+// JS day convention: 0 = Sunday ... 6 = Saturday
+const days = [
+  { value: 1, label: 'Monday (Jumatatu)' },
+  { value: 2, label: 'Tuesday (Jumanne)' },
+  { value: 3, label: 'Wednesday (Jumatano)' },
+  { value: 4, label: 'Thursday (Alhamisi)' },
+  { value: 5, label: 'Friday (Ijumaa)' },
+  { value: 6, label: 'Saturday (Jumamosi)' },
+  { value: 0, label: 'Sunday (Jumapili)' }
+]
 
 function increment() {
   if (matchCount.value < 50) matchCount.value++
@@ -100,7 +124,8 @@ function submit() {
   if (matchCount.value < 1 || matchCount.value > 50) return
   emit('generated', {
     count: matchCount.value,
-    league: league.value || null
+    league: league.value || null,
+    day: day.value === '' ? null : day.value
   })
 }
 </script>

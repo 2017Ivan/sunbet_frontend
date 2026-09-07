@@ -147,7 +147,7 @@
                   <polyline points="22 4 12 14.01 9 11.01"/>
                 </svg>
                 <p class="text-gray-400 text-xs">
-                  Funds will be sent to your mobile money within 1-24 hours.
+                  Your balance will be deducted immediately upon withdrawal.
                 </p>
               </div>
             </div>
@@ -168,7 +168,7 @@
             </div>
             <h3 class="text-2xl font-bold text-gray-100 mb-2">Withdrawal Successful!</h3>
             <p class="text-gray-400 text-sm mb-4">
-              TSh {{ lastWithdrawAmount.toLocaleString() }} has been withdrawn
+              TSh {{ lastWithdrawAmount.toLocaleString() }} has been withdrawn from your balance
             </p>
             <div class="bg-gray-900 border border-gray-700 rounded-xl p-4 mb-6">
               <p class="text-gray-400 text-xs">New Balance</p>

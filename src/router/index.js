@@ -277,6 +277,16 @@ const routes = [
         },
       },
       {
+        path: "hero",
+        name: "admin-hero",
+        component: () => import('../pages/admin/components/AdminHero.vue'),
+        meta: {
+          title: "Hero Banner",
+          requiresAuth: true,
+          requiresRole: ['ADMIN', 'AGENT']
+        },
+      },
+      {
         path: "deposits",
         name: "admin-deposits",
         component: () => import('../pages/admin/components/AdminDeposits.vue'),

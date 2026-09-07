@@ -47,20 +47,20 @@
       </div>
     </div>
 
-    <!-- Pending Deposit Requests -->
+    <!-- Recent Deposits (read-only) -->
     <div class="bg-[#1A1A1A] rounded-2xl border border-[#2A2A2A] p-6">
       <div class="flex items-center justify-between mb-1">
-        <h3 class="text-lg font-bold text-white">💰 Deposit Requests</h3>
+        <h3 class="text-lg font-bold text-white">💰 Recent Deposits</h3>
         <button @click="loadDepositRequests" class="text-xs text-rose-400 hover:text-rose-300 font-semibold">🔄 Refresh</button>
       </div>
-      <p class="text-xs text-gray-500 mb-4">Auto-credited deposits. Funds are added to the customer's balance automatically once payment is confirmed — no action needed.</p>
+      <p class="text-xs text-gray-500 mb-4">Deposits are auto-credited to the customer's balance immediately.</p>
 
       <div v-if="depositRequests.length > 0" class="mb-4 px-4 py-3 rounded-xl bg-emerald-950/40 border border-emerald-800/40 text-emerald-300 text-sm font-semibold">
-        🔔 {{ depositRequests.length }} deposit(s) — automatically confirmed on payment.
+        🔔 {{ depositRequests.length }} recent deposit(s) — automatically credited.
       </div>
 
       <div v-if="depositRequests.length === 0" class="text-gray-500 text-sm py-4 text-center">
-        No deposit requests waiting.
+        No deposits yet.
       </div>
 
       <div class="divide-y divide-[#2A2A2A]">
@@ -68,52 +68,15 @@
           <div class="flex-1 min-w-0">
             <div class="flex items-center gap-2 flex-wrap">
               <p class="text-white font-semibold text-sm">TSh {{ formatMoney(d.amount) }}</p>
-              <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400">CONFIRMED</span>
+              <span :class="d.status === 'CONFIRMED'
+                ? 'bg-emerald-500/20 text-emerald-400'
+                : 'bg-amber-500/20 text-amber-400'"
+                class="text-[10px] px-2 py-0.5 rounded-full">
+                {{ d.status || 'PENDING' }}
+              </span>
             </div>
             <p class="text-gray-400 text-sm mt-0.5 font-mono">📞 {{ d.payer_phone || d.user?.phone_number || '—' }}</p>
             <p class="text-[11px] text-gray-500 mt-0.5">⏰ {{ formatDate(d.createdAt || d.created_at) }}</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Pending Withdraw Requests -->
-    <div class="bg-[#1A1A1A] rounded-2xl border border-[#2A2A2A] p-6">
-      <div class="flex items-center justify-between mb-1">
-        <h3 class="text-lg font-bold text-white">🏦 Withdraw Requests</h3>
-        <button @click="loadWithdrawRequests" class="text-xs text-rose-400 hover:text-rose-300 font-semibold">🔄 Refresh</button>
-      </div>
-      <p class="text-xs text-gray-500 mb-4">Customer wants to withdraw. Click <strong class="text-emerald-400">Accept</strong> to send the money (funds are deducted from balance) or <strong class="text-gray-400">Cancel</strong> to reject.</p>
-
-      <div v-if="withdrawRequests.length === 0" class="text-gray-500 text-sm py-4 text-center">
-        No pending withdraw requests.
-      </div>
-
-      <div class="divide-y divide-[#2A2A2A]">
-        <div v-for="w in withdrawRequests" :key="w.id" class="py-3 flex flex-col sm:flex-row sm:items-center gap-3">
-          <div class="flex-1 min-w-0">
-            <div class="flex items-center gap-2 flex-wrap">
-              <p class="text-white font-semibold text-sm">TSh {{ formatMoney(w.amount) }}</p>
-              <span class="text-[10px] px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-400">PENDING</span>
-            </div>
-            <p class="text-gray-400 text-sm mt-0.5 font-mono">📞 {{ w.user?.phone_number || '—' }}</p>
-            <p class="text-[11px] text-gray-500 mt-0.5">⏰ {{ formatDate(w.createdAt || w.created_at) }}</p>
-          </div>
-          <div class="flex gap-2">
-            <button
-              @click="confirmWithdraw(w)"
-              :disabled="w.busy"
-              class="px-4 py-2 text-sm bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50 transition-colors font-semibold"
-            >
-              {{ w.busy ? '...' : '✓ Accept' }}
-            </button>
-            <button
-              @click="cancelWithdraw(w)"
-              :disabled="w.busy"
-              class="px-4 py-2 text-sm bg-gray-700 text-gray-300 rounded-lg hover:bg-gray-600 disabled:opacity-50 transition-colors font-semibold"
-            >
-              ✕ Cancel
-            </button>
           </div>
         </div>
       </div>
@@ -397,7 +360,6 @@ import { ref, reactive, onMounted, onBeforeUnmount, watch, computed } from 'vue'
 import { useNotificationStore } from '../../../stores/notifications.store'
 import manageUsersService from '../../../services/manageUsersService'
 import DepositService from '../../../services/deposit/deposit.service'
-import MoneyService from '../../../services/money/money.service'
 import socketService from '../../../services/socket/socket.service'
 
 const notificationStore = useNotificationStore()
@@ -497,7 +459,7 @@ async function removeRecipient(r) {
   }
 }
 
-// ============ DEPOSIT REQUESTS ============
+// ============ DEPOSIT REQUESTS (READ-ONLY) ============
 const depositRequests = ref([])
 let depositRefreshTimer = null
 
@@ -507,79 +469,9 @@ function handleDepositSignal() {
 }
 
 async function loadDepositRequests() {
-  const result = await DepositService.getRequests({ status: 'PENDING', limit: 30 })
+  const result = await DepositService.getRequests({ limit: 30 })
   if (result.success) {
-    depositRequests.value = (result.data?.deposit_requests || []).map(r => ({ ...r, busy: false }))
-  }
-}
-
-async function confirmDeposit(d) {
-  d.busy = true
-  try {
-    const result = await DepositService.confirmRequest(d.id)
-    if (result.success) {
-      showToast('Deposit accepted ✅ — balance updated & customer notified', 'success', `TSh ${formatMoney(d.amount)}`)
-      await loadDepositRequests()
-    } else {
-      showToast('Failed: ' + (result.message || 'Unknown error'), 'error')
-    }
-  } finally {
-    d.busy = false
-  }
-}
-
-async function cancelDeposit(d) {
-  d.busy = true
-  try {
-    const result = await DepositService.cancelRequest(d.id)
-    if (result.success) {
-      showToast('Deposit request cancelled', 'success', `TSh ${formatMoney(d.amount)}`)
-      await loadDepositRequests()
-    } else {
-      showToast('Failed: ' + (result.message || 'Unknown error'), 'error')
-    }
-  } finally {
-    d.busy = false
-  }
-}
-
-// ============ WITHDRAW REQUESTS (ADMIN ACCEPT/CANCEL) ============
-const withdrawRequests = ref([])
-
-async function loadWithdrawRequests() {
-  const result = await MoneyService.getWithdrawRequests({ status: 'PENDING', limit: 30 })
-  if (result.success) {
-    withdrawRequests.value = (result.data?.withdraw_requests || result.data?.requests || []).map(r => ({ ...r, busy: false }))
-  }
-}
-
-async function confirmWithdraw(w) {
-  w.busy = true
-  try {
-    const result = await MoneyService.confirmWithdraw(w.id)
-    if (result.success) {
-      showToast('Withdraw accepted ✅ — balance deducted & customer notified', 'success', `TSh ${formatMoney(w.amount)}`)
-      await loadWithdrawRequests()
-    } else {
-      showToast('Failed: ' + (result.message || 'Unknown error'), 'error')
-    }
-  } finally {
-    w.busy = false
-  }
-}
-
-async function cancelWithdraw(w) {
-  w.busy = true
-  try {
-    const result = await MoneyService.cancelWithdraw(w.id)
-    if (result.success) {
-      showToast('Withdraw request cancelled', 'success', `TSh ${formatMoney(w.amount)}`)
-      await loadWithdrawRequests()
-    } else {
-      showToast('Failed: ' + (result.message || 'Unknown error'), 'error')
-    }
-  } finally {
-    w.busy = false
+    depositRequests.value = result.data?.deposit_requests || []
   }
 }
 

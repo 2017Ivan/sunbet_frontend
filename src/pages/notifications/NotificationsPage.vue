@@ -55,30 +55,6 @@
               </div>
               <p class="text-gray-400 text-sm mt-1 leading-relaxed break-words">{{ notif.message }}</p>
 
-              <!-- Deposit request actions (admin only) -->
-              <div v-if="isAdminDepositRequest(notif)" class="flex flex-wrap items-center gap-2 mt-3">
-                <span v-if="depositState[notif.id]?.msg" class="text-xs font-semibold" :class="depositState[notif.id].success ? 'text-emerald-400' : 'text-red-400'">
-                  {{ depositState[notif.id].msg }}
-                </span>
-                <template v-else>
-                  <button
-                    @click.stop="acceptDeposit(notif)"
-                    :disabled="depositState[notif.id]?.busy"
-                    class="px-3 py-1.5 text-xs bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50 font-semibold"
-                  >
-                    ✓ Accept
-                  </button>
-                  <button
-                    @click.stop="cancelDeposit(notif)"
-                    :disabled="depositState[notif.id]?.busy"
-                    class="px-3 py-1.5 text-xs bg-gray-800 text-gray-300 rounded-lg hover:bg-gray-700 disabled:opacity-50 font-semibold"
-                  >
-                    ✕ Cancel
-                  </button>
-                  <span class="text-[11px] text-gray-500">Make the payment to this number, user pays with PIN, then Accept.</span>
-                </template>
-              </div>
-
               <div class="flex items-center justify-between mt-2">
                 <span class="text-[11px] text-gray-600">{{ timeAgo(notif.created_at) }}</span>
                 <button
@@ -108,13 +84,10 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref, computed, watch } from 'vue'
+import { onMounted, computed } from 'vue'
 import { useNotificationStore } from '../../stores/notifications.store'
-import { useAuthStore } from '../../stores/auth/authStore'
-import DepositService from '../../services/deposit/deposit.service'
 
 const notificationStore = useNotificationStore()
-const authStore = useAuthStore()
 
 // ---- Arifa za leo tu (recent) ----
 const isToday = (dateString) => {
@@ -134,59 +107,6 @@ const todayNotifications = computed(() =>
 const todayUnreadCount = computed(() =>
   todayNotifications.value.filter(n => !n.is_read).length
 )
-
-// Per-notification action state (admin accept/cancel)
-const depositState = reactive({})
-
-// Only show accept/cancel for ADMIN role, and only while the request is still PENDING.
-// If the pending-status fetch is still loading/failed, ADMIN still sees the button (role gate only).
-const pendingDepositIds = ref(new Set())
-const pendingStatus = ref('loading') // 'loading' | 'ready' | 'failed'
-
-async function loadPendingDeposits() {
-  if (authStore.user?.role !== 'ADMIN') return
-  pendingStatus.value = 'loading'
-  const result = await DepositService.getRequests({ status: 'PENDING', limit: 100 })
-  if (result.success) {
-    pendingDepositIds.value = new Set((result.data?.deposit_requests || []).map(r => r.id))
-    pendingStatus.value = 'ready'
-  } else {
-    pendingStatus.value = 'failed'
-  }
-}
-
-function isAdminDepositRequest(notif) {
-  if (authStore.user?.role !== 'ADMIN') return false
-  if (!notif.metadata || notif.metadata.type !== 'deposit_request' || !notif.metadata.deposit_request_id) return false
-  if (pendingStatus.value !== 'ready') return true
-  return pendingDepositIds.value.has(notif.metadata.deposit_request_id)
-}
-
-async function acceptDeposit(notif) {
-  depositState[notif.id] = { busy: true, success: false, msg: '' }
-  const result = await DepositService.confirmRequest(notif.metadata.deposit_request_id)
-  if (result.success) {
-    depositState[notif.id] = { busy: false, success: true, msg: '✅ Accepted — user balance updated & notified' }
-  } else {
-    depositState[notif.id] = { busy: false, success: false, msg: '❌ ' + (result.message || 'Accept failed') }
-  }
-  await notificationStore.markAsRead(notif.id)
-  await loadPendingDeposits()
-  await notificationStore.fetchMyNotifications()
-}
-
-async function cancelDeposit(notif) {
-  depositState[notif.id] = { busy: true, success: false, msg: '' }
-  const result = await DepositService.cancelRequest(notif.metadata.deposit_request_id)
-  if (result.success) {
-    depositState[notif.id] = { busy: false, success: true, msg: '✕ Cancelled' }
-  } else {
-    depositState[notif.id] = { busy: false, success: false, msg: '❌ ' + (result.message || 'Cancel failed') }
-  }
-  await notificationStore.markAsRead(notif.id)
-  await loadPendingDeposits()
-  await notificationStore.fetchMyNotifications()
-}
 
 function getTypeBg(type) {
   const types = {
@@ -248,14 +168,5 @@ async function loadMore() {
 onMounted(async () => {
   await notificationStore.fetchMyNotifications()
   await notificationStore.fetchUnreadCount()
-  await loadPendingDeposits()
-})
-
-// Re-load pending set when role becomes ready or when notifications refresh
-watch(() => authStore.user?.role, (role) => {
-  if (role === 'ADMIN') loadPendingDeposits()
-})
-watch(() => notificationStore.notifications.length, () => {
-  loadPendingDeposits()
 })
 </script>

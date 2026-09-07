@@ -2,7 +2,7 @@
 <template>
   <Teleport to="body">
     <Transition name="celebration" appear>
-      <div class="fixed inset-0 z-[200] flex items-center justify-center px-4" role="dialog" aria-modal="true">
+      <div class="fixed inset-0 z-[200] flex items-center justify-center px-1" role="dialog" aria-modal="true">
         <!-- Soft glow backdrop (content behind stays visible) -->
         <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(245,158,11,0.18),rgba(0,0,0,0.65)_70%)] backdrop-blur-[2px]" @click="dismiss"></div>
 
@@ -24,10 +24,13 @@
           <div class="absolute -top-16 left-1/2 -translate-x-1/2 w-72 h-40 bg-amber-400/15 blur-3xl rounded-full"></div>
 
           <div class="px-6 pt-10 pb-7 relative">
+            <!-- Congratulations -->
+            <h2 class="text-3xl font-black text-amber-400 tracking-widest uppercase mb-2">CONGRATULATIONS</h2>
+
             <!-- Trophy -->
-            <div class="relative w-44 h-44 mx-auto trophy-wrap flex items-center justify-center">
+            <div class="relative w-full trophy-wrap flex items-center justify-center">
               <div class="absolute inset-0 glow-pulse"></div>
-              <span class="text-[140px] leading-none trophy drop-shadow-[0_0_40px_rgba(251,191,36,0.45)]">🏆</span>
+              <span class="text-[160px] leading-none trophy drop-shadow-[0_0_40px_rgba(251,191,36,0.45)]">🏆</span>
               <!-- Sparkles -->
               <svg class="absolute -top-2 -right-4 w-8 h-8 sparkle" viewBox="0 0 24 24" fill="#fde68a"><path d="M12 1l2.4 6.6L21 10l-6.6 2.4L12 19l-2.4-6.6L3 10l6.6-2.4L12 1z"/></svg>
               <svg class="absolute top-10 -left-6 w-5 h-5 sparkle" style="animation-delay:.6s" viewBox="0 0 24 24" fill="#fbbf24"><path d="M12 1l2.4 6.6L21 10l-6.6 2.4L12 19l-2.4-6.6L3 10l6.6-2.4L12 1z"/></svg>
@@ -41,6 +44,13 @@
             <div class="mt-4">
               <p class="text-5xl font-black bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400 bg-clip-text text-transparent drop-shadow-[0_0_18px_rgba(251,191,36,0.45)] tabular-nums">
                 TZS {{ displayAmount }}
+              </p>
+            </div>
+
+            <!-- Total Odds -->
+            <div class="mt-2">
+              <p class="text-sm text-amber-400/80 font-semibold">
+                Total Odds: <span class="text-white font-bold">{{ totalOdds }}</span>
               </p>
             </div>
 
@@ -59,13 +69,18 @@
 </template>
 
 <script setup>
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 
 const props = defineProps({
   win: { type: Object, required: true }
 })
 
 const emit = defineEmits(['close'])
+
+const totalOdds = computed(() => {
+  const odds = parseFloat(props.win.total_odds) || parseFloat(props.win.totalOdds) || 0
+  return odds.toFixed(2)
+})
 
 // ---- Amount count-up ----
 const displayAmount = ref('0')

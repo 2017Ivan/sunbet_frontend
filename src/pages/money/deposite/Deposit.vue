@@ -12,7 +12,7 @@
           Back to Profile
         </RouterLink>
         <h1 class="text-lg font-bold text-gray-300">Deposit Funds</h1>
-        <p class="text-gray-400 text-sm mt-1">Add funds to your account securely</p>
+        <p class="text-gray-400 text-sm mt-1">Add funds to your account securely via Mobile Money</p>
       </div>
 
       <!-- Balance Card -->
@@ -185,7 +185,7 @@ const router = useRouter()
 const authStore = useAuthStore()
 
 // CONFIG
-const MINIMUM_DEPOSIT = 125000
+const MINIMUM_DEPOSIT = 500
 
 // State
 const depositAmount = ref(0)
@@ -307,7 +307,7 @@ const closePendingModal = () => {
 }
 
 // Lifecycle
-onMounted(() => {
+onMounted(async () => {
   if (authStore.isLoggedIn) {
     authStore.fetchUserBalance()
   }

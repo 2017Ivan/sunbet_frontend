@@ -219,6 +219,7 @@ const navItems = [
   { path: '/admin/notifications', icon: '🔔', label: 'Send Notification' },
   { path: '/admin/settings', icon: '⚙️', label: 'Settings' },
   { path: '/admin/fixtures', icon: '📅', label: 'Fixtures' },
+  { path: '/admin/hero', icon: '🖼️', label: 'Hero Banner' },
   { path: '/admin/deposits', icon: '💰', label: 'Deposits' },
 ]
 
@@ -231,6 +232,7 @@ const pageTitles = {
   '/admin/notifications': { title: 'Send Notification', subtitle: 'Tuma notification kwa mteja mmoja au wateja wote' },
   '/admin/settings': { title: 'Settings', subtitle: 'Configure admin settings' },
   '/admin/fixtures': { title: 'Fixtures', subtitle: 'Manage and add fixtures' },
+  '/admin/hero': { title: 'Hero Banner', subtitle: 'Pakia thumbnail images za homepage hero slider' },
   '/admin/deposits': { title: 'Deposits', subtitle: 'Tazama na simamia deposits zote (completed / pending / failed)' },
 }
 

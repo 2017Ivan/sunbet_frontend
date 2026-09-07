@@ -3,11 +3,11 @@ import api from '../api'
 
 const DepositService = {
   // ============ CUSTOMER ============
-  // Initiates a PalmPesa mobile-money deposit. The balance is credited
-  // automatically once PalmPesa confirms the payment via webhook.
+  // Initiates a mobile-money deposit. The balance is credited automatically once
+  // the ACTIVE gateway (PalmPesa or Snipe) confirms the payment via webhook.
   requestDeposit: async (data) => {
     try {
-      const response = await api.post('/money/deposit/palmpesa', data)
+      const response = await api.post('/money/deposit', data)
       return response.data
     } catch (error) {
       if (error.response?.data) return error.response.data
@@ -68,7 +68,7 @@ const DepositService = {
     }
   },
 
-  // ============ ADMIN REQUESTS ============
+  // ============ ADMIN (READ-ONLY) ============
   getRequests: async (params = {}) => {
     try {
       const response = await api.get('/deposit/requests', { params })
@@ -76,26 +76,6 @@ const DepositService = {
     } catch (error) {
       if (error.response?.data) return error.response.data
       return { success: false, message: error.message || 'Failed to load deposit requests.' }
-    }
-  },
-
-  confirmRequest: async (request_id) => {
-    try {
-      const response = await api.post('/deposit/confirm', { request_id })
-      return response.data
-    } catch (error) {
-      if (error.response?.data) return error.response.data
-      return { success: false, message: error.message || 'Failed to confirm deposit.' }
-    }
-  },
-
-  cancelRequest: async (request_id) => {
-    try {
-      const response = await api.post('/deposit/cancel', { request_id })
-      return response.data
-    } catch (error) {
-      if (error.response?.data) return error.response.data
-      return { success: false, message: error.message || 'Failed to cancel deposit.' }
     }
   }
 }

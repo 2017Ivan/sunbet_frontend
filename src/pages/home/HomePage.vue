@@ -61,12 +61,12 @@
             </div>
           </div>
 
-          <div class="text-center  py-1.5 backdrop-blur-sm">
+          <div v-if="showViewAllLive" class="text-center  backdrop-blur-sm">
             <button 
               @click="navigateToLive" 
-              class="text-gray-600 hover:text-rose-600 font-semibold text-sm transition-colors"
+              class="text-gray-600 py-1.5 cursor-pointer  w-full font-semibold text-sm transition-colors"
             >
-              View All Live
+              View All Live ({{ liveDisplayGames.length }})
             </button>
           </div>
         </div>
@@ -286,11 +286,18 @@ const groupedGames = computed(() => {
 })
 
 // LIVE matches zinaonyeshwa JUU (grouped kwa league), upcoming CHINI
+// Onyesha only 5 live matches kwenye homepage
+const LIVE_HOMEPAGE_LIMIT = 5
+
 const effectiveLiveGames = computed(() => liveDisplayGames.value)
+
+const limitedLiveGames = computed(() => liveDisplayGames.value.slice(0, LIVE_HOMEPAGE_LIMIT))
+
+const showViewAllLive = computed(() => liveDisplayGames.value.length > LIVE_HOMEPAGE_LIMIT)
 
 const groupedLiveGames = computed(() => {
   const groups = {}
-  effectiveLiveGames.value.forEach(game => {
+  limitedLiveGames.value.forEach(game => {
     if (!groups[game.league]) groups[game.league] = []
     groups[game.league].push(game)
   })
