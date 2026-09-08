@@ -25,7 +25,7 @@
 
           <div class="px-6 pt-10 pb-7 relative">
             <!-- Congratulations -->
-            <h2 class="text-3xl font-black text-amber-400 tracking-widest uppercase mb-2">CONGRATULATIONS</h2>
+            <h2 class="text-xl font-black text-amber-400 tracking-widest uppercase mb-2 font-italic">CONGRATULATIONS</h2>
 
             <!-- Trophy -->
             <div class="relative w-full trophy-wrap flex items-center justify-center">
@@ -42,8 +42,11 @@
 
             <!-- Amount -->
             <div class="mt-4">
-              <p class="text-5xl font-black bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400 bg-clip-text text-transparent drop-shadow-[0_0_18px_rgba(251,191,36,0.45)] tabular-nums">
-                TZS {{ displayAmount }}
+             <p class="text-xl font-black bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400 bg-clip-text text-transparent drop-shadow-[0_0_18px_rgba(251,191,36,0.45)] tabular-nums">
+                TZS 
+              </p>
+              <p class="text-2xl font-black bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400 bg-clip-text text-transparent drop-shadow-[0_0_18px_rgba(251,191,36,0.45)] tabular-nums">
+             {{ displayAmount }}
               </p>
             </div>
 

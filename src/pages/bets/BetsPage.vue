@@ -4,10 +4,7 @@
     <div class="max-w-4xl mx-auto px-2">
       
       <!-- Header -->
-      <div class="mb-6">
-        <h1 class="text-2xl font-bold text-rose-950">My Bets</h1>
-        <p class="text-sm text-gray-500 mt-1">Track all your betting activity</p>
-      </div>
+    
 
       <!-- Tabs -->
       <div class="flex gap-1 p-1 bg-green-100/60 rounded-xl border border-gray-200 mb-6 overflow-x-auto">
