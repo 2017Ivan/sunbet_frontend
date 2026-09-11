@@ -22,6 +22,28 @@ const PaymentGatewayService = {
       if (error.response?.data) return error.response.data
       return { success: false, message: error.message || 'Failed to switch payment gateway.' }
     }
+  },
+
+  // GET provider API keys (DB-backed) - ADMIN
+  getKeys: async () => {
+    try {
+      const response = await api.get('/money/deposit/gateway/keys')
+      return response.data
+    } catch (error) {
+      if (error.response?.data) return error.response.data
+      return { success: false, message: error.message || 'Failed to load provider API keys.' }
+    }
+  },
+
+  // PUT update provider API keys (DB-backed) - ADMIN  { gateway, ...fields }
+  updateKeys: async (gateway, fields = {}) => {
+    try {
+      const response = await api.put('/money/deposit/gateway/keys', { gateway, ...fields })
+      return response.data
+    } catch (error) {
+      if (error.response?.data) return error.response.data
+      return { success: false, message: error.message || 'Failed to update provider API keys.' }
+    }
   }
 }
 
