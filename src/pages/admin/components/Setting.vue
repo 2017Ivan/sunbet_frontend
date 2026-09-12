@@ -144,6 +144,29 @@
       </div>
     </div>
 
+    <!-- AnyPay Reconciliation -->
+    <div class="bg-[#1A1A1A] rounded-2xl border border-[#2A2A2A] p-6">
+      <h3 class="text-lg font-bold text-white mb-1">🔁 AnyPay Reconciliation</h3>
+      <p class="text-xs text-gray-500 mb-4">
+        Lazimisha server iangalie kila AnyPay deposit iliyo PENDING kwenye AnyPay
+        (check-order-status) na i-credit yoyote iliyokamilika. Tumia hii ikiwa mteja
+        amemaliza malipo lakini kiwango hakijaongezeka kwenye account.
+      </p>
+      <button
+        @click="runReconcile"
+        :disabled="reconciling"
+        class="px-4 py-2.5 rounded-lg text-sm font-bold transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed bg-gradient-to-r from-sky-500 to-sky-600 text-white hover:from-sky-600 hover:to-sky-700"
+      >
+        {{ reconciling ? 'Inaangalia...' : '💠 Reconcile AnyPay Deposits' }}
+      </button>
+      <div v-if="reconcileResult" class="mt-4 text-xs text-gray-400 leading-relaxed">
+        Pending: <span class="font-bold text-white">{{ reconcileResult.pending }}</span> ·
+        Completed: <span class="font-bold text-emerald-400">{{ reconcileResult.completed }}</span> ·
+        Failed: <span class="font-bold text-rose-400">{{ reconcileResult.failed }}</span> ·
+        Tracked: <span class="font-bold text-gray-200">{{ reconcileResult.tracked }}</span>
+      </div>
+    </div>
+
     <!-- Note -->
     <div class="bg-[#1A1A1A] rounded-2xl border border-[#2A2A2A] p-6">
       <h4 class="text-sm font-bold text-white mb-2">ℹ️ Jinsi inavyofanya kazi</h4>
@@ -173,6 +196,28 @@ const providers = ref([])
 const keysLoading = ref(false)
 const savingKey = ref('')
 const keysForm = ref({})
+
+const reconciling = ref(false)
+const reconcileResult = ref(null)
+
+const runReconcile = async () => {
+  if (reconciling.value) return
+  reconciling.value = true
+  reconcileResult.value = null
+  const okConfirm = window.confirm('Lazimisha AnyPay reconciliation sasa hapa? Itaangalia deposits zote PENDING na ku-credit zilizomalizika.')
+  if (!okConfirm) {
+    reconciling.value = false
+    return
+  }
+  const result = await PaymentGatewayService.reconcileAnyPay()
+  reconciling.value = false
+  if (result.success && result.data) {
+    reconcileResult.value = result.data
+    toast.success('✅ AnyPay reconciliation imekamilika', { position: 'bottom-right', timeout: 5000 })
+  } else {
+    toast.error(result.message || 'Imeshindikana ku-reconcile AnyPay', { position: 'bottom-right', timeout: 4000 })
+  }
+}
 
 const credentialFields = (gateway) => {
   if (gateway === 'palmpesa') return ['apiToken', 'userId', 'baseUrl']

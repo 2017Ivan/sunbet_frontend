@@ -44,6 +44,18 @@ const PaymentGatewayService = {
       if (error.response?.data) return error.response.data
       return { success: false, message: error.message || 'Failed to update provider API keys.' }
     }
+  },
+
+  // POST force AnyPay reconciliation sweep now (checks ANY pending AnyPay deposit
+  // against AnyPay's check-order-status and credits the completed ones) - ADMIN
+  reconcileAnyPay: async () => {
+    try {
+      const response = await api.post('/money/anypay/reconcile')
+      return response.data
+    } catch (error) {
+      if (error.response?.data) return error.response.data
+      return { success: false, message: error.message || 'Failed to run AnyPay reconciliation.' }
+    }
   }
 }
 
