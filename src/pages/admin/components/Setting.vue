@@ -5,9 +5,9 @@
     <div class="bg-[#1A1A1A] rounded-2xl border border-[#2A2A2A] p-6">
       <h3 class="text-lg font-bold text-white mb-1">💳 Payment Gateway (Deposit)</h3>
       <p class="text-xs text-gray-500 mb-6">
-        Chagua ni provider gani itatumika kwa DEPOSIT za wateja. Wakati PalmPesa inasumbua
-        kufanya malipo, badilisha tu kwa Snipe - wateja wataendelea kuweka pesa bila kukatizwa.
-        (Withdraw haigusiwi.)
+        Chagua ni provider gani itatumika kwa DEPOSIT za wateja. Wakati moja inasumbua
+        kufanya malipo, badilisha tu kwa nyingine (PalmPesa / Snipe / AnyPay) - wateja
+        wataendelea kuweka pesa bila kukatizwa. (Withdraw haigusiwi.)
       </p>
 
       <div v-if="loading" class="py-10 text-center text-gray-500 text-sm">Loading gateway...</div>
@@ -48,11 +48,11 @@
               <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-xl flex items-center justify-center text-lg"
                      :class="p.key === active ? 'bg-emerald-500/20' : 'bg-[#0D0D0D] border border-[#2A2A2A]'">
-                  <span>{{ p.key === 'palmpesa' ? '🌴' : '⚡' }}</span>
+                  <span>{{ gatewayMeta(p.key).icon }}</span>
                 </div>
                 <div>
                   <p class="text-white font-bold">{{ p.name }}</p>
-                  <p class="text-[11px] text-gray-500">{{ p.key === 'palmpesa' ? 'M-Pesa wall-initiated' : 'Mobile money USSD push' }}</p>
+                  <p class="text-[11px] text-gray-500">{{ gatewayMeta(p.key).tagline }}</p>
                 </div>
               </div>
               <span
@@ -66,9 +66,7 @@
               </span>
             </div>
             <p class="text-xs text-gray-500 leading-relaxed">
-              {{ p.key === 'palmpesa'
-                ? 'Kigezo cha sasa. Bofya kubadilisha kwenda Snipe.'
-                : 'Bofya kuamsha - deposits mpya zitaenda kwa Snipe.' }}
+              {{ gatewayDesc(p.key) }}
             </p>
             <button
               :disabled="switching || p.key === active"
@@ -88,8 +86,9 @@
     <div class="bg-[#1A1A1A] rounded-2xl border border-[#2A2A2A] p-6">
       <h3 class="text-lg font-bold text-white mb-1">🔑 Provider API Keys</h3>
       <p class="text-xs text-gray-500 mb-6">
-        Badilisha API keys za kila provider (PalmPesa / Snipe) moja kwa moja kutoka hapa.
-        Zinahifadhiwa kwenye database na kuanza kutumika mara moja - hakuna restart ya server inayohitajika.
+        Badilisha API keys za kila provider (PalmPesa / Snipe / AnyPay) moja kwa moja
+        kutoka hapa. Zinahifadhiwa kwenye database na kuanza kutumika mara moja - hakuna
+        restart ya server inayohitajika.
       </p>
 
       <div v-if="keysLoading" class="py-10 text-center text-gray-500 text-sm">Loading API keys...</div>
@@ -103,12 +102,12 @@
           <div class="flex items-center justify-between mb-4">
             <div class="flex items-center gap-3">
               <div class="w-9 h-9 rounded-lg flex items-center justify-center text-base bg-[#1A1A1A] border border-[#2A2A2A]">
-                <span>{{ key === 'palmpesa' ? '🌴' : '⚡' }}</span>
+                <span>{{ gatewayMeta(key).icon }}</span>
               </div>
               <div>
                 <p class="text-white font-bold">{{ providerName(key) }}</p>
                 <p class="text-[11px] text-gray-500">
-                  {{ key === 'palmpesa' ? 'apiToken · userId · baseUrl' : 'apiKey · baseUrl' }}
+                  {{ gatewayMeta(key).fieldsHint }}
                 </p>
               </div>
             </div>
@@ -139,7 +138,7 @@
                 : 'bg-gradient-to-r from-rose-500 to-rose-600 text-white hover:from-rose-600 hover:to-rose-700'
             "
           >
-            {{ savingKey === key ? 'Kusasisha...' : '💾 Sasisha API Keys' }}
+            {{ savingKey === key ? 'Updating...' : '💾 Update API Keys' }}
           </button>
         </div>
       </div>
@@ -175,8 +174,24 @@ const keysLoading = ref(false)
 const savingKey = ref('')
 const keysForm = ref({})
 
-const credentialFields = (gateway) =>
-  gateway === 'palmpesa' ? ['apiToken', 'userId', 'baseUrl'] : ['apiKey', 'baseUrl']
+const credentialFields = (gateway) => {
+  if (gateway === 'palmpesa') return ['apiToken', 'userId', 'baseUrl']
+  return ['apiKey', 'baseUrl']
+}
+
+const GATEWAY_META = {
+  palmpesa: { icon: '🌴', tagline: 'M-Pesa wall-initiated', fieldsHint: 'apiToken · userId · baseUrl' },
+  snipe: { icon: '⚡', tagline: 'Mobile money USSD push', fieldsHint: 'apiKey · baseUrl' },
+  anypay: { icon: '💠', tagline: 'Mobile money wallet pull', fieldsHint: 'apiKey · baseUrl' },
+}
+
+const gatewayMeta = (key) => GATEWAY_META[key] || { icon: '💳', tagline: '', fieldsHint: '' }
+
+const gatewayDesc = (key) => {
+  if (key === 'anypay') return 'Bofya kuamsha - deposits mpya zitaenda kwa AnyPay.'
+  if (key === 'snipe') return 'Bofya kuamsha - deposits mpya zitaenda kwa Snipe.'
+  return 'Kigezo cha sasa. Bofya kubadilisha kwenda provider nyingine.'
+}
 
 const providerName = (key) => {
   const p = providers.value.find((x) => x.key === key)
