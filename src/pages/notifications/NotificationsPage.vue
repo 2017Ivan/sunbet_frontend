@@ -20,7 +20,7 @@
       <!-- Loading -->
       <div v-if="notificationStore.isLoading" class="py-16 text-center text-gray-400 text-sm">
         <span class="inline-block w-6 h-6 border-2 border-gray-600 border-t-rose-500 rounded-full animate-spin"></span>
-        <p class="mt-3">Inapakia arifa zako...</p>
+        <p class="mt-3">Loading your notifications...</p>
       </div>
 
       <!-- Empty -->
@@ -62,7 +62,7 @@
                   class="text-[11px] text-rose-400 hover:text-rose-700 font-semibold"
                   @click.stop="markRead(notif.id)"
                 >
-                  Soma
+                  Read
                 </button>
               </div>
             </div>
@@ -137,14 +137,14 @@ function timeAgo(dateString) {
   const now = new Date()
   const date = new Date(dateString)
   const seconds = Math.floor((now - date) / 1000)
-  if (seconds < 60) return 'Sasa hivi'
+  if (seconds < 60) return 'Just now'
   const minutes = Math.floor(seconds / 60)
-  if (minutes < 60) return `${minutes} min iliyopita`
+  if (minutes < 60) return `${minutes} min ago`
   const hours = Math.floor(minutes / 60)
-  if (hours < 24) return `${hours} saa iliyopita`
+  if (hours < 24) return `${hours} hour${hours === 1 ? '' : 's'} ago`
   const days = Math.floor(hours / 24)
-  if (days === 1) return 'Jana'
-  return `${days} siku zilizopita`
+  if (days === 1) return 'Yesterday'
+  return `${days} days ago`
 }
 
 async function openNotification(notif) {
