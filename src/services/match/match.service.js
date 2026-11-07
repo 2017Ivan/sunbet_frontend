@@ -11,6 +11,14 @@ export const matchService = {
     return api.get('/match/live')
   },
 
+  getFootballApiLiveMatches() {
+    return api.get('/match/football-api/live')
+  },
+
+  getFootballApiMarkets(externalId, status) {
+    return api.get(`/match/football-api/${externalId}/markets`, { params: { status } })
+  },
+
   getMatchDetails(id) {
     return api.get(`/match/${id}`)
   },

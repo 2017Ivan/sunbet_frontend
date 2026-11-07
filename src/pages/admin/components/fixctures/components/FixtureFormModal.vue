@@ -73,6 +73,8 @@
                 v-model.number="form.odds_home"
                 type="number"
                 step="0.01"
+                min="1.01"
+                required
                 placeholder="1.95"
                 class="w-full px-2 sm:px-3 py-2 rounded-lg bg-slate-900 border border-cyan-800 text-cyan-100 text-sm"
               />
@@ -83,6 +85,8 @@
                 v-model.number="form.odds_draw"
                 type="number"
                 step="0.01"
+                min="1.01"
+                required
                 placeholder="3.20"
                 class="w-full px-2 sm:px-3 py-2 rounded-lg bg-slate-900 border border-cyan-800 text-cyan-100 text-sm"
               />
@@ -93,6 +97,8 @@
                 v-model.number="form.odds_away"
                 type="number"
                 step="0.01"
+                min="1.01"
+                required
                 placeholder="4.50"
                 class="w-full px-2 sm:px-3 py-2 rounded-lg bg-slate-900 border border-cyan-800 text-cyan-100 text-sm"
               />
@@ -168,9 +174,9 @@ watch(() => props.fixture, (newVal) => {
       league: newVal.league || '',
       date: newVal.date || '',
       time: newVal.time || '',
-      odds_home: newVal.odds?.['1X2']?.home || newVal.odds?.home || null,
-      odds_draw: newVal.odds?.['1X2']?.draw || newVal.odds?.draw || null,
-      odds_away: newVal.odds?.['1X2']?.away || newVal.odds?.away || null,
+      odds_home: newVal.odds?.['1X2']?.['1'] ?? newVal.odds?.['1X2']?.home ?? null,
+      odds_draw: newVal.odds?.['1X2']?.X ?? newVal.odds?.['1X2']?.draw ?? null,
+      odds_away: newVal.odds?.['1X2']?.['2'] ?? newVal.odds?.['1X2']?.away ?? null,
       status: newVal.status || 'UPCOMING'
     }
   }

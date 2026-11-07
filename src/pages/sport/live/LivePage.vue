@@ -34,35 +34,40 @@
         <div  
           v-for="(matches, leagueName) in filteredGames" 
           :key="leagueName"
-          class="mb-0"
+          class="mx-2 mb-3 overflow-hidden rounded-xl bg-emerald-700"
         >
           <!-- League Header -->
-          <div class="sticky top-0 z-10 py-2 pl-1 bg-gradient-to-b from-emerald-600 via-green-400 to-emerald-600 backdrop-blur-sm">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-bold text-gray-50 truncate">{{ leagueName }}</span>
-
-              <div class="flex gap-1 flex-shrink-0">
-                <span 
-                  class="w-12 text-center text-xs sm:text-sm font-bold text-gray-50 hover:text-gray-900 rounded transition-colors duration-200"
+          <div class="flex items-center justify-between gap-3 rounded-t-[10px] bg-emerald-700 px-3 py-2.5 text-white">
+            <span class="flex min-w-0 items-center gap-2 text-[13px] sm:text-sm font-bold truncate">
+              <span class="shrink-0 text-sm" aria-hidden="true">⚽</span>
+              <span class="truncate">{{ leagueName }}</span>
+            </span>
+            <div class="flex shrink-0 items-center gap-2 text-emerald-100">
+              <svg class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path d="M3 16h2V9H3v7Zm6 0h2V4H9v12Zm6 0h2V7h-2v9Z" />
+              </svg>
+              <button
+                type="button"
+                class="rounded p-0.5 hover:bg-white/10"
+                :aria-expanded="!isLeagueCollapsed(leagueName)"
+                :aria-label="isLeagueCollapsed(leagueName) ? 'Expand league matches' : 'Collapse league matches'"
+                @click.stop="toggleLeagueGroup(leagueName)"
+              >
+                <svg
+                  class="h-3.5 w-3.5 transition-transform duration-200"
+                  :class="isLeagueCollapsed(leagueName) ? '-rotate-90' : 'rotate-0'"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                  aria-hidden="true"
                 >
-                  1
-                </span>
-                <span 
-                  class="w-12 text-center text-xs sm:text-sm font-bold text-gray-50 hover:text-gray-900 rounded transition-colors duration-200"
-                >
-                  X
-                </span>
-                <span 
-                  class="w-12 text-center text-xs sm:text-sm font-bold text-gray-50 hover:text-gray-900 rounded transition-colors duration-200"
-                >
-                  2
-                </span>
-              </div>
+                  <path d="m6 7 4 4 4-4 1.4 1.4L10 13.8l-5.4-5.4L6 7Z" />
+                </svg>
+              </button>
             </div>
           </div>
 
           <!-- Matches for this league -->
-          <div class="overflow-hidden shadow-sm">
+          <div v-if="!isLeagueCollapsed(leagueName)" class="overflow-hidden rounded-t-lg bg-[#eaf2f8]">
             <MatchCard 
               v-for="game in matches" 
               :key="game.id"
@@ -100,6 +105,15 @@ const { liveMatches, loading } = storeToRefs(matchStore)
 const isLoading = ref(true)
 const selectedSport = ref('all')
 const allGames = ref([])
+const collapsedLeagues = ref({})
+
+const isLeagueCollapsed = (leagueName) => Boolean(collapsedLeagues.value[leagueName])
+const toggleLeagueGroup = (leagueName) => {
+  collapsedLeagues.value = {
+    ...collapsedLeagues.value,
+    [leagueName]: !isLeagueCollapsed(leagueName)
+  }
+}
 
 // ---- Navigation ----
 const navigateToMatch = (matchId) => {
@@ -148,6 +162,7 @@ const transformMatch = (dbMatch) => {
     awayTeam: dbMatch.away_team || dbMatch.awayTeam || 'Unknown',
     currentScore: dbMatch.current_score || dbMatch.score || { home: 0, away: 0 },
     predetermined_script: dbMatch.predetermined_script,
+    markets: dbMatch.markets,
     odds: {
       home: parseFloat(odds1X2['1'] || odds1X2.home) || null,
       draw: parseFloat(odds1X2['X'] || odds1X2.draw) || null,

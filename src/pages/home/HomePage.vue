@@ -34,24 +34,42 @@
         <div v-if="effectiveLiveGames.length > 0" class="mt-3">
          
 
-          <div v-for="(liveMatches, leagueName) in groupedLiveGames" :key="'live-league-' + leagueName">
+          <div v-for="(liveMatches, leagueName) in groupedLiveGames" :key="'live-league-' + leagueName" class="mx-2 mb-3 overflow-hidden rounded-xl bg-emerald-700">
             <!-- LIVE League Header -->
-            <div class="sticky top-0 z-10 py-2 pl-1 bg-gradient-to-b from-emerald-600 via-green-400 to-emerald-600 backdrop-blur-sm">
-              <div class="flex items-center justify-between">
-                <span class="text-xs font-bold text-gray-50 truncate">
+            <div class="flex items-center justify-between gap-3 rounded-t-[10px] bg-emerald-700 px-3 py-2.5 text-white">
+              <span class="flex min-w-0 items-center gap-2 text-[13px] sm:text-sm font-bold truncate">
+                <span class="shrink-0 text-sm" aria-hidden="true">⚽</span>
+                <span class="truncate">
                   <span class="inline-block px-1.5 py-0.5 mr-1 text-[10px] font-extrabold bg-white text-emerald-800 rounded animate-pulse">LIVE</span>
                   {{ leagueName }}
                 </span>
-                <div class="flex gap-1 flex-shrink-0">
-                  <span class="w-12 text-center text-xs sm:text-sm font-bold text-gray-50 rounded transition-colors duration-200">1</span>
-                  <span class="w-12 text-center text-xs sm:text-sm font-bold text-gray-50 rounded transition-colors duration-200">X</span>
-                  <span class="w-12 text-center text-xs sm:text-sm font-bold text-gray-50 rounded transition-colors duration-200">2</span>
-                </div>
+              </span>
+              <div class="flex shrink-0 items-center gap-2 text-emerald-100">
+                <svg class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path d="M3 16h2V9H3v7Zm6 0h2V4H9v12Zm6 0h2V7h-2v9Z" />
+                </svg>
+                <button
+                  type="button"
+                  class="rounded p-0.5 hover:bg-white/10"
+                  :aria-expanded="!isLeagueCollapsed('live', leagueName)"
+                  :aria-label="isLeagueCollapsed('live', leagueName) ? 'Expand league matches' : 'Collapse league matches'"
+                  @click.stop="toggleLeagueGroup('live', leagueName)"
+                >
+                  <svg
+                    class="h-3.5 w-3.5 transition-transform duration-200"
+                    :class="isLeagueCollapsed('live', leagueName) ? '-rotate-90' : 'rotate-0'"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path d="m6 7 4 4 4-4 1.4 1.4L10 13.8l-5.4-5.4L6 7Z" />
+                  </svg>
+                </button>
               </div>
             </div>
 
             <!-- LIVE Matches for this league -->
-            <div class="bg-white overflow-hidden">
+            <div v-if="!isLeagueCollapsed('live', leagueName)" class="overflow-hidden rounded-t-lg bg-[#eaf2f8]">
               <MatchCard 
                 v-for="game in liveMatches" 
                 :key="'live-' + game.id"
@@ -80,22 +98,40 @@
           <div 
             v-for="(matches, leagueName) in groupedGames" 
             :key="leagueName"
+            class="mx-2 mb-3 overflow-hidden rounded-xl bg-white"
           >
             <!-- League Header -->
-            <div class="sticky top-0 z-10 py-2 pl-1 bg-gradient-to-b from-emerald-600 via-green-400 to-emerald-600 backdrop-blur-sm">
-              <div class="flex items-center justify-between">
-                <span class="text-xs font-bold text-gray-50 truncate">{{ leagueName }}</span>
-
-                <div class="flex gap-1 flex-shrink-0">
-                  <span class="w-12 text-center text-xs sm:text-sm font-bold text-gray-50 hover:text-gray-900 rounded transition-colors duration-200">1</span>
-                  <span class="w-12 text-center text-xs sm:text-sm font-bold text-gray-50 hover:text-gray-900 rounded transition-colors duration-200">X</span>
-                  <span class="w-12 text-center text-xs sm:text-sm font-bold text-gray-50 hover:text-gray-900 rounded transition-colors duration-200">2</span>
-                </div>
+            <div class="flex items-center justify-between gap-3 rounded-t-[10px] bg-emerald-700 px-3 py-2.5 text-white">
+              <span class="flex min-w-0 items-center gap-2 text-[13px] sm:text-sm font-bold truncate">
+                <span class="shrink-0 text-sm" aria-hidden="true">⚽</span>
+                <span class="truncate">{{ leagueName }}</span>
+              </span>
+              <div class="flex shrink-0 items-center gap-2 text-emerald-100">
+                <svg class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path d="M3 16h2V9H3v7Zm6 0h2V4H9v12Zm6 0h2V7h-2v9Z" />
+                </svg>
+                <button
+                  type="button"
+                  class="rounded p-0.5 hover:bg-white/10"
+                  :aria-expanded="!isLeagueCollapsed('upcoming', leagueName)"
+                  :aria-label="isLeagueCollapsed('upcoming', leagueName) ? 'Expand league matches' : 'Collapse league matches'"
+                  @click.stop="toggleLeagueGroup('upcoming', leagueName)"
+                >
+                  <svg
+                    class="h-3.5 w-3.5 transition-transform duration-200"
+                    :class="isLeagueCollapsed('upcoming', leagueName) ? '-rotate-90' : 'rotate-0'"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path d="m6 7 4 4 4-4 1.4 1.4L10 13.8l-5.4-5.4L6 7Z" />
+                  </svg>
+                </button>
               </div>
             </div>
 
             <!-- Matches for this league -->
-            <div class="bg-white overflow-hidden">
+            <div v-if="!isLeagueCollapsed('upcoming', leagueName)" class="overflow-hidden rounded-b-[10px] bg-[#eaf2f8]">
               <MatchCard 
                 v-for="game in matches" 
                 :key="game.id"
@@ -112,8 +148,7 @@
             @click="navigateToSports" 
             class="text-gray-600 hover:text-rose-600 font-semibold text-sm transition-colors"
           >
-            <!-- View All Football ({{ totalGamesCount }})  -->
-            View All Football
+            View All Football ({{ totalFootballGamesCount }})
           </button>
         </div>
 
@@ -152,6 +187,19 @@ const allGames = ref([])
 const displayGames = ref([])
 const allLiveGames = ref([])
 const liveDisplayGames = ref([])
+const collapsedLeagueGroups = ref({})
+
+const leagueGroupKey = (type, leagueName) => `${type}:${leagueName}`
+const isLeagueCollapsed = (type, leagueName) => Boolean(
+  collapsedLeagueGroups.value[leagueGroupKey(type, leagueName)]
+)
+const toggleLeagueGroup = (type, leagueName) => {
+  const key = leagueGroupKey(type, leagueName)
+  collapsedLeagueGroups.value = {
+    ...collapsedLeagueGroups.value,
+    [key]: !collapsedLeagueGroups.value[key]
+  }
+}
 
 // Timer ya auto-refresh (30s)
 let autoRefreshTimer = null
@@ -180,6 +228,7 @@ const transformMatch = (dbMatch) => {
     awayTeam: dbMatch.away_team || dbMatch.awayTeam || 'Unknown',
     currentScore: { home: 0, away: 0 },
     predetermined_script: dbMatch.predetermined_script,
+    markets: dbMatch.markets,
     odds: {
       home: parseFloat(odds1X2['1'] || odds1X2.home) || null,
       draw: parseFloat(odds1X2['X'] || odds1X2.draw) || null,
@@ -205,6 +254,7 @@ const transformLiveMatch = (dbMatch) => {
     awayTeam: dbMatch.away_team || dbMatch.awayTeam || 'Unknown',
     currentScore: dbMatch.current_score || dbMatch.score || { home: 0, away: 0 },
     predetermined_script: dbMatch.predetermined_script,
+    markets: dbMatch.markets,
     odds: {
       home: parseFloat(odds1X2['1'] || odds1X2.home) || null,
       draw: parseFloat(odds1X2['X'] || odds1X2.draw) || null,
@@ -221,39 +271,87 @@ const detectSport = (league) => {
   return 'football'
 }
 
+const HOMEPAGE_FEATURED_LEAGUES = [
+  ['serie a', 'italy serie a', 'serie a italy'],
+  ['premier league', 'england premier league', 'premier league england'],
+  ['la liga', 'spain la liga', 'la liga spain', 'primera division'],
+  ['championship', 'england championship', 'championship england', 'efl championship'],
+  ['tanzania premier league', 'premier league tanzania', 'tanzania ligi kuu bara', 'ligi kuu bara', 'tanzania mainland premier league', 'nbc premier league'],
+  ['south africa premier soccer league', 'south african premier soccer league', 'premier soccer league', 'premier soccer league south africa', 'south africa premier league', 'south africa premier division', 'south african premier division'],
+  ['egyptian premier league', 'egypt premier league', 'premier league egypt'],
+  ['moroccan botola', 'morocco botola', 'botola pro inwi', 'botola pro'],
+  ['nigerian premier football league', 'nigeria premier football league', 'nigeria premier league', 'nigeria npfl', 'npfl']
+]
+const HOMEPAGE_EUROPEAN_LEAGUE_COUNT = 4
+const LIVE_HOMEPAGE_LIMIT = 5
+const LIVE_HOMEPAGE_MIN_AFRICAN_LEAGUES = 2
+
+const getHomepageLeaguePriority = (league) => {
+  const normalizedLeague = String(league || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim()
+
+  return HOMEPAGE_FEATURED_LEAGUES.findIndex((aliases) => aliases.includes(normalizedLeague))
+}
+
+const selectHomepageFeaturedMatches = (matches, limit = Infinity) => {
+  const featuredMatches = matches
+    .map((game, index) => ({
+      game,
+      index,
+      priority: getHomepageLeaguePriority(game.league)
+    }))
+    .filter((entry) => entry.priority >= 0)
+    .sort((a, b) => a.priority - b.priority || a.index - b.index)
+
+  const leagueRepresentatives = HOMEPAGE_FEATURED_LEAGUES
+    .map((_, priority) => featuredMatches.find((entry) => entry.priority === priority))
+    .filter(Boolean)
+  const representativeIds = new Set(leagueRepresentatives.map(({ game }) => game.id))
+  const additionalMatches = featuredMatches.filter(({ game }) => !representativeIds.has(game.id))
+
+  return [...leagueRepresentatives, ...additionalMatches]
+    .slice(0, limit)
+    .map(({ game }) => game)
+}
+
+const selectHomepageLiveMatches = (matches) => {
+  const featuredMatches = selectHomepageFeaturedMatches(matches)
+  const featuredSet = new Set(featuredMatches)
+  const europeanMatches = featuredMatches.filter((game) => {
+    const priority = getHomepageLeaguePriority(game.league)
+    return priority >= 0 && priority < HOMEPAGE_EUROPEAN_LEAGUE_COUNT
+  })
+  const africanMatches = featuredMatches.filter(
+    game => getHomepageLeaguePriority(game.league) >= HOMEPAGE_EUROPEAN_LEAGUE_COUNT
+  )
+  const prioritizedMatches = [
+    ...europeanMatches.slice(0, LIVE_HOMEPAGE_LIMIT - LIVE_HOMEPAGE_MIN_AFRICAN_LEAGUES),
+    ...africanMatches.slice(0, LIVE_HOMEPAGE_MIN_AFRICAN_LEAGUES),
+    ...europeanMatches.slice(LIVE_HOMEPAGE_LIMIT - LIVE_HOMEPAGE_MIN_AFRICAN_LEAGUES),
+    ...africanMatches.slice(LIVE_HOMEPAGE_MIN_AFRICAN_LEAGUES)
+  ]
+  const otherLeagueMatches = matches.filter(
+    game => game.sport === 'football' && !featuredSet.has(game)
+  )
+
+  return [...prioritizedMatches, ...otherLeagueMatches]
+}
+
 const loadGames = async () => {
   isLoading.value = true
   try {
     await matchStore.fetchAllMatches()
 
-    // 📊 LOG RAW DATABASE MATCHES
-    console.groupCollapsed('📊 UPCOMING MATCHES FROM DATABASE')
-    console.log('Total Upcoming Matches:', upcomingMatches.value.length)
-    console.table(upcomingMatches.value.map((m) => ({
-      id: m.id,
-      home_team: m.home_team,
-      away_team: m.away_team,
-      league: m.league,
-      date: m.date,
-      time: m.time,
-      status: m.status,
-    })))
-    console.log('Full Raw Data:', upcomingMatches.value)
-    console.groupEnd()
-
     const mapped = upcomingMatches.value.map(transformMatch)
     allGames.value = mapped
-    displayGames.value = mapped.slice(0, 6)
+    displayGames.value = selectHomepageFeaturedMatches(mapped, 6)
 
     const mappedLive = liveMatches.value.map(transformLiveMatch)
     allLiveGames.value = mappedLive
-    liveDisplayGames.value = mappedLive
+    liveDisplayGames.value = selectHomepageLiveMatches(mappedLive)
 
-    // 📊 LOG LIVE vs UPCOMING (kuonyesha mpangilio: LIVE juu, Upcoming chini)
-    console.log(`🔴 LIVE Matches (Juu): ${liveDisplayGames.value.length}`)
-    console.table(liveDisplayGames.value.map((m) => ({ id: m.id, event: m.homeTeam + ' vs ' + m.awayTeam, status: m.status, league: m.league })))
-    console.log(`🟢 Upcoming Matches (Chini): ${displayGames.value.length}`)
-    console.table(groupedGames.value ? Object.entries(groupedGames.value).map(([league, ms]) => ({ league, count: ms.length, teams: ms.map(x => x.homeTeam + ' vs ' + x.awayTeam).join(', ') })) : [])
   } catch (error) {
     console.error('Error loading games:', error)
   } finally {
@@ -267,10 +365,10 @@ const refreshDataSilently = async () => {
     await matchStore.fetchAllMatches()
     const mapped = upcomingMatches.value.map(transformMatch)
     allGames.value = mapped
-    displayGames.value = mapped.slice(0, 6)
+    displayGames.value = selectHomepageFeaturedMatches(mapped, 6)
     const mappedLive = liveMatches.value.map(transformLiveMatch)
     allLiveGames.value = mappedLive
-    liveDisplayGames.value = mappedLive
+    liveDisplayGames.value = selectHomepageLiveMatches(mappedLive)
   } catch (err) {
     console.error('Silent refresh error:', err)
   }
@@ -287,8 +385,6 @@ const groupedGames = computed(() => {
 
 // LIVE matches zinaonyeshwa JUU (grouped kwa league), upcoming CHINI
 // Onyesha only 5 live matches kwenye homepage
-const LIVE_HOMEPAGE_LIMIT = 5
-
 const effectiveLiveGames = computed(() => liveDisplayGames.value)
 
 const limitedLiveGames = computed(() => liveDisplayGames.value.slice(0, LIVE_HOMEPAGE_LIMIT))
@@ -304,14 +400,14 @@ const groupedLiveGames = computed(() => {
   return groups
 })
 
-const totalGamesCount = computed(() => allGames.value.length)
+const totalFootballGamesCount = computed(() => allGames.value.filter((game) => game.sport === 'football').length)
 const liveTotalCount = computed(() => allLiveGames.value.length)
 
 watch(upcomingMatches, (newMatches) => {
   if (!loading.value) {
     const mapped = newMatches.map(transformMatch)
     allGames.value = mapped
-    displayGames.value = mapped.slice(0, 6)
+    displayGames.value = selectHomepageFeaturedMatches(mapped, 6)
   }
 }, { deep: true })
 
@@ -319,7 +415,7 @@ watch(liveMatches, (newLiveMatches) => {
   if (!loading.value) {
     const mapped = newLiveMatches.map(transformLiveMatch)
     allLiveGames.value = mapped
-    liveDisplayGames.value = mapped
+    liveDisplayGames.value = selectHomepageLiveMatches(mapped)
   }
 }, { deep: true })
 

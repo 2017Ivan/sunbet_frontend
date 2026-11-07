@@ -1,14 +1,14 @@
 <!-- SportDetailPage.vue - SunBet Theme (Rose & Gray) -->
 <template>
-  <div class="min-h-screen pb-16 bg-[#f8fafc] text-gray-700">
+  <div class="min-h-screen pb-16 bg-slate-50 text-slate-700">
     <!-- Back Button & Header -->
-    <div class="sticky top-0 z-20 bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-md">
+    <div class="sticky top-0 z-20 bg-white border-b border-slate-200">
       <div class="max-w-7xl mx-auto px-3 sm:px-4 py-2.5 sm:py-3">
         <div class="flex items-center justify-between relative">
           <!-- Back Button -->
           <button 
             @click="goBack"
-            class="p-2 hover:bg-rose-50 text-gray-500 hover:text-rose-600 rounded-xl transition-colors duration-200 border border-gray-200"
+            class="p-2 bg-slate-50 hover:bg-rose-50 text-slate-600 hover:text-rose-700 rounded-lg transition-colors duration-200"
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -17,10 +17,10 @@
           
           <!-- Center Content -->
           <div class="text-center flex-1 px-2">
-            <h1 class="text-sm sm:text-base font-black text-gray-900 truncate" v-if="matchData">
-              {{ matchData.homeTeam }} <span class="text-rose-600 font-bold">vs</span> {{ matchData.awayTeam }}
+            <h1 class="text-sm sm:text-base font-semibold text-slate-900 truncate" v-if="matchData">
+              Match details
             </h1>
-            <p class="text-[10px] sm:text-xs text-gray-500 font-medium truncate" v-if="matchData">{{ matchData.league }}</p>
+            <p class="text-xs text-slate-500 font-medium truncate" v-if="matchData">{{ matchData.league }}</p>
           </div>
 
           <div class="w-9"></div>
@@ -29,30 +29,30 @@
     </div>
 
     <!-- Loading State -->
-    <div v-if="!matchData" class="max-w-4xl mx-auto px-3 mt-10 text-center py-12 bg-white rounded-2xl border border-gray-200">
+    <div v-if="!matchData" class="max-w-4xl mx-auto px-3 mt-10 text-center py-12">
       <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-rose-500 mb-3"></div>
-      <p class="text-sm font-semibold text-gray-500">Loading markets...</p>
+      <p class="text-sm font-medium text-slate-500">Loading match details...</p>
     </div>
 
     <!-- Match Details Content -->
-    <div v-else class="max-w-4xl mx-auto px-3 mt-4 space-y-4">
+    <div v-else class="max-w-4xl mx-auto px-3 mt-4 sm:mt-6 space-y-4">
       
       <!-- Match Banner Card -->
-      <div class="bg-gradient-to-b from-white to-gray-50 rounded-2xl border border-gray-200 p-4 shadow-xl backdrop-blur-sm">
+      <div class="bg-white rounded-2xl p-4 sm:p-6">
         <div class="flex flex-col items-center">
           
           <!-- Status & Live Time Badge -->
           <div class="mb-3">
-            <span v-if="isLive" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-rose-500/10 text-rose-600 border border-rose-500/30">
+            <span v-if="isLive" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-rose-50 text-rose-700">
               <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span> LIVE {{ displayTime }}
             </span>
-            <span v-else-if="matchData.status === 'HALF_TIME'" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-500/10 text-amber-600 border border-amber-500/30">
+            <span v-else-if="matchData.status === 'HALF_TIME'" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700">
               HT
             </span>
-            <span v-else-if="matchData.status === 'FINISHED'" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-700 border border-gray-200">
+            <span v-else-if="matchData.status === 'FINISHED'" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600">
               FT
             </span>
-            <span v-else class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-gray-50 text-gray-500 border border-gray-200">
+            <span v-else class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-600">
               ⏳ {{ displayTime }}
             </span>
           </div>
@@ -61,26 +61,26 @@
           <div class="flex items-center justify-between w-full max-w-xl gap-2">
             <!-- Home Team -->
             <div class="flex flex-col items-center flex-1 text-center">
-              <div class="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-gray-50 border border-gray-200 flex items-center justify-center text-sm sm:text-2xl font-black text-rose-600 mb-2 shadow-inner">
+              <div class="w-12 h-12 sm:w-16 sm:h-16 rounded-xl bg-slate-100 flex items-center justify-center text-sm sm:text-xl font-bold text-rose-700 mb-2">
                 {{ getTeamInitials(matchData.homeTeam) }}
               </div>
-              <span class="text-xs sm:text-sm font-bold text-gray-700 line-clamp-1">{{ matchData.homeTeam }}</span>
-              <span v-if="isLiveOrFinished" class="text-2xl font-black text-rose-600 mt-1">{{ matchData.score?.home ?? 0 }}</span>
+              <span class="text-xs sm:text-sm font-semibold text-slate-800 line-clamp-2">{{ matchData.homeTeam }}</span>
+              <span v-if="isLiveOrFinished" class="text-xl sm:text-2xl font-bold text-slate-900 mt-1">{{ matchData.score?.home ?? 0 }}</span>
             </div>
 
             <!-- VS -->
             <div class="flex flex-col items-center px-2">
-              <span class="text-xs font-black text-gray-500 bg-gray-50 px-2.5 py-1 rounded-lg border border-gray-200">VS</span>
-              <span class="text-[10px] text-gray-500 mt-2 font-mono">{{ matchData.date }}</span>
+              <span class="text-[11px] font-semibold tracking-wide text-slate-400">VS</span>
+              <span class="text-[10px] text-slate-500 mt-2 text-center">{{ matchData.date }}</span>
             </div>
 
             <!-- Away Team -->
             <div class="flex flex-col items-center flex-1 text-center">
-              <div class="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-gray-50 border border-gray-200 flex items-center justify-center text-sm sm:text-2xl font-black text-rose-600 mb-2 shadow-inner">
+              <div class="w-12 h-12 sm:w-16 sm:h-16 rounded-xl bg-slate-100 flex items-center justify-center text-sm sm:text-xl font-bold text-rose-700 mb-2">
                 {{ getTeamInitials(matchData.awayTeam) }}
               </div>
-              <span class="text-xs sm:text-sm font-bold text-gray-700 line-clamp-1">{{ matchData.awayTeam }}</span>
-              <span v-if="isLiveOrFinished" class="text-2xl font-black text-rose-600 mt-1">{{ matchData.score?.away ?? 0 }}</span>
+              <span class="text-xs sm:text-sm font-semibold text-slate-800 line-clamp-2">{{ matchData.awayTeam }}</span>
+              <span v-if="isLiveOrFinished" class="text-xl sm:text-2xl font-bold text-slate-900 mt-1">{{ matchData.score?.away ?? 0 }}</span>
             </div>
           </div>
 
@@ -89,18 +89,27 @@
 
       <!-- DYNAMIC BETTING MARKETS LIST -->
       <div class="space-y-3">
+        <p v-if="apiMarketsLoading" class="text-center text-sm font-medium text-slate-500 py-2">
+          Loading markets...
+        </p>
+
+        <div
+          v-if="!apiMarketsLoading && formattedMarkets.length === 0"
+          class="bg-white rounded-xl px-4 py-8 text-center text-sm text-slate-500"
+        >
+          Markets are not available for this match yet.
+        </div>
+
         <div 
           v-for="market in formattedMarkets" 
           :key="market.key"
-          class="bg-white rounded-2xl border border-gray-200 p-3 sm:p-4 shadow-sm"
+          class="bg-white rounded-xl p-3 sm:p-4"
         >
           <!-- Market Header Title -->
           <div class="flex justify-between items-center mb-3">
-            <h3 class="text-xs sm:text-sm font-black text-gray-700 uppercase tracking-wider flex items-center gap-2">
-              <span class="w-1.5 h-3 bg-rose-500 rounded-full"></span>
+            <h3 class="text-sm sm:text-base font-semibold text-slate-800">
               {{ market.title }}
             </h3>
-            <span class="text-[10px] text-gray-500 font-mono">{{ Object.keys(market.options).length }} options</span>
           </div>
 
           <!-- Market Odds Grid -->
@@ -111,14 +120,34 @@
             <button 
               v-for="opt in market.options"
               :key="opt.key"
-              @click="handleOddsClick(market.key, opt.key, opt.value, market.title)"
-              class="odds-btn relative overflow-hidden flex justify-between items-center px-3 py-2.5 rounded-sm border transition-all duration-200 text-left active:scale-[0.98]"
-              :class="getOddButtonClass(market.key, opt.key)"
+              @click="handleOddsClick(market.key, opt.key, opt.value, market.title, opt.label)"
+              :disabled="market.readOnly || isSelectionLocked(opt.value, market.key)"
+              class="relative flex justify-between items-center px-3 py-2.5 rounded-sm transition-colors duration-200 text-left active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600"
+              :class="[
+                getOddButtonClass(market.key, opt.key),
+                (market.readOnly || isSelectionLocked(opt.value, market.key)) && 'cursor-not-allowed opacity-75'
+              ]"
             >
               <span class="relative z-10 text-xs font-bold truncate pr-1" :class="getLabelClass(market.key, opt.key)">
-                {{ formatOptionLabel(opt.key, market.key) }}
+                {{ opt.label || formatOptionLabel(opt.key, market.key) }}
               </span>
-              <span class="relative z-10 text-xs sm:text-sm font-black font-mono ml-auto">{{ formatOdds(opt.value) }}</span>
+              <span
+                v-if="!isMarketOddsHidden(market.key) && !market.readOnly && !isSelectionLocked(opt.value, market.key)"
+                class="relative z-10 text-xs sm:text-sm font-black font-mono ml-auto"
+              >{{ formatOdds(opt.value) }}</span>
+              <svg
+                v-if="market.readOnly || isSelectionLocked(opt.value, market.key)"
+                class="relative z-10 ml-1 h-3.5 w-3.5 shrink-0 text-gray-500"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                aria-label="Market locked"
+                title="Market locked"
+              >
+                <rect x="4" y="10" width="16" height="11" rx="2" />
+                <path d="M8 10V7a4 4 0 1 1 8 0v3" />
+              </svg>
             </button>
           </div>
 
@@ -130,7 +159,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useBetStore } from '../../../stores/bet/betStore.js'
 import { useMatchStore } from '../../../stores/match/useMatchStore.js'
@@ -139,6 +168,9 @@ const router = useRouter()
 const route = useRoute()
 const betStore = useBetStore()
 const matchStore = useMatchStore()
+const apiMarkets = ref(null)
+const apiMarketsLoading = ref(false)
+let apiMarketsRequestId = 0
 
 const matchId = computed(() => route.params.id || route.query.id)
 
@@ -153,6 +185,32 @@ const rawMatch = computed(() => {
   return matchStore.upcomingMatches.find(m => m.id == matchId.value) ||
          matchStore.liveMatches.find(m => m.id == matchId.value) || null
 })
+
+watch(
+  () => rawMatch.value?.source === 'FOOTBALL_API' ? rawMatch.value.external_id : null,
+  async (externalId) => {
+    const requestId = ++apiMarketsRequestId
+    apiMarkets.value = null
+    apiMarketsLoading.value = Boolean(externalId)
+    if (!externalId) return
+
+    try {
+      const markets = await matchStore.fetchFootballApiMarkets(externalId, rawMatch.value?.status)
+      if (requestId === apiMarketsRequestId) {
+        apiMarkets.value = markets
+      }
+    } catch (error) {
+      if (requestId === apiMarketsRequestId) {
+        console.error('[SPORT DETAIL] Market loading failed:', error)
+      }
+    } finally {
+      if (requestId === apiMarketsRequestId) {
+        apiMarketsLoading.value = false
+      }
+    }
+  },
+  { immediate: true }
+)
 
 // General match information
 const matchData = computed(() => {
@@ -271,9 +329,19 @@ const displayTime = computed(() => {
 // Majina ya Masoko kwa Kiingereza/Kiswahili Kizuri cha Betting
 const marketTitleMap = {
   '1X2': '1X2 | Full Time',
-  'Double_Chance': 'Double Chance',
-  'BTTS': 'Both Teams To Score',
-  'Over_Under': 'Over / Under (Goals)',
+  'Double_Chance': 'Double Chance | Full Time',
+  'BTTS': 'Both Teams To Score | Full Time',
+  'Over_Under': 'Over/Under | Full Time',
+  'Draw_No_Bet': 'Draw No Bet | Full Time',
+  'Asian_Handicap': 'Asian Handicap',
+  'Corner_Line': 'Corners Over / Under',
+  'Corner_Asian': 'Asian Handicap (Corners)',
+  'Card_Line': 'Cards Over / Under',
+  'Card_Asian': 'Asian Handicap (Cards)',
+  'Asian_Handicap_Half': 'Asian Handicap (1st Half)',
+  'Goal_Line_Half': 'Goals Over / Under (1st Half)',
+  'Corner_Line_Half': 'Corners Over / Under (1st Half)',
+  'Goal_Line_Fixed': 'Fixed Goal Lines',
   'Correct_Score': 'Correct Score',
   'Handicap': 'Handicap',
   'HT_FT': 'Half Time / Full Time',
@@ -294,42 +362,165 @@ const optionOrderMap = {
   'Over_Under': ['OVER', 'UNDER', 'Over', 'Under']
 }
 
-// Convert DB Odds object to structured list WITH GUARANTEED ARRAY ORDERING
+const BETTABLE_MARKETS = new Set([
+  '1X2',
+  'Double_Chance',
+  'BTTS',
+  'Over_Under',
+  'Draw_No_Bet',
+  'Correct_Score',
+  'Total_Goals',
+  'BTTS_Win',
+  'Odd_Even',
+  'Clean_Sheet'
+])
+const LATE_LOCKED_MARKETS = new Set([
+  'Correct_Score',
+  'Total_Goals',
+  'BTTS_Win',
+  'Odd_Even'
+])
+
+const marketKeyForTitle = (title) => {
+  const exactTitles = {
+    '1X2 | Full Time': '1X2',
+    'Double Chance | Full Time': 'Double_Chance',
+    'Both Teams To Score | Full Time': 'BTTS',
+    'Over/Under | Full Time': 'Over_Under',
+    'Draw No Bet | Full Time': 'Draw_No_Bet',
+    'Correct Score | Full Time': 'Correct_Score',
+    'Total Goals Exact | Full Time': 'Total_Goals',
+    '1X2 and Both Teams To Score | Full Time': 'BTTS_Win',
+    'Odd/Even | Full Time': 'Odd_Even',
+    'Asian Handicap | Full Time': 'Asian_Handicap',
+    'Asian Handicap | First Half': 'Asian_Handicap_Half',
+    'Total Corners Over/Under | Full Time': 'Corner_Line',
+    'Total Corners Over/Under | First Half': 'Corner_Line_Half',
+    'Corner Asian Handicap | Full Time': 'Corner_Asian',
+    'Total Bookings Over/Under | Full Time': 'Card_Line',
+    'Card Asian Handicap | Full Time': 'Card_Asian',
+    'Fixed Goal Lines': 'Goal_Line_Fixed',
+    'Over/Under | First Half': 'Goal_Line_Half'
+  }
+  if (exactTitles[title]) return exactTitles[title]
+  if (title.startsWith('Clean Sheet | ') && title.endsWith(' | Full Time')) return 'Clean_Sheet'
+  return null
+}
+
+const selectionKeyForMarketArray = (market, selectionName) => {
+  if (market.key === 'Over_Under' || market.key === 'Goal_Line_Half'
+    || market.key === 'Corner_Line' || market.key === 'Corner_Line_Half'
+    || market.key === 'Card_Line' || market.key === 'Goal_Line_Fixed') {
+    const match = selectionName.match(/^(Over|Under)\s+(.+)$/i)
+    if (match) return `${match[1].toUpperCase()}_${match[2]}`
+  }
+
+  if (market.key === 'BTTS_Win') {
+    const match = selectionName.match(/^(1|X|2) & (Yes|No)$/)
+    if (match) {
+      const result = match[1] === '1' ? 'Home' : match[1] === '2' ? 'Away' : 'Draw'
+      return `${result}_${match[2]}`
+    }
+  }
+
+  if (market.key === 'Clean_Sheet') {
+    const side = market.title.includes(`| ${matchData.value.homeTeam} |`) ? 'Home' : 'Away'
+    return `${side}_${selectionName}`
+  }
+
+  return selectionName
+}
+
+const isImpossibleCorrectScore = (marketKey, selectionName) => {
+  if (marketKey !== 'Correct_Score' || !['LIVE', 'HALF_TIME'].includes(matchData.value?.status)) {
+    return false
+  }
+
+  const scoreline = String(selectionName).match(/^(\d+)[-_](\d+)$/)
+  const currentHome = Number(matchData.value?.score?.home)
+  const currentAway = Number(matchData.value?.score?.away)
+  if (!scoreline || !Number.isFinite(currentHome) || !Number.isFinite(currentAway)) return false
+
+  return Number(scoreline[1]) < currentHome || Number(scoreline[2]) < currentAway
+}
+
 const formattedMarkets = computed(() => {
-  if (!rawMatch.value?.odds) return []
+  if (!rawMatch.value) return []
+  const apiMarketsAvailable = rawMatch.value.source === 'FOOTBALL_API'
+    && Array.isArray(apiMarkets.value)
+    && apiMarkets.value.length > 0
+  const storedMarkets = apiMarketsAvailable
+    ? apiMarkets.value
+    : Array.isArray(rawMatch.value.markets) && rawMatch.value.markets.length > 0
+      ? rawMatch.value.markets
+      : rawMatch.value.odds
+
+  if (Array.isArray(storedMarkets)) {
+    return storedMarkets.map((market, index) => {
+      const key = marketKeyForTitle(market.market)
+      const normalizedMarket = { key, title: market.market }
+      const options = (market.selections || [])
+        .filter((selection) => (
+          Number.isFinite(Number(selection.odds))
+          && Number(selection.odds) > 1
+          && !isImpossibleCorrectScore(key, selection.name)
+        ))
+        .map((selection) => ({
+          key: key ? selectionKeyForMarketArray(normalizedMarket, selection.name) : selection.name,
+          label: selection.name,
+          value: Number(selection.odds)
+        }))
+
+      return {
+        key: key || `market-${index}`,
+        title: market.market,
+        options,
+        readOnly: !BETTABLE_MARKETS.has(key)
+      }
+    }).filter((market) => market.options.length > 0)
+  }
 
   const oddsObj = rawMatch.value.odds
-  
+  if (!oddsObj || typeof oddsObj !== 'object') return []
+
   return Object.keys(oddsObj).map(marketKey => {
     const rawOptions = oddsObj[marketKey] || {}
     const optionsArray = []
+    const addOption = (key) => {
+      const value = rawOptions[key]
+      const numericValue = Number(value)
+      if (value !== null && value !== undefined && value !== ''
+        && Number.isFinite(numericValue) && numericValue > 1
+        && !isImpossibleCorrectScore(marketKey, key)) {
+        optionsArray.push({ key, value })
+      }
+    }
     
     if (optionOrderMap[marketKey]) {
       const preferredOrder = optionOrderMap[marketKey]
       
       preferredOrder.forEach(key => {
-        if (rawOptions[key] !== undefined) {
-          optionsArray.push({ key: key, value: rawOptions[key] })
-        }
+        addOption(key)
       })
 
       Object.keys(rawOptions).forEach(key => {
         if (!preferredOrder.includes(key)) {
-          optionsArray.push({ key: key, value: rawOptions[key] })
+          addOption(key)
         }
       })
     } else {
       Object.keys(rawOptions).forEach(key => {
-        optionsArray.push({ key: key, value: rawOptions[key] })
+        addOption(key)
       })
     }
 
     return {
       key: marketKey,
       title: marketTitleMap[marketKey] || marketKey.replace(/_/g, ' '),
-      options: optionsArray
+      options: optionsArray,
+      readOnly: !BETTABLE_MARKETS.has(marketKey)
     }
-  })
+  }).filter(market => market.options.length > 0)
 })
 
 const getGridColsClass = (marketKey, totalOptions) => {
@@ -370,23 +561,54 @@ const isSelected = (marketKey, optionKey) => {
 
 const getOddButtonClass = (marketKey, optionKey) => {
   if (isSelected(marketKey, optionKey)) {
-    return 'selected border-emerald-500 bg-emerald-800/60 shadow-lg shadow-emerald-800/10 text-white font-black ring-1 ring-emerald-700/80'
+    return 'border border-emerald-500 bg-emerald-800/60 text-white font-black'
   }
-  return 'bg-white border-gray-200 text-gray-700 hover:border-rose-500 hover:bg-rose-50'
+  return 'bg-slate-50 text-slate-700 hover:bg-rose-50'
 }
 
 const getLabelClass = (marketKey, optionKey) => {
-  return isSelected(marketKey, optionKey) ? 'text-rose-700' : 'text-gray-700'
+  return isSelected(marketKey, optionKey) ? 'text-white' : 'text-slate-700'
+}
+
+const isLateMarketLocked = (marketKey) => {
+  const status = matchData.value?.status
+  if (!['LIVE', 'HALF_TIME'].includes(status)) return false
+  const minute = getCurrentMatchMinute()
+  return Number.isFinite(minute) && minute >= 85 && LATE_LOCKED_MARKETS.has(marketKey)
+}
+
+const getCurrentMatchMinute = () => {
+  const storedMinute = Number.parseInt(matchData.value?.elapsed_minute, 10)
+  if (Number.isFinite(storedMinute)) return storedMinute
+
+  const displayedMinute = Number.parseInt(displayTime.value, 10)
+  return Number.isFinite(displayedMinute) ? displayedMinute : null
+}
+
+const isMarketOddsHidden = (marketKey) => (
+  ['FINISHED', 'CANCELLED'].includes(matchData.value?.status)
+  || isLateMarketLocked(marketKey)
+)
+
+const isSelectionLocked = (odds, marketKey) => {
+  const status = matchData.value?.status
+  if (['FINISHED', 'CANCELLED'].includes(status)) return true
+  if (!['LIVE', 'HALF_TIME'].includes(status)) return false
+  const minute = getCurrentMatchMinute()
+  if (!Number.isFinite(minute) || minute < 85) return false
+  return LATE_LOCKED_MARKETS.has(marketKey) || Number(odds) <= 1.15
 }
 
 // Handle Add/Remove Bet Slip
-const handleOddsClick = (marketKey, optionKey, oddsValue, marketTitle) => {
+const handleOddsClick = (marketKey, optionKey, oddsValue, marketTitle, selectionLabel) => {
   if (!matchData.value || !oddsValue) return
+  if (!BETTABLE_MARKETS.has(marketKey)) return
+  if (isSelectionLocked(oddsValue, marketKey)) return
   const odds = parseFloat(oddsValue)
   if (isNaN(odds)) return
 
   const fullMarketKey = `${matchData.value.id}_${marketKey}_${optionKey}`
-  const label = formatOptionLabel(optionKey, marketKey)
+  const label = selectionLabel || formatOptionLabel(optionKey, marketKey)
 
   betStore.addToSlip({
     matchId: matchData.value.id,
@@ -413,37 +635,3 @@ onMounted(() => {
   }
 })
 </script>
-
-<style scoped>
-.odds-btn {
-  isolation: isolate;
-}
-.odds-btn::after {
-  content: '';
-  position: absolute;
-  inset: -4px;
-  border-radius: inherit;
-  background: conic-gradient(
-    from 0deg,
-    transparent 0deg,
-    rgba(16, 185, 129, 0) 200deg,
-    #10b981 320deg,
-    #34d399 350deg,
-    #10b981 360deg
-  );
-  z-index: 0;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-}
-.odds-btn.selected::after {
-  opacity: 1;
-  animation: oddsGlowSpin 1.6s linear infinite;
-}
-.odds-btn.selected:hover::after {
-  animation-duration: 0.8s;
-}
-@keyframes oddsGlowSpin {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
-}
-</style>

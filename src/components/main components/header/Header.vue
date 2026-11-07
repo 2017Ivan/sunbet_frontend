@@ -170,6 +170,45 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
+
+          <Transition name="search-results">
+            <div
+              v-if="searchQuery.trim().length > 0"
+              class="absolute top-full left-0 right-0 z-[60] mt-2 max-h-[60vh] overflow-y-auto rounded-xl border border-rose-900 bg-[#160D0F] shadow-xl"
+            >
+              <p v-if="searchQuery.trim().length < 2" class="px-4 py-3 text-sm text-rose-200/70">
+                Andika angalau herufi 2 kutafuta timu.
+              </p>
+              <p v-else-if="matchStore.loading" class="px-4 py-3 text-sm text-rose-200/70">
+                Inatafuta mechi...
+              </p>
+              <p v-else-if="searchMatches.length === 0" class="px-4 py-3 text-sm text-rose-200/70">
+                Hakuna mechi iliyopatikana.
+              </p>
+              <button
+                v-for="match in searchMatches"
+                :key="match.id ?? match.match_id"
+                type="button"
+                class="flex w-full items-center justify-between gap-3 border-b border-white/5 px-4 py-3 text-left last:border-b-0 hover:bg-white/5"
+                @click="openSearchMatch(match)"
+              >
+                <span class="min-w-0">
+                  <span class="block truncate text-sm font-semibold text-white">
+                    {{ getMatchTeamName(match, 'home') }} <span class="text-rose-300">vs</span> {{ getMatchTeamName(match, 'away') }}
+                  </span>
+                  <span class="mt-0.5 block truncate text-xs text-rose-200/60">
+                    {{ match.league || match.competition || 'Football' }}
+                  </span>
+                </span>
+                <span
+                  v-if="match.status === 'LIVE' || match.live"
+                  class="shrink-0 rounded-full bg-red-500/15 px-2 py-1 text-[10px] font-bold text-red-300"
+                >
+                  LIVE
+                </span>
+              </button>
+            </div>
+          </Transition>
         </div>
         <button 
           @click="performSearch"
@@ -179,20 +218,6 @@
         </button>
       </div>
 
-      <div v-if="searchQuery.length > 0" class="mt-2 sm:mt-3 space-y-1">
-        <div class="text-xs text-rose-300 px-2">Recent Searches</div>
-
-        <div class="flex flex-wrap gap-1 sm:gap-2">
-          <span 
-            v-for="suggestion in suggestions" 
-            :key="suggestion"
-            @click="searchQuery = suggestion"
-            class="px-2 sm:px-3 py-0.5 sm:py-1 text-xs sm:text-sm text-rose-200 bg-white/5 hover:bg-white/10 rounded-full cursor-pointer transition-all duration-200"
-          >
-            {{ suggestion }}
-          </span>
-        </div>
-      </div>
     </div>
 
     <!-- ROW 3: Navigation Menu -->
@@ -227,8 +252,9 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted, h } from 'vue'
-import { RouterLink, useRoute } from 'vue-router'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { useNotificationStore } from '../../../stores/notifications.store'
+import { useMatchStore } from '../../../stores/match/useMatchStore.js'
 import socketService from '../../../services/socket/socket.service'
 
 const props = defineProps({
@@ -240,22 +266,55 @@ const props = defineProps({
 const emit = defineEmits(['toggle-sidebar', 'logout'])
 
 const route = useRoute()
+const router = useRouter()
+const matchStore = useMatchStore()
 
 // ---- Search State ----
 const isSearchOpen = ref(false)
 const searchQuery = ref('')
-const suggestions = ref([
-  'Manchester United',
-  'Real Madrid',
-  'Liverpool vs Arsenal',
-  'NBA Playoffs',
-  'Tennis US Open'
-])
+
+const getMatchTeamName = (match, side) => (
+  side === 'home'
+    ? match.home_team || match.homeTeam || ''
+    : match.away_team || match.awayTeam || ''
+)
+
+const searchMatches = computed(() => {
+  const query = searchQuery.value.trim().toLocaleLowerCase()
+  if (query.length < 2) return []
+
+  const matchesById = new Map()
+  for (const match of [...matchStore.liveMatches, ...matchStore.upcomingMatches]) {
+    const id = match.id ?? match.match_id
+    const homeTeam = getMatchTeamName(match, 'home')
+    const awayTeam = getMatchTeamName(match, 'away')
+    if (
+      id == null
+      || ['FINISHED', 'CANCELLED'].includes(match.status)
+      || (!homeTeam.toLocaleLowerCase().includes(query) && !awayTeam.toLocaleLowerCase().includes(query))
+    ) {
+      continue
+    }
+
+    const teamName = [homeTeam, awayTeam].find(name => name.toLocaleLowerCase().startsWith(query))
+    matchesById.set(String(id), { ...match, searchStartsWith: Boolean(teamName) })
+  }
+
+  return [...matchesById.values()]
+    .sort((a, b) => Number(b.searchStartsWith) - Number(a.searchStartsWith))
+    .slice(0, 8)
+})
 
 const toggleSearch = () => {
   isSearchOpen.value = !isSearchOpen.value
   if (!isSearchOpen.value) {
     searchQuery.value = ''
+  } else if (
+    matchStore.upcomingMatches.length === 0
+    && matchStore.liveMatches.length === 0
+    && !matchStore.loading
+  ) {
+    matchStore.fetchAllMatches()
   }
 }
 
@@ -264,10 +323,16 @@ const clearSearch = () => {
 }
 
 const performSearch = () => {
-  if (searchQuery.value.trim()) {
-    console.log('Searching for:', searchQuery.value)
-    alert(`Searching for: ${searchQuery.value}`)
-  }
+  if (searchMatches.value.length > 0) openSearchMatch(searchMatches.value[0])
+}
+
+const openSearchMatch = (match) => {
+  const id = match.id ?? match.match_id
+  if (id == null) return
+
+  isSearchOpen.value = false
+  searchQuery.value = ''
+  router.push({ name: 'sport-detail', params: { id } })
 }
 
 // ---- Icons ----
@@ -426,6 +491,16 @@ onUnmounted(() => {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+.search-results-enter-active,
+.search-results-leave-active {
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+.search-results-enter-from,
+.search-results-leave-to {
+  opacity: 0;
+  transform: translateY(-6px);
 }
 
 /* Dropdown animation */

@@ -5,9 +5,12 @@
   
   <!-- Actual Content -->
   <template v-else>
-    <nav class="fixed bottom-0 left-0 right-0 z-40 lg:hidden safe-area-pb">
-      <div class="pointer-events-none absolute inset-x-0 -top-6 h-6 bg-gradient-to-t from-black/40 to-transparent" />
-
+    <nav
+      class="fixed bottom-0 left-0 right-0 z-40 lg:hidden safe-area-pb transition-transform duration-300 ease-in-out"
+      :class="{ 'translate-y-full pointer-events-none': isHidden }"
+      :aria-hidden="isHidden"
+      :inert="isHidden"
+    >
       <div class="relative bg-[#0A0A0B]/95 backdrop-blur-2xl border-t border-[#221C16]">
         <div class="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[#D4AF6A]/35 to-transparent" />
 
@@ -18,8 +21,8 @@
             to="/"
             class="group relative flex flex-col items-center justify-center gap-1 flex-1 h-full pt-2.5 pb-2"
           >
-            <span v-if="isActive('/')" class="absolute top-1 w-9 h-9 rounded-full bg-gradient-to-b from-[#B5333D]/25 to-[#B5333D]/5" />
-            <span v-if="isActive('/')" class="absolute -top-px left-1/2 -translate-x-1/2 w-5 h-[2px] rounded-full bg-gradient-to-r from-[#D4AF6A] to-[#B5333D]" />
+            <span v-if="isActive('/')" class="active-tab-bulb" />
+            <span v-if="isActive('/')" class="active-tab-indicator" />
             <div class="relative w-[21px] h-[21px] transition-all duration-300" :class="isActive('/') ? 'scale-110' : 'group-hover:scale-105 group-active:scale-95'">
               <svg class="w-full h-full" viewBox="0 0 24 24" fill="none" :stroke="isActive('/') ? '#FFFFFF' : 'rgba(255,255,255,0.45)'" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
@@ -36,8 +39,8 @@
             to="/sports"
             class="group relative flex flex-col items-center justify-center gap-1 flex-1 h-full pt-2.5 pb-2"
           >
-            <span v-if="isActive('/sports')" class="absolute top-1 w-9 h-9 rounded-full bg-gradient-to-b from-[#B5333D]/25 to-[#B5333D]/5" />
-            <span v-if="isActive('/sports')" class="absolute -top-px left-1/2 -translate-x-1/2 w-5 h-[2px] rounded-full bg-gradient-to-r from-[#D4AF6A] to-[#B5333D]" />
+            <span v-if="isActive('/sports')" class="active-tab-bulb" />
+            <span v-if="isActive('/sports')" class="active-tab-indicator" />
             <div class="relative w-[21px] h-[21px] transition-all duration-300" :class="isActive('/sports') ? 'scale-110' : 'group-hover:scale-105 group-active:scale-95'">
               <svg class="w-full h-full" viewBox="0 0 24 24" fill="none" :stroke="isActive('/sports') ? '#FFFFFF' : 'rgba(255,255,255,0.45)'" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="9.5"/>
@@ -87,8 +90,8 @@
             to="/bets" 
             class="group relative flex flex-col items-center justify-center gap-1 flex-1 h-full pt-2.5 pb-2"
           >
-            <span v-if="isActive('/bets')" class="absolute top-1 w-9 h-9 rounded-full bg-gradient-to-b from-[#B5333D]/25 to-[#B5333D]/5" />
-            <span v-if="isActive('/bets')" class="absolute -top-px left-1/2 -translate-x-1/2 w-5 h-[2px] rounded-full bg-gradient-to-r from-[#D4AF6A] to-[#B5333D]" />
+            <span v-if="isActive('/bets')" class="active-tab-bulb" />
+            <span v-if="isActive('/bets')" class="active-tab-indicator" />
             <div class="relative w-[21px] h-[21px] transition-all duration-300" :class="isActive('/bets') ? 'scale-110' : 'group-hover:scale-105 group-active:scale-95'">
               <svg class="w-full h-full" viewBox="0 0 24 24" fill="none" :stroke="isActive('/bets') ? '#FFFFFF' : 'rgba(255,255,255,0.45)'" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M4 4h12l4 4v12H4z"/>
@@ -112,8 +115,8 @@
             to="/profile"
             class="group relative flex flex-col items-center justify-center gap-1 flex-1 h-full pt-2.5 pb-2"
           >
-            <span v-if="isActive('/profile')" class="absolute top-1 w-9 h-9 rounded-full bg-gradient-to-b from-[#B5333D]/25 to-[#B5333D]/5" />
-            <span v-if="isActive('/profile')" class="absolute -top-px left-1/2 -translate-x-1/2 w-5 h-[2px] rounded-full bg-gradient-to-r from-[#D4AF6A] to-[#B5333D]" />
+            <span v-if="isActive('/profile')" class="active-tab-bulb" />
+            <span v-if="isActive('/profile')" class="active-tab-indicator" />
             <div class="relative w-[21px] h-[21px] transition-all duration-300" :class="isActive('/profile') ? 'scale-110' : 'group-hover:scale-105 group-active:scale-95'">
               <svg class="w-full h-full" viewBox="0 0 24 24" fill="none" :stroke="isActive('/profile') ? '#FFFFFF' : 'rgba(255,255,255,0.45)'" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="8" r="3.8"/>
@@ -132,7 +135,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { onMounted, onUnmounted, ref, watch } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 import BottomNavSkeleton from '../../skeletons/bottomNav/BottomNavSkeleton.vue'
 
@@ -147,10 +150,39 @@ const props = defineProps({
 defineEmits(['toggle-betslip'])
 
 const route = useRoute()
+const isHidden = ref(false)
+let lastScrollY = 0
 
 const isActive = (path) => {
   return route.path === path || route.path.startsWith(path + '/')
 }
+
+const handleScroll = () => {
+  const currentScrollY = window.scrollY
+  const scrollDelta = currentScrollY - lastScrollY
+
+  if (currentScrollY <= 24) {
+    isHidden.value = false
+  } else if (Math.abs(scrollDelta) > 4) {
+    isHidden.value = scrollDelta > 0
+  }
+
+  lastScrollY = currentScrollY
+}
+
+watch(() => route.fullPath, () => {
+  isHidden.value = false
+  lastScrollY = window.scrollY
+})
+
+onMounted(() => {
+  lastScrollY = window.scrollY
+  window.addEventListener('scroll', handleScroll, { passive: true })
+})
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleScroll)
+})
 
 // ---- Simulate loading ----
 setTimeout(() => {
@@ -161,6 +193,42 @@ setTimeout(() => {
 <style scoped>
 .safe-area-pb {
   padding-bottom: env(safe-area-inset-bottom);
+}
+
+.active-tab-bulb {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 100%;
+  height: 48px;
+  transform: translateX(-50%);
+  clip-path: polygon(
+    calc(50% - 16px) 0,
+    calc(50% + 16px) 0,
+    100% 42%,
+    100% 72%,
+    84% 100%,
+    16% 100%,
+    0 72%,
+    0 42%
+  );
+  background: linear-gradient(
+    180deg,
+    rgba(212, 175, 106, 0.3) 0%,
+    rgba(181, 51, 61, 0.22) 48%,
+    transparent 100%
+  );
+}
+
+.active-tab-indicator {
+  position: absolute;
+  top: -1px;
+  left: 50%;
+  width: 32px;
+  height: 2px;
+  transform: translateX(-50%);
+  border-radius: 9999px;
+  background: linear-gradient(90deg, #D4AF6A, #B5333D);
 }
 
 .fab-idle {

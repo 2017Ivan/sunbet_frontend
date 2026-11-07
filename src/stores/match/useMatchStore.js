@@ -6,6 +6,7 @@ export const useMatchStore = defineStore('match', {
   state: () => ({
     upcomingMatches: [],
     liveMatches: [],
+    footballApiMarketsByFixture: {},
     selectedMatch: null,
     loading: false,
     actionLoading: false,
@@ -26,15 +27,80 @@ export const useMatchStore = defineStore('match', {
 
         this.upcomingMatches = upcomingRes.data.data || []
         this.liveMatches = liveRes.data.data || []
-        
-        console.log('📈 Upcoming Matches:', this.upcomingMatches.length)
-        console.log('📡 Live Matches:', this.liveMatches.length)
+
+        const footballApiUpcomingMatches = this.upcomingMatches.filter(
+          match => match.source === 'FOOTBALL_API'
+        )
+        console.log('⚽ Full Football API upcoming match objects:', footballApiUpcomingMatches)
+
+        try {
+          const apiLiveRes = await matchService.getFootballApiLiveMatches()
+          const apiLiveMatches = apiLiveRes.data.data || []
+          const existingApiIds = new Set(
+            this.liveMatches
+              .filter(match => match.source === 'FOOTBALL_API')
+              .map(match => String(match.external_id))
+          )
+          const apiMatchesById = new Map(
+            apiLiveMatches.map(match => [String(match.external_id), match])
+          )
+          this.liveMatches = [
+            ...this.liveMatches.map(match => {
+              const apiMatch = match.source === 'FOOTBALL_API'
+                ? apiMatchesById.get(String(match.external_id))
+                : null
+              return apiMatch ? { ...match, ...apiMatch, id: match.id } : match
+            }),
+            ...apiLiveMatches.filter(match => !existingApiIds.has(String(match.external_id)))
+          ]
+        } catch (apiError) {
+          console.error('[FOOTBALL API LIVE ERROR]:', apiError)
+          this.error = apiError.response?.data?.message || 'Imeshindikana kuleta live matches kutoka Football API'
+        }
       } catch (err) {
         this.error = err.response?.data?.message || 'Imeshindikana kuleta mechi'
         console.error('[MATCH STORE ERROR]:', err)
       } finally {
         this.loading = false
       }
+    },
+
+    async fetchFootballApiMarkets(externalId, status) {
+      const fixtureStatus = status === 'LIVE' ? 'LIVE' : 'UPCOMING'
+      const cacheKey = `${externalId}:${fixtureStatus}`
+      const cachedFixtureOdds = this.footballApiMarketsByFixture[cacheKey]
+      if (cachedFixtureOdds) return cachedFixtureOdds.markets
+
+      const response = await matchService.getFootballApiMarkets(externalId, fixtureStatus)
+      const fixtureOdds = response.data?.data
+      const markets = fixtureOdds?.markets
+      if (!Array.isArray(markets)) {
+        throw new Error('Football API imerudisha markets zisizo sahihi')
+      }
+
+      this.footballApiMarketsByFixture = {
+        ...this.footballApiMarketsByFixture,
+        [cacheKey]: { fixtureOdds, markets }
+      }
+
+      const addMarketsToMatch = (match) => (
+        match.source === 'FOOTBALL_API' && String(match.external_id) === String(externalId)
+          ? {
+            ...match,
+            markets,
+            football_api_odds: fixtureOdds
+          }
+          : match
+      )
+      this.upcomingMatches = this.upcomingMatches.map(addMarketsToMatch)
+      this.liveMatches = this.liveMatches.map(addMarketsToMatch)
+
+      const fullMatch = [...this.upcomingMatches, ...this.liveMatches].find(
+        match => match.source === 'FOOTBALL_API' && String(match.external_id) === String(externalId)
+      )
+      console.log('⚽ Full Football API match with raw odds and markets:', fullMatch)
+
+      return markets
     },
 
     async fetchMatchDetails(id) {
@@ -213,7 +279,7 @@ export const useMatchStore = defineStore('match', {
       })
 
       // ✅ LISTENER KWA MATCH SCORE & MINUTE UPDATE
-      this.socket.on('match_score_update', ({ match_id, current_score, elapsed_minute }) => {
+      this.socket.on('match_score_update', ({ match_id, current_score, elapsed_minute, markets }) => {
         console.log('⚡ Score/Minute Update:', match_id, current_score, elapsed_minute)
         
         // Match ID Comparison kwa kutumia String() kuzuia type mismatch
@@ -224,6 +290,7 @@ export const useMatchStore = defineStore('match', {
             ...this.liveMatches[liveIndex],
             current_score: current_score ? { ...current_score } : this.liveMatches[liveIndex].current_score,
             elapsed_minute: elapsed_minute !== undefined ? elapsed_minute : this.liveMatches[liveIndex].elapsed_minute,
+            markets: Array.isArray(markets) ? markets : this.liveMatches[liveIndex].markets,
             _updatedAt: Date.now()
           }
           
@@ -237,6 +304,7 @@ export const useMatchStore = defineStore('match', {
               status: 'LIVE',
               current_score: current_score ? { ...current_score } : this.upcomingMatches[upcomingIndex].current_score,
               elapsed_minute: elapsed_minute !== undefined ? elapsed_minute : this.upcomingMatches[upcomingIndex].elapsed_minute,
+              markets: Array.isArray(markets) ? markets : this.upcomingMatches[upcomingIndex].markets,
               _updatedAt: Date.now()
             }
 
@@ -255,8 +323,23 @@ export const useMatchStore = defineStore('match', {
             status: 'LIVE',
             current_score: current_score ? { ...current_score } : this.selectedMatch.current_score,
             elapsed_minute: elapsed_minute !== undefined ? elapsed_minute : this.selectedMatch.elapsed_minute,
+            markets: Array.isArray(markets) ? markets : this.selectedMatch.markets,
             _updatedAt: Date.now()
           }
+        }
+      })
+
+      this.socket.on('match_odds_update', ({ match_id, markets }) => {
+        if (!Array.isArray(markets)) return
+
+        this.upcomingMatches = this.upcomingMatches.map(match => (
+          String(match.id) === String(match_id) ? { ...match, markets } : match
+        ))
+        this.liveMatches = this.liveMatches.map(match => (
+          String(match.id) === String(match_id) ? { ...match, markets } : match
+        ))
+        if (this.selectedMatch && String(this.selectedMatch.id) === String(match_id)) {
+          this.selectedMatch = { ...this.selectedMatch, markets }
         }
       })
 

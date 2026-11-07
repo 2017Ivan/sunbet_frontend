@@ -1,7 +1,9 @@
 <!-- App.vue -->
 <template>
-<router-view></router-view>
+  <router-view />
+  <PwaInstallPrompt />
 </template>
 
 <script setup>
+import PwaInstallPrompt from './components/ui/PwaInstallPrompt.vue'
 </script>

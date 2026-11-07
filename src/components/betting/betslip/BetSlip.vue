@@ -24,7 +24,7 @@
     <Transition name="slide-right">
       <div
         v-if="open"
-        class="fixed top-0 right-0 z-50 h-full w-full max-w-sm bg-white border-l border-gray-200 flex flex-col shadow-[−8px_0_40px_rgba(0,0,0,0.6)]"
+        class="fixed top-0 right-0 z-50 h-full w-full max-w-none bg-white border-l border-gray-200 flex flex-col shadow-[−8px_0_40px_rgba(0,0,0,0.6)]"
       >
         <BetSlipContent 
           @close="$emit('close')" 

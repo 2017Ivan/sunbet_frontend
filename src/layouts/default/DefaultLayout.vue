@@ -19,7 +19,11 @@
       <div class="max-w-7xl mx-auto w-full lg:pr-[300px] xl:pr-[360px] 2xl:pr-[420px]">
         <!-- Main Content - shrinks/expands to fit the page content -->
         <slot name="main">
-          <router-view></router-view>
+          <router-view v-slot="{ Component, route }">
+            <Transition name="route" mode="out-in" appear>
+              <component :is="Component" :key="route.path" />
+            </Transition>
+          </router-view>
         </slot>
 
         <Footer />
@@ -184,6 +188,27 @@ watch(
 </script>
 
 <style scoped>
+.route-enter-active,
+.route-leave-active {
+  transition: opacity 400ms ease-in-out, transform 400ms ease-in-out;
+}
+
+.route-enter-from {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.route-leave-to {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .route-enter-active,
+  .route-leave-active {
+    transition: none;
+  }
+}
+
 /* Hide scrollbar for all elements */
 :global(*::-webkit-scrollbar) {
   width: 0px;
