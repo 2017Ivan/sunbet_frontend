@@ -98,7 +98,7 @@
           <div 
             v-for="(matches, leagueName) in groupedGames" 
             :key="leagueName"
-            class="mx-2 mb-3 overflow-hidden rounded-xl bg-white"
+            class="mx-2 mb-3 overflow-hidden rounded-xl bg-emerald-700"
           >
             <!-- League Header -->
             <div class="flex items-center justify-between gap-3 rounded-t-[10px] bg-emerald-700 px-3 py-2.5 text-white">
@@ -131,7 +131,7 @@
             </div>
 
             <!-- Matches for this league -->
-            <div v-if="!isLeagueCollapsed('upcoming', leagueName)" class="overflow-hidden rounded-b-[10px] bg-[#eaf2f8]">
+            <div v-if="!isLeagueCollapsed('upcoming', leagueName)" class="overflow-hidden rounded-t-lg bg-[#eaf2f8]">
               <MatchCard 
                 v-for="game in matches" 
                 :key="game.id"
