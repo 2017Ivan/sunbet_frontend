@@ -282,11 +282,10 @@ const HOMEPAGE_FEATURED_LEAGUES = [
   ['moroccan botola', 'morocco botola', 'botola pro inwi', 'botola pro'],
   ['nigerian premier football league', 'nigeria premier football league', 'nigeria premier league', 'nigeria npfl', 'npfl']
 ]
-const HOMEPAGE_EUROPEAN_LEAGUE_COUNT = 4
-const UPCOMING_HOMEPAGE_LIMIT = 5
-const LIVE_HOMEPAGE_LIMIT = 5
-const LIVE_HOMEPAGE_MIN_AFRICAN_LEAGUES = 2
-const HOMEPAGE_FALLBACK_LIMIT = 5
+const HOMEPAGE_MATCH_LIMIT = 5
+const HOMEPAGE_MATCHES_PER_LEAGUE_LIMIT = 3
+const HOMEPAGE_LEAGUE_LIMIT = 3
+const LIVE_HOMEPAGE_LIMIT = HOMEPAGE_MATCH_LIMIT
 
 const getHomepageLeaguePriority = (league) => {
   const normalizedLeague = String(league || '')
@@ -297,58 +296,53 @@ const getHomepageLeaguePriority = (league) => {
   return HOMEPAGE_FEATURED_LEAGUES.findIndex((aliases) => aliases.includes(normalizedLeague))
 }
 
-const selectHomepageFeaturedMatches = (matches, limit = Infinity) => {
-  const featuredMatches = matches
+const selectHomepageMatches = (matches) => {
+  const candidates = matches
     .map((game, index) => ({
       game,
       index,
       priority: getHomepageLeaguePriority(game.league)
     }))
-    .filter((entry) => entry.priority >= 0)
-    .sort((a, b) => a.priority - b.priority || a.index - b.index)
+    .filter(({ game }) => game.sport === 'football')
+    .sort((first, second) => {
+      if (first.priority >= 0 && second.priority >= 0) {
+        return first.priority - second.priority || first.index - second.index
+      }
+      if (first.priority >= 0) return -1
+      if (second.priority >= 0) return 1
 
-  const leagueRepresentatives = HOMEPAGE_FEATURED_LEAGUES
-    .map((_, priority) => featuredMatches.find((entry) => entry.priority === priority))
-    .filter(Boolean)
-  const representativeIds = new Set(leagueRepresentatives.map(({ game }) => game.id))
-  const additionalMatches = featuredMatches.filter(({ game }) => !representativeIds.has(game.id))
+      const firstKickoff = `${first.game.date || ''} ${first.game.time || ''}`
+      const secondKickoff = `${second.game.date || ''} ${second.game.time || ''}`
+      return firstKickoff.localeCompare(secondKickoff) || first.index - second.index
+    })
 
-  return [...leagueRepresentatives, ...additionalMatches]
-    .slice(0, limit)
-    .map(({ game }) => game)
+  const selectedMatches = []
+  const matchesPerLeague = new Map()
+
+  for (const candidate of candidates) {
+    if (selectedMatches.length >= HOMEPAGE_MATCH_LIMIT) break
+
+    const normalizedLeague = String(candidate.game.league || '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, ' ')
+      .trim()
+    const leagueKey = candidate.priority >= 0
+      ? `priority:${candidate.priority}`
+      : `other:${normalizedLeague}`
+    const leagueMatchCount = matchesPerLeague.get(leagueKey) || 0
+
+    if (leagueMatchCount >= HOMEPAGE_MATCHES_PER_LEAGUE_LIMIT) continue
+    if (leagueMatchCount === 0 && matchesPerLeague.size >= HOMEPAGE_LEAGUE_LIMIT) continue
+
+    selectedMatches.push(candidate.game)
+    matchesPerLeague.set(leagueKey, leagueMatchCount + 1)
+  }
+
+  return selectedMatches
 }
 
-const selectHomepageFallbackMatches = (matches) => matches
-  .filter(game => game.sport === 'football' && getHomepageLeaguePriority(game.league) < 0)
-  .slice(0, HOMEPAGE_FALLBACK_LIMIT)
-
-const selectHomepageUpcomingMatches = (matches) => {
-  const featuredMatches = selectHomepageFeaturedMatches(matches, UPCOMING_HOMEPAGE_LIMIT)
-  return featuredMatches.length ? featuredMatches : selectHomepageFallbackMatches(matches)
-}
-
-const selectHomepageLiveMatches = (matches) => {
-  const featuredMatches = selectHomepageFeaturedMatches(matches)
-  if (featuredMatches.length === 0) return selectHomepageFallbackMatches(matches)
-
-  const featuredSet = new Set(featuredMatches)
-  const europeanMatches = featuredMatches.filter((game) => {
-    const priority = getHomepageLeaguePriority(game.league)
-    return priority >= 0 && priority < HOMEPAGE_EUROPEAN_LEAGUE_COUNT
-  })
-  const africanMatches = featuredMatches.filter(
-    game => getHomepageLeaguePriority(game.league) >= HOMEPAGE_EUROPEAN_LEAGUE_COUNT
-  )
-  const prioritizedMatches = [
-    ...europeanMatches.slice(0, LIVE_HOMEPAGE_LIMIT - LIVE_HOMEPAGE_MIN_AFRICAN_LEAGUES),
-    ...africanMatches.slice(0, LIVE_HOMEPAGE_MIN_AFRICAN_LEAGUES),
-    ...europeanMatches.slice(LIVE_HOMEPAGE_LIMIT - LIVE_HOMEPAGE_MIN_AFRICAN_LEAGUES),
-    ...africanMatches.slice(LIVE_HOMEPAGE_MIN_AFRICAN_LEAGUES)
-  ]
-  const otherLeagueMatches = matches.filter(game => game.sport === 'football' && !featuredSet.has(game))
-
-  return [...prioritizedMatches, ...otherLeagueMatches]
-}
+const selectHomepageUpcomingMatches = (matches) => selectHomepageMatches(matches)
+const selectHomepageLiveMatches = (matches) => selectHomepageMatches(matches)
 
 const loadGames = async () => {
   isLoading.value = true
