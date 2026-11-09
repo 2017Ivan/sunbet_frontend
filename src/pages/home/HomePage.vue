@@ -283,8 +283,10 @@ const HOMEPAGE_FEATURED_LEAGUES = [
   ['nigerian premier football league', 'nigeria premier football league', 'nigeria premier league', 'nigeria npfl', 'npfl']
 ]
 const HOMEPAGE_EUROPEAN_LEAGUE_COUNT = 4
+const UPCOMING_HOMEPAGE_LIMIT = 5
 const LIVE_HOMEPAGE_LIMIT = 5
 const LIVE_HOMEPAGE_MIN_AFRICAN_LEAGUES = 2
+const HOMEPAGE_FALLBACK_LIMIT = 5
 
 const getHomepageLeaguePriority = (league) => {
   const normalizedLeague = String(league || '')
@@ -316,8 +318,19 @@ const selectHomepageFeaturedMatches = (matches, limit = Infinity) => {
     .map(({ game }) => game)
 }
 
+const selectHomepageFallbackMatches = (matches) => matches
+  .filter(game => game.sport === 'football' && getHomepageLeaguePriority(game.league) < 0)
+  .slice(0, HOMEPAGE_FALLBACK_LIMIT)
+
+const selectHomepageUpcomingMatches = (matches) => {
+  const featuredMatches = selectHomepageFeaturedMatches(matches, UPCOMING_HOMEPAGE_LIMIT)
+  return featuredMatches.length ? featuredMatches : selectHomepageFallbackMatches(matches)
+}
+
 const selectHomepageLiveMatches = (matches) => {
   const featuredMatches = selectHomepageFeaturedMatches(matches)
+  if (featuredMatches.length === 0) return selectHomepageFallbackMatches(matches)
+
   const featuredSet = new Set(featuredMatches)
   const europeanMatches = featuredMatches.filter((game) => {
     const priority = getHomepageLeaguePriority(game.league)
@@ -332,9 +345,7 @@ const selectHomepageLiveMatches = (matches) => {
     ...europeanMatches.slice(LIVE_HOMEPAGE_LIMIT - LIVE_HOMEPAGE_MIN_AFRICAN_LEAGUES),
     ...africanMatches.slice(LIVE_HOMEPAGE_MIN_AFRICAN_LEAGUES)
   ]
-  const otherLeagueMatches = matches.filter(
-    game => game.sport === 'football' && !featuredSet.has(game)
-  )
+  const otherLeagueMatches = matches.filter(game => game.sport === 'football' && !featuredSet.has(game))
 
   return [...prioritizedMatches, ...otherLeagueMatches]
 }
@@ -346,7 +357,7 @@ const loadGames = async () => {
 
     const mapped = upcomingMatches.value.map(transformMatch)
     allGames.value = mapped
-    displayGames.value = selectHomepageFeaturedMatches(mapped, 6)
+    displayGames.value = selectHomepageUpcomingMatches(mapped)
 
     const mappedLive = liveMatches.value.map(transformLiveMatch)
     allLiveGames.value = mappedLive
@@ -365,7 +376,7 @@ const refreshDataSilently = async () => {
     await matchStore.fetchAllMatches()
     const mapped = upcomingMatches.value.map(transformMatch)
     allGames.value = mapped
-    displayGames.value = selectHomepageFeaturedMatches(mapped, 6)
+    displayGames.value = selectHomepageUpcomingMatches(mapped)
     const mappedLive = liveMatches.value.map(transformLiveMatch)
     allLiveGames.value = mappedLive
     liveDisplayGames.value = selectHomepageLiveMatches(mappedLive)
@@ -407,7 +418,7 @@ watch(upcomingMatches, (newMatches) => {
   if (!loading.value) {
     const mapped = newMatches.map(transformMatch)
     allGames.value = mapped
-    displayGames.value = selectHomepageFeaturedMatches(mapped, 6)
+    displayGames.value = selectHomepageUpcomingMatches(mapped)
   }
 }, { deep: true })
 

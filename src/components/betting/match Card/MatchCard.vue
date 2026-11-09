@@ -109,6 +109,7 @@
 <script setup>
 import { computed } from 'vue'
 import { useBetStore } from '../../../stores/bet/betStore.js'
+import { useMinuteClock } from '../../../composables/useMinuteClock.js'
 
 const props = defineProps({
   game: {
@@ -118,6 +119,7 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['click'])
+const currentTime = useMinuteClock()
 const betStore = useBetStore()
 
 const isLive = computed(() => props.game?.status === 'LIVE' || props.game?.live || false)
@@ -210,7 +212,7 @@ const displayTime = computed(() => {
 
     if (props.game.date && props.game.time && props.game.time.includes(':')) {
       const matchStart = new Date(`${props.game.date} ${props.game.time}`)
-      const wallMinutes = Math.floor((Date.now() - matchStart.getTime()) / 60000)
+      const wallMinutes = Math.floor((currentTime.value - matchStart.getTime()) / 60000)
 
       if (!Number.isNaN(wallMinutes) && wallMinutes >= 0) {
         const script = props.game.predetermined_script || {}
@@ -264,14 +266,21 @@ const oddsValue = (type) => {
 }
 const marketFires = (type) => fireForOdds(oddsValue(type))
 
+const parseMatchMinute = (value) => {
+  const minute = String(value ?? '').match(/(?:^|\|\s*)(\d+)(?:\s*\+\s*\d+)?/)
+  return minute ? Number(minute[1]) : null
+}
+
 const isOddsSelectionLocked = (type) => {
   const status = props.game?.status
   if (['FINISHED', 'CANCELLED'].includes(status)) return true
   if (!['LIVE', 'HALF_TIME'].includes(status) && !props.game?.live) return false
 
   const reportedMinute = props.game?.elapsed_minute ?? props.game?._raw?.elapsed_minute
-  const minute = Number.parseInt(reportedMinute ?? displayTime.value, 10)
-  return Number.isFinite(minute) && minute >= 85 && oddsValue(type) <= 1.15
+  const minute = parseMatchMinute(reportedMinute) ?? parseMatchMinute(displayTime.value)
+  if (!Number.isFinite(minute)) return false
+  if (minute >= 90) return true
+  return minute >= 85 && oddsValue(type) <= 1.15
 }
 
 const formatOdds = (odds) => {

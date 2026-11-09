@@ -277,7 +277,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useBetStore } from '../../stores/bet/betStore.js'
 import CashOutModal from '../../components/bet/CashOutModal.vue'
@@ -291,6 +291,8 @@ const bet = ref(null)
 const selections = ref([])
 const isLoading = ref(false)
 const showCashOutModal = ref(false)
+let betRefreshInterval = null
+let isRefreshingBet = false
 
 // ---- Market Display ----
 const marketMap = {
@@ -578,6 +580,7 @@ const loadBet = async () => {
     if (existingBet) {
       bet.value = existingBet
       mapSelections(existingBet.selections)
+      refreshOpenBet()
       return
     }
 
@@ -594,6 +597,25 @@ const loadBet = async () => {
     bet.value = null
   } finally {
     isLoading.value = false
+  }
+}
+
+const refreshOpenBet = async () => {
+  if (!isOpen.value || !bet.value || isRefreshingBet) return
+
+  const ticketCode = bet.value.ticket_code || route.params.id
+  isRefreshingBet = true
+  try {
+    const response = await betStore.fetchBetByTicket(ticketCode)
+    if (!response?.success || !response.data) {
+      console.error('Error refreshing bet details:', response?.error || 'Invalid bet response')
+      return
+    }
+
+    bet.value = response.data
+    mapSelections(response.data.selections)
+  } finally {
+    isRefreshingBet = false
   }
 }
 
@@ -673,6 +695,11 @@ const goBack = () => {
 // ---- Mounted ----
 onMounted(() => {
   loadBet()
+  betRefreshInterval = setInterval(refreshOpenBet, 60_000)
+})
+
+onUnmounted(() => {
+  if (betRefreshInterval) clearInterval(betRefreshInterval)
 })
 </script>
 

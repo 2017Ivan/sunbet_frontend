@@ -163,11 +163,13 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useBetStore } from '../../../stores/bet/betStore.js'
 import { useMatchStore } from '../../../stores/match/useMatchStore.js'
+import { useMinuteClock } from '../../../composables/useMinuteClock.js'
 
 const router = useRouter()
 const route = useRoute()
 const betStore = useBetStore()
 const matchStore = useMatchStore()
+const currentTime = useMinuteClock()
 const apiMarkets = ref(null)
 const apiMarketsLoading = ref(false)
 let apiMarketsRequestId = 0
@@ -308,8 +310,7 @@ const displayTime = computed(() => {
     // 3. Clock time calculation
     if (matchData.value.date && matchData.value.time && matchData.value.time.includes(':')) {
       const matchStart = new Date(`${matchData.value.date} ${matchData.value.time}`)
-      const now = new Date()
-      const elapsedMinutes = Math.floor((now - matchStart) / (1000 * 60))
+      const elapsedMinutes = Math.floor((currentTime.value - matchStart) / (1000 * 60))
 
       if (!isNaN(elapsedMinutes) && elapsedMinutes >= 0) {
         return elapsedMinutes >= 90 ? "90+'" : `${elapsedMinutes}'`
@@ -577,16 +578,24 @@ const isLateMarketLocked = (marketKey) => {
   return Number.isFinite(minute) && minute >= 85 && LATE_LOCKED_MARKETS.has(marketKey)
 }
 
-const getCurrentMatchMinute = () => {
-  const storedMinute = Number.parseInt(matchData.value?.elapsed_minute, 10)
-  if (Number.isFinite(storedMinute)) return storedMinute
+const isAllMarketsLocked = () => {
+  const status = matchData.value?.status
+  if (!['LIVE', 'HALF_TIME'].includes(status)) return false
+  const minute = getCurrentMatchMinute()
+  return Number.isFinite(minute) && minute >= 90
+}
 
-  const displayedMinute = Number.parseInt(displayTime.value, 10)
-  return Number.isFinite(displayedMinute) ? displayedMinute : null
+const getCurrentMatchMinute = () => {
+  const storedMinute = String(matchData.value?.elapsed_minute ?? '').match(/(?:^|\|\s*)(\d+)/)
+  if (storedMinute) return Number(storedMinute[1])
+
+  const displayedMinute = String(displayTime.value).match(/(?:^|\|\s*)(\d+)/)
+  return displayedMinute ? Number(displayedMinute[1]) : null
 }
 
 const isMarketOddsHidden = (marketKey) => (
   ['FINISHED', 'CANCELLED'].includes(matchData.value?.status)
+  || isAllMarketsLocked()
   || isLateMarketLocked(marketKey)
 )
 
@@ -595,7 +604,9 @@ const isSelectionLocked = (odds, marketKey) => {
   if (['FINISHED', 'CANCELLED'].includes(status)) return true
   if (!['LIVE', 'HALF_TIME'].includes(status)) return false
   const minute = getCurrentMatchMinute()
-  if (!Number.isFinite(minute) || minute < 85) return false
+  if (!Number.isFinite(minute)) return false
+  if (minute >= 90) return true
+  if (minute < 85) return false
   return LATE_LOCKED_MARKETS.has(marketKey) || Number(odds) <= 1.15
 }
 

@@ -36,22 +36,19 @@ export const useMatchStore = defineStore('match', {
         try {
           const apiLiveRes = await matchService.getFootballApiLiveMatches()
           const apiLiveMatches = apiLiveRes.data.data || []
-          const existingApiIds = new Set(
+          const storedApiMatchesById = new Map(
             this.liveMatches
               .filter(match => match.source === 'FOOTBALL_API')
-              .map(match => String(match.external_id))
-          )
-          const apiMatchesById = new Map(
-            apiLiveMatches.map(match => [String(match.external_id), match])
+              .map(match => [String(match.external_id), match])
           )
           this.liveMatches = [
-            ...this.liveMatches.map(match => {
-              const apiMatch = match.source === 'FOOTBALL_API'
-                ? apiMatchesById.get(String(match.external_id))
-                : null
-              return apiMatch ? { ...match, ...apiMatch, id: match.id } : match
-            }),
-            ...apiLiveMatches.filter(match => !existingApiIds.has(String(match.external_id)))
+            ...this.liveMatches.filter(match => match.source !== 'FOOTBALL_API'),
+            ...apiLiveMatches.map(apiMatch => {
+              const storedMatch = storedApiMatchesById.get(String(apiMatch.external_id))
+              return storedMatch
+                ? { ...storedMatch, ...apiMatch, id: storedMatch.id }
+                : apiMatch
+            })
           ]
         } catch (apiError) {
           console.error('[FOOTBALL API LIVE ERROR]:', apiError)
