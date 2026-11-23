@@ -10,7 +10,7 @@
         </svg>
         <div class="flex min-w-0 items-center gap-2">
           <span
-            v-if="game.status === 'HALF_TIME'"
+            v-if="isHalfTime"
             class="px-1.5 py-0.5 text-[10px] font-bold text-amber-500 bg-amber-500/10 border border-amber-500/20 rounded"
           >
             HT
@@ -123,9 +123,10 @@ const currentTime = useMinuteClock()
 const betStore = useBetStore()
 
 const isLive = computed(() => props.game?.status === 'LIVE' || props.game?.live || false)
+const isHalfTime = computed(() => props.game?.live_status === 'HT' || props.game?.status === 'HALF_TIME')
 
 const isLiveOrFinished = computed(() => {
-  return isLive.value || ['HALF_TIME', 'FINISHED'].includes(props.game.status)
+  return isLive.value || isHalfTime.value || ['HALF_TIME', 'FINISHED'].includes(props.game.status)
 })
 
 // ============================================
@@ -196,15 +197,23 @@ const formatLivePeriodTime = (elapsedValue) => {
 
 const displayTime = computed(() => {
   if (!props.game) return ''
-  if (['HALF_TIME', 'FINISHED'].includes(props.game.status)) return ''
+  if (isHalfTime.value || ['HALF_TIME', 'FINISHED'].includes(props.game.status)) return ''
 
   if (isLive.value) {
-    const elapsedValue = props.game.elapsed_minute
+    // Tumia dakika halisi kutoka provider (status_code) kwanza; hii inaepuka
+    // kuhesabu saa mwenyewe na kupotosha dakika baada ya halftime.
+    const elapsedValue = props.game.live_minute
+      ?? props.game.elapsed_minute
       ?? props.game.current_minute
+      ?? props.game._raw?.live_minute
       ?? props.game._raw?.elapsed_minute
     if (elapsedValue !== undefined && elapsedValue !== null) {
       return formatLivePeriodTime(elapsedValue) || 'LIVE'
     }
+
+    // API matches: usikokotoe dakika kwa saa. Tumia dakika ya provider tu;
+    // kama haipo, onyesha LIVE ili kusiwe na tofauti kati ya kurasa.
+    if ((props.game.source || props.game._raw?.source) === 'FOOTBALL_API') return 'LIVE'
 
     if (typeof props.game.time === 'string' && props.game.time.includes("'")) {
       return formatLivePeriodTime(props.game.time) || props.game.time

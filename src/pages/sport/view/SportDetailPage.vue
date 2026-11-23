@@ -43,11 +43,11 @@
           
           <!-- Status & Live Time Badge -->
           <div class="mb-3">
-            <span v-if="isLive" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-rose-50 text-rose-700">
-              <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span> LIVE {{ displayTime }}
-            </span>
-            <span v-else-if="matchData.status === 'HALF_TIME'" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700">
+            <span v-if="isHalfTime" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700">
               HT
+            </span>
+            <span v-else-if="isLive" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-rose-50 text-rose-700">
+              <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span> LIVE {{ displayTime }}
             </span>
             <span v-else-if="matchData.status === 'FINISHED'" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600">
               FT
@@ -159,7 +159,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useBetStore } from '../../../stores/bet/betStore.js'
 import { useMatchStore } from '../../../stores/match/useMatchStore.js'
@@ -225,7 +225,10 @@ const matchData = computed(() => {
     league: m.league,
     time: m.time || m.match_time || '',
     date: m.date || m.match_date || '',
-    elapsed_minute: m.elapsed_minute ?? m.current_minute,
+    source: m.source || null,
+    elapsed_minute: m.live_minute ?? m.elapsed_minute ?? m.current_minute,
+    live_minute: m.live_minute ?? null,
+    live_status: m.live_status ?? null,
     status: m.status || (m.live ? 'LIVE' : 'UPCOMING'),
     live: m.status === 'LIVE' || m.live || false,
     score: m.current_score || m.score || { home: 0, away: 0 }
@@ -233,10 +236,12 @@ const matchData = computed(() => {
 })
 
 const isLive = computed(() => matchData.value?.status === 'LIVE' || matchData.value?.live || false)
+const isHalfTime = computed(() => matchData.value?.live_status === 'HT' || matchData.value?.status === 'HALF_TIME')
 
 const isLiveOrFinished = computed(() => {
   if (!matchData.value) return false
-  return isLive.value || ['HALF_TIME', 'FINISHED'].includes(matchData.value.status)
+  return isLive.value || isHalfTime.value
+    || ['HALF_TIME', 'FINISHED'].includes(matchData.value.status)
 })
 
 // ============================================
@@ -296,6 +301,9 @@ const displayTime = computed(() => {
   if (!matchData.value) return ''
 
   if (isLive.value) {
+    // Provider imesema ni halftime - usionyeshe dakika inayoendelea.
+    if (matchData.value.live_status === 'HT') return 'HT'
+
     // 1. Kama Socket au Store ina elapsed_minute
     if (matchData.value.elapsed_minute !== undefined && matchData.value.elapsed_minute !== null) {
       const elapsed = parseInt(matchData.value.elapsed_minute)
@@ -306,6 +314,9 @@ const displayTime = computed(() => {
     if (typeof matchData.value.time === 'string' && matchData.value.time.includes("'")) {
       return matchData.value.time
     }
+
+    // API matches: usikokotoe dakika kwa saa; tumia dakika ya provider tu.
+    if (matchData.value.source === 'FOOTBALL_API') return 'LIVE'
 
     // 3. Clock time calculation
     if (matchData.value.date && matchData.value.time && matchData.value.time.includes(':')) {
@@ -640,9 +651,29 @@ const getTeamInitials = (name) => {
 
 const goBack = () => router.back()
 
+let detailRefreshTimer = null
+
 onMounted(() => {
   if (matchStore.upcomingMatches.length === 0 && matchStore.liveMatches.length === 0) {
     matchStore.fetchAllMatches()
+  }
+
+  // Refresh kwa utulivu kila sekunde 30 ili dakika ya live match iwe sawa na
+  // HomePage/LivePage (zote zinatumia dakika ya provider).
+  detailRefreshTimer = setInterval(() => {
+    const stillLive = matchStore.liveMatches.some(
+      (m) => String(m.id) === String(matchId.value)
+    )
+    if (stillLive) {
+      matchStore.fetchAllMatches()
+    }
+  }, 30000)
+})
+
+onBeforeUnmount(() => {
+  if (detailRefreshTimer) {
+    clearInterval(detailRefreshTimer)
+    detailRefreshTimer = null
   }
 })
 </script>

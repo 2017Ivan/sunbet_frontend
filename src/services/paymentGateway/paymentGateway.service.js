@@ -2,7 +2,7 @@
 import api from '../api'
 
 const PaymentGatewayService = {
-  // GET current active deposit gateway (PalmPesa / Snipe)
+  // GET current active deposit gateway (DaliPay / PalmPesa / Snipe / AnyPay)
   getGateway: async () => {
     try {
       const response = await api.get('/money/deposit/gateway')
@@ -13,7 +13,7 @@ const PaymentGatewayService = {
     }
   },
 
-  // POST switch active deposit gateway  { gateway: 'palmpesa' | 'snipe' }
+  // POST switch active deposit gateway  { gateway: 'dalipay' | 'palmpesa' | 'snipe' | 'anypay' }
   setGateway: async (gateway) => {
     try {
       const response = await api.post('/money/deposit/gateway', { gateway })
@@ -55,6 +55,18 @@ const PaymentGatewayService = {
     } catch (error) {
       if (error.response?.data) return error.response.data
       return { success: false, message: error.message || 'Failed to run AnyPay reconciliation.' }
+    }
+  },
+
+  // POST force DaliPay reconciliation sweep now (polls every pending DaliPay
+  // collection status and credits completed ones) - ADMIN
+  reconcileDalipay: async () => {
+    try {
+      const response = await api.post('/money/dalipay/reconcile')
+      return response.data
+    } catch (error) {
+      if (error.response?.data) return error.response.data
+      return { success: false, message: error.message || 'Failed to run DaliPay reconciliation.' }
     }
   }
 }

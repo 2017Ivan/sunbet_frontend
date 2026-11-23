@@ -1,4 +1,4 @@
-<!-- Setting.vue - Admin Settings: switch active payment gateway (PalmPesa <-> Snipe) + edit API keys -->
+<!-- Setting.vue - Admin Settings: switch active payment gateway (DaliPay / PalmPesa / Snipe / AnyPay) + edit API keys -->
 <template>
   <div class="space-y-6">
     <!-- Payment Gateway -->
@@ -6,8 +6,8 @@
       <h3 class="text-lg font-bold text-white mb-1">💳 Payment Gateway (Deposit)</h3>
       <p class="text-xs text-gray-500 mb-6">
         Chagua ni provider gani itatumika kwa DEPOSIT za wateja. Wakati moja inasumbua
-        kufanya malipo, badilisha tu kwa nyingine (PalmPesa / Snipe / AnyPay) - wateja
-        wataendelea kuweka pesa bila kukatizwa. (Withdraw haigusiwi.)
+        kufanya malipo, badilisha tu kwa nyingine (DaliPay / PalmPesa / Snipe / AnyPay) -
+        wateja wataendelea kuweka pesa bila kukatizwa. (Withdraw haigusiwi.)
       </p>
 
       <div v-if="loading" class="py-10 text-center text-gray-500 text-sm">Loading gateway...</div>
@@ -86,9 +86,10 @@
     <div class="bg-[#1A1A1A] rounded-2xl border border-[#2A2A2A] p-6">
       <h3 class="text-lg font-bold text-white mb-1">🔑 Provider API Keys</h3>
       <p class="text-xs text-gray-500 mb-6">
-        Badilisha API keys za kila provider (PalmPesa / Snipe / AnyPay) moja kwa moja
+        Badilisha API keys za kila provider (DaliPay / PalmPesa / Snipe / AnyPay) moja kwa moja
         kutoka hapa. Zinahifadhiwa kwenye database na kuanza kutumika mara moja - hakuna
-        restart ya server inayohitajika.
+        restart ya server inayohitajika. Kwa DaliPay, callbackSecret ni ile
+        "callback secret" ya webhook kwenye dashboard yao (inatumika kuthibitisha X-Signature).
       </p>
 
       <div v-if="keysLoading" class="py-10 text-center text-gray-500 text-sm">Loading API keys...</div>
@@ -167,13 +168,36 @@
       </div>
     </div>
 
+    <!-- DaliPay Reconciliation -->
+    <div class="bg-[#1A1A1A] rounded-2xl border border-[#2A2A2A] p-6">
+      <h3 class="text-lg font-bold text-white mb-1">💠 DaliPay Reconciliation</h3>
+      <p class="text-xs text-gray-500 mb-4">
+        Lazimisha server iangalie kila DaliPay collection iliyo PENDING
+        (/collections/{uuid}/status) na i-credit yoyote iliyokamilika. Tumia hii ikiwa
+        mteja amemaliza malipo lakini kiwango hakijaongezeka kwenye account.
+      </p>
+      <button
+        @click="runDalipayReconcile"
+        :disabled="dalipayReconciling"
+        class="px-4 py-2.5 rounded-lg text-sm font-bold transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed bg-gradient-to-r from-emerald-500 to-emerald-600 text-white hover:from-emerald-600 hover:to-emerald-700"
+      >
+        {{ dalipayReconciling ? 'Inaangalia...' : '💠 Reconcile DaliPay Deposits' }}
+      </button>
+      <div v-if="dalipayReconcileResult" class="mt-4 text-xs text-gray-400 leading-relaxed">
+        Pending: <span class="font-bold text-white">{{ dalipayReconcileResult.pending }}</span> ·
+        Completed: <span class="font-bold text-emerald-400">{{ dalipayReconcileResult.completed }}</span> ·
+        Failed: <span class="font-bold text-rose-400">{{ dalipayReconcileResult.failed }}</span> ·
+        Tracked: <span class="font-bold text-gray-200">{{ dalipayReconcileResult.tracked }}</span>
+      </div>
+    </div>
+
     <!-- Note -->
     <div class="bg-[#1A1A1A] rounded-2xl border border-[#2A2A2A] p-6">
       <h4 class="text-sm font-bold text-white mb-2">ℹ️ Jinsi inavyofanya kazi</h4>
       <ul class="text-xs text-gray-500 space-y-1.5 list-disc list-inside">
         <li>Mabadiliko yanaanza kutumika mara moja - hakuna restart ya server inayohitajika.</li>
         <li>Deposits zilizoanza na provider ya zamani zinaendelea kufuatiliwa hadi kukamilika.</li>
-        <li>Chaguo linahifadhiwa la kudumu (server inakumbuka hata ikianzishwa upya).</li>
+        <li>Server inapowaka upya, deposit gateway hurudi kwenye <b>DaliPay</b> (default).</li>
         <li>API keys zina-edit kwenye tovuti, zinawekwa kwenye database si hardcoded.</li>
         <li>Ukipata shida na moja, geuza tu na nyingine - sawa vitu vingine havibadiliki.</li>
       </ul>
@@ -200,6 +224,28 @@ const keysForm = ref({})
 const reconciling = ref(false)
 const reconcileResult = ref(null)
 
+const dalipayReconciling = ref(false)
+const dalipayReconcileResult = ref(null)
+
+const runDalipayReconcile = async () => {
+  if (dalipayReconciling.value) return
+  dalipayReconciling.value = true
+  dalipayReconcileResult.value = null
+  const okConfirm = window.confirm('Lazimisha DaliPay reconciliation sasa hapa? Itaangalia collections zote PENDING na ku-credit zilizomalizika.')
+  if (!okConfirm) {
+    dalipayReconciling.value = false
+    return
+  }
+  const result = await PaymentGatewayService.reconcileDalipay()
+  dalipayReconciling.value = false
+  if (result.success && result.data) {
+    dalipayReconcileResult.value = result.data
+    toast.success('✅ DaliPay reconciliation imekamilika', { position: 'bottom-right', timeout: 5000 })
+  } else {
+    toast.error(result.message || 'Imeshindikana ku-reconcile DaliPay', { position: 'bottom-right', timeout: 4000 })
+  }
+}
+
 const runReconcile = async () => {
   if (reconciling.value) return
   reconciling.value = true
@@ -220,22 +266,25 @@ const runReconcile = async () => {
 }
 
 const credentialFields = (gateway) => {
+  if (gateway === 'dalipay') return ['publicKey', 'secretKey', 'callbackSecret', 'baseUrl']
   if (gateway === 'palmpesa') return ['apiToken', 'userId', 'baseUrl']
   return ['apiKey', 'baseUrl']
 }
 
 const GATEWAY_META = {
+  dalipay: { icon: '💠', tagline: 'Mobile money collections (USSD)', fieldsHint: 'publicKey · secretKey · callbackSecret · baseUrl' },
   palmpesa: { icon: '🌴', tagline: 'M-Pesa wall-initiated', fieldsHint: 'apiToken · userId · baseUrl' },
   snipe: { icon: '⚡', tagline: 'Mobile money USSD push', fieldsHint: 'apiKey · baseUrl' },
-  anypay: { icon: '💠', tagline: 'Mobile money wallet pull', fieldsHint: 'apiKey · baseUrl' },
+  anypay: { icon: '🔷', tagline: 'Mobile money wallet pull', fieldsHint: 'apiKey · baseUrl' },
 }
 
 const gatewayMeta = (key) => GATEWAY_META[key] || { icon: '💳', tagline: '', fieldsHint: '' }
 
 const gatewayDesc = (key) => {
+  if (key === 'dalipay') return 'Default. Deposits mpya zitaenda kwa DaliPay (collection + USSD push).'
   if (key === 'anypay') return 'Bofya kuamsha - deposits mpya zitaenda kwa AnyPay.'
   if (key === 'snipe') return 'Bofya kuamsha - deposits mpya zitaenda kwa Snipe.'
-  return 'Kigezo cha sasa. Bofya kubadilisha kwenda provider nyingine.'
+  return 'Bofya kuamsha - deposits mpya zitaenda kwa PalmPesa.'
 }
 
 const providerName = (key) => {

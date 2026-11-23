@@ -632,7 +632,7 @@ const mapSelections = (rawSelections) => {
       league: m.league || '',
       score: m.current_score || null,
       matchStatus: m.status || '',
-      elapsed_minute: m.elapsed_minute ?? null,
+      elapsed_minute: m.live_minute ?? m.elapsed_minute ?? null,
       marketType: sel.market_key || sel.market || '1X2',
       result: sel.status || 'PENDING',
       selectionType: sel.outcome_key || sel.pick || ''
